@@ -1,13 +1,13 @@
-import Head from 'next/head'
-import { useEffect, useState } from 'react'
-import styles from '../styles/Home.module.css'
-import useSWR from 'swr'
+import Head from 'next/head';
+import { useEffect, useState } from 'react';
+import styles from '../styles/Home.module.css';
+import useSWR from 'swr';
 
 import Reading from '../components/Reading/Reading';
 import Wind from '../components/Wind/Wind';
-import { sensorMap } from '../utils/const';
+import { sensorMap } from '../utils/constants';
 
-const fetcher = (...args) => fetch(...args).then(res => res.json())
+const fetcher = (...args) => fetch(...args).then(res => res.json());
 
 const useSensors = () => {
   const { data, error } = useSWR('/api/weatherlink', fetcher);
@@ -16,19 +16,19 @@ const useSensors = () => {
     sensors: data,
     isLoading: !error && !data,
     isError: error
-  }
-}
+  };
+};
 
 export default function Home() {
-  const { sensors, isLoading, isError } = useSensors('/api/weatherlink', fetcher)
-  const [mainSensor, setMainSensor] = useState(null);
+  const { sensors, isLoading, isError } = useSensors();
+  const [mainSensor, setMainSensor] = useState<any | null>(null);
 
   useEffect(() => {
     if (sensors) {
-      setMainSensor(sensors.sensors.find((sensor) => sensor.lsid === sensorMap.MAIN ).data[0]);
+      setMainSensor(sensors.sensors.find(sensor => sensor.lsid === sensorMap.MAIN).data[0]);
       console.log(mainSensor);
     }
-  }, [sensors]);
+  }, [sensors, mainSensor]);
 
   return (
     <div className={styles.container}>
@@ -38,7 +38,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <h1>Current Conditions in #aq</h1>
-      
+
       {mainSensor ? (
         <div className={styles.main}>
           <Reading title="Temp" value={`${mainSensor.temp}°`} />
@@ -52,5 +52,5 @@ export default function Home() {
         <h1>Hang Tight</h1>
       )}
     </div>
-  )
+  );
 }

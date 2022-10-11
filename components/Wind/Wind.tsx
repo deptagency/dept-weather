@@ -1,10 +1,10 @@
 import styles from './Wind.module.css';
 
-export default function Wind({ windData }) {
+export default function Wind({ windData }: { windData: { wind_dir_last: number; wind_speed_last: number } }) {
   const { wind_dir_last, wind_speed_last } = windData;
 
-  const getWindDirection = (deg) => {
-    if (deg > 348.75 && deg < 11.25 || deg === 360) return 'N';
+  const getWindDirection = (deg: Number) => {
+    if ((deg > 348.75 && deg < 11.25) || deg === 360) return 'N';
     else if (deg > 11.25 && deg < 33.75) return 'NNE';
     else if (deg > 33.75 && deg < 56.25) return 'NE';
     else if (deg > 56.25 && deg < 78.75) return 'ENE';
@@ -21,12 +21,13 @@ export default function Wind({ windData }) {
     else if (deg > 303.75 && deg < 326.25) return 'NW';
     else if (deg > 326.25 && deg < 348.75) return 'NNW';
     else return '?';
-  }
+  };
 
   return (
     <div>
       <h2>
-        {Math.round(wind_speed_last)}<small>mph </small>
+        {Math.round(wind_speed_last)}
+        <small>mph </small>
         {getWindDirection(wind_dir_last)}
       </h2>
       <div className={styles.face}>
@@ -35,11 +36,14 @@ export default function Wind({ windData }) {
         <span className={`${styles.dir} ${styles.s}`}>S</span>
         <span className={`${styles.dir} ${styles.w}`}>W</span>
 
-        <div className={styles.arrow} style={{
-          transform: `translateX(-50%) translateY(-100%) rotate(${wind_dir_last}deg)`
-        }}></div>
+        <div
+          className={styles.arrow}
+          style={{
+            transform: `translateX(-50%) translateY(-100%) rotate(${wind_dir_last}deg)`
+          }}
+        ></div>
       </div>
       <h2>{/*getWindDirection()*/}</h2>
     </div>
-  )
+  );
 }
