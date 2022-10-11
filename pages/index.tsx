@@ -5,30 +5,33 @@ import useSWR from 'swr';
 
 import Reading from '../components/Reading/Reading';
 import Wind from '../components/Wind/Wind';
-import { sensorMap } from '../utils/constants';
+import { CurrentConditions, MainSensorData, SensorType } from '../models';
 
-const fetcher = (...args) => fetch(...args).then(res => res.json());
+const fetcher = (input: RequestInfo | URL, init?: RequestInit) => fetch(input, init).then(res => res.json());
 
-const useSensors = () => {
-  const { data, error } = useSWR('/api/weatherlink', fetcher);
+const useSensors = (): { currentConditions?: CurrentConditions; isLoading: boolean; isError: boolean } => {
+  const { data, error } = useSWR<CurrentConditions>('/api/weatherlink', fetcher);
 
   return {
-    sensors: data,
+    currentConditions: data,
     isLoading: !error && !data,
     isError: error
   };
 };
 
 export default function Home() {
-  const { sensors, isLoading, isError } = useSensors();
-  const [mainSensor, setMainSensor] = useState<any | null>(null);
+  const { currentConditions, isLoading, isError } = useSensors();
+  const [mainSensor, setMainSensor] = useState<MainSensorData | null>(null);
 
   useEffect(() => {
-    if (sensors) {
-      setMainSensor(sensors.sensors.find(sensor => sensor.lsid === sensorMap.MAIN).data[0]);
+    if (currentConditions) {
+      setMainSensor(
+        (currentConditions.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0] as MainSensorData) ??
+          null
+      );
       console.log(mainSensor);
     }
-  }, [sensors, mainSensor]);
+  }, [currentConditions, mainSensor]);
 
   return (
     <div className={styles.container}>

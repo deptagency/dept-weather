@@ -1,6 +1,7 @@
+import { MainSensorData } from '../../models';
 import styles from './Wind.module.css';
 
-export default function Wind({ windData }: { windData: { wind_dir_last: number; wind_speed_last: number } }) {
+export default function Wind({ windData }: { windData: MainSensorData }) {
   const { wind_dir_last, wind_speed_last } = windData;
 
   const getWindDirection = (deg: Number) => {
