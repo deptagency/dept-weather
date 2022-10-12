@@ -18,6 +18,9 @@ export class Cached<T> {
   get maxAge(): number {
     return this.isCacheValid ? this.cachedItemExpiration - this.nowTimeInSeconds : 0;
   }
+  get validUntil(): number {
+    return this.isCacheValid ? this.cachedItemExpiration : 0;
+  }
 
   constructor(
     getItemOnMiss: () => Promise<T>,

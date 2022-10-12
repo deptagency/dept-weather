@@ -1,9 +1,7 @@
-import { MainSensorData } from '../../models/weatherlink';
+import { Wind as WindModel } from '../../models/api';
 import styles from './Wind.module.css';
 
-export default function Wind({ windData }: { windData: MainSensorData }) {
-  const { wind_dir_last, wind_speed_last } = windData;
-
+export default function Wind({ wind }: { wind: WindModel }) {
   const getWindDirection = (deg: Number) => {
     if ((deg > 348.75 && deg < 11.25) || deg === 360) return 'N';
     else if (deg > 11.25 && deg < 33.75) return 'NNE';
@@ -27,9 +25,9 @@ export default function Wind({ windData }: { windData: MainSensorData }) {
   return (
     <div>
       <h2>
-        {Math.round(wind_speed_last)}
+        {Math.round(wind.speed)}
         <small>mph </small>
-        {getWindDirection(wind_dir_last)}
+        {getWindDirection(wind.direction)}
       </h2>
       <div className={styles.face}>
         <span className={`${styles.dir} ${styles.n}`}>N</span>
@@ -40,7 +38,7 @@ export default function Wind({ windData }: { windData: MainSensorData }) {
         <div
           className={styles.arrow}
           style={{
-            transform: `translateX(-50%) translateY(-100%) rotate(${wind_dir_last}deg)`
+            transform: `translateX(-50%) translateY(-100%) rotate(${wind.direction}deg)`
           }}
         ></div>
       </div>

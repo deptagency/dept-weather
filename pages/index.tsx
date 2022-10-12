@@ -1,37 +1,25 @@
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
 import styles from '../styles/Home.module.css';
 import useSWR from 'swr';
 
 import Reading from '../components/Reading/Reading';
-import Wind from '../components/Wind/Wind';
-import { CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
+import WindComp from '../components/Wind/Wind';
+import { Observations, Response } from '../models/api';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
 
-const useSensors = (): { currentConditions?: CurrentConditions; isLoading: boolean; isError: boolean } => {
-  const { data, error } = useSWR<CurrentConditions>('/api/current', fetcher);
+const useObservations = (): { observations?: Response<Observations>; isLoading: boolean; isError: boolean } => {
+  const { data, error } = useSWR<Response<Observations>>('/api/current', fetcher);
 
   return {
-    currentConditions: data,
+    observations: data,
     isLoading: !error && !data,
     isError: error
   };
 };
 
 export default function Home() {
-  const { currentConditions, isLoading, isError } = useSensors();
-  const [mainSensor, setMainSensor] = useState<MainSensorData | null>(null);
-
-  useEffect(() => {
-    if (currentConditions) {
-      setMainSensor(
-        (currentConditions.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0] as MainSensorData) ??
-          null
-      );
-      console.log(mainSensor);
-    }
-  }, [currentConditions, mainSensor]);
+  const { observations, isLoading, isError } = useObservations();
 
   return (
     <div className={styles.container}>
@@ -42,15 +30,25 @@ export default function Home() {
       </Head>
       <h1>Current Conditions in #aq</h1>
 
-      {mainSensor ? (
-        <div className={styles.main}>
-          <Reading title="Temp" value={`${mainSensor.temp}°`} />
-          <Reading title="Feels Like" value={`${mainSensor.heat_index}°`} />
-          <Reading title="Humidity" value={`${mainSensor.hum}%`} />
-          <Reading title="Wind">
-            <Wind windData={mainSensor} />
-          </Reading>
-        </div>
+      {observations ? (
+        !isError ? (
+          <div className={styles.main}>
+            <Reading title="Temp" value={`${observations.data.temperature}°`} />
+            <Reading title="Feels Like" value={`${observations.data.feelsLike}°`} />
+            <Reading title="Humidity" value={`${observations.data.humidity}%`} />
+            <Reading title="Wind">
+              <WindComp wind={observations.data.wind} />
+            </Reading>
+          </div>
+        ) : (
+          <>
+            <h1>Something went wrong :(</h1>
+            <br />
+            {observations?.errors.map(error => (
+              <h3 key={error}>{error}</h3>
+            ))}
+          </>
+        )
       ) : (
         <h1>Hang Tight</h1>
       )}
