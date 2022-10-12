@@ -1,5 +1,5 @@
 import { default as WeatherLink } from 'weatherlink';
-import { CurrentConditions, SensorType } from '../models';
+import { CurrentConditions, SensorType } from '../models/weatherlink';
 import { Cached } from './cached';
 
 export class WeatherlinkHelper {

@@ -5,7 +5,7 @@ import useSWR from 'swr';
 
 import Reading from '../components/Reading/Reading';
 import Wind from '../components/Wind/Wind';
-import { CurrentConditions, MainSensorData, SensorType } from '../models';
+import { CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
 
 const fetcher = (input: RequestInfo | URL, init?: RequestInit) => fetch(input, init).then(res => res.json());
 

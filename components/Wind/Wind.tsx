@@ -1,4 +1,4 @@
-import { MainSensorData } from '../../models';
+import { MainSensorData } from '../../models/weatherlink';
 import styles from './Wind.module.css';
 
 export default function Wind({ windData }: { windData: MainSensorData }) {
