@@ -15,7 +15,7 @@ export interface Station {
   active: boolean;
   private: boolean;
   recording_interval: number;
-  firmware_version?: any;
+  firmware_version: number;
   registered_date: number;
   time_zone: string;
   city: string;
