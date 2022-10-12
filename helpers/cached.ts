@@ -1,6 +1,8 @@
 export class Cached<T> {
   private getItemOnMiss: () => Promise<T>;
   private calculateExpiration: (newItem: T) => Promise<number>;
+  private shouldLog: boolean;
+  private logPrefix: string;
 
   private cachedItem?: T;
   private cachedItemExpiration = 0;
@@ -13,15 +15,31 @@ export class Cached<T> {
       this.cachedItem !== null && this.cachedItem !== undefined && this.nowTimeInSeconds < this.cachedItemExpiration
     );
   }
+  get maxAge(): number {
+    return this.isCacheValid ? this.cachedItemExpiration - this.nowTimeInSeconds : 0;
+  }
 
-  constructor(getItemOnMiss: () => Promise<T>, calculateExpiration: (newItem: T) => Promise<number>) {
+  constructor(
+    getItemOnMiss: () => Promise<T>,
+    calculateExpiration: (newItem: T) => Promise<number>,
+    shouldLog?: boolean,
+    logPrefix?: string
+  ) {
     this.getItemOnMiss = getItemOnMiss;
     this.calculateExpiration = calculateExpiration;
+    this.shouldLog = shouldLog ?? false;
+    this.logPrefix = logPrefix ?? '';
+  }
+
+  private log(message: string) {
+    if (this.shouldLog) {
+      console.log(`${this.logPrefix}${message}`);
+    }
   }
 
   async get(): Promise<T> {
     if (!this.isCacheValid) {
-      console.log(
+      this.log(
         `cache MISS because ${this.nowTimeInSeconds} (now) >= ${this.cachedItemExpiration} (cachedItemExpiration)`
       );
       this.cachedItem = await this.getItemOnMiss();
@@ -29,12 +47,12 @@ export class Cached<T> {
       try {
         this.cachedItemExpiration = await this.calculateExpiration(this.cachedItem);
       } catch (err) {
-        console.log(`couldn't calculate cachedItemExpiration due to an exception: ${err}`);
+        this.log(`couldn't calculate cachedItemExpiration due to an exception: ${err}`);
         this.cachedItemExpiration = 0;
       }
-      console.log(`cache now expires at ${this.cachedItemExpiration}`);
+      this.log(`cache now expires at ${this.cachedItemExpiration}`);
     } else {
-      console.log('cache HIT');
+      this.log('cache HIT');
     }
 
     return this.cachedItem!;

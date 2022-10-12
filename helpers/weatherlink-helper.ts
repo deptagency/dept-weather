@@ -18,6 +18,8 @@ export class WeatherlinkHelper {
       const lastReading = newItem.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0]?.ts ?? 0;
       const recordingInterval = (await this.getMainStation()).recording_interval * 60;
       return lastReading ? lastReading + recordingInterval + 10 : 0;
-    }
+    },
+    true,
+    '[WeatherlinkHelper.current] '
   );
 }

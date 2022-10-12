@@ -7,10 +7,10 @@ import Reading from '../components/Reading/Reading';
 import Wind from '../components/Wind/Wind';
 import { CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
 
-const fetcher = (input: RequestInfo | URL, init?: RequestInit) => fetch(input, init).then(res => res.json());
+const fetcher = (key: string) => fetch(key).then(res => res.json());
 
 const useSensors = (): { currentConditions?: CurrentConditions; isLoading: boolean; isError: boolean } => {
-  const { data, error } = useSWR<CurrentConditions>('/api/weatherlink', fetcher);
+  const { data, error } = useSWR<CurrentConditions>('/api/current', fetcher);
 
   return {
     currentConditions: data,
