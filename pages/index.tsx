@@ -34,7 +34,7 @@ export default function Home() {
         !isError ? (
           <div className={styles.main}>
             <Reading title="Temp" value={`${observations.data.temperature}°`} />
-            <Reading title="Feels Like" value={`${observations.data.feelsLike}°`} />
+            <Reading title="Feels Like" value={`${observations.data.feelsLike ?? observations.data.temperature}°`} />
             <Reading title="Humidity" value={`${observations.data.humidity}%`} />
             <Reading title="Wind">
               <WindComp wind={observations.data.wind} />
