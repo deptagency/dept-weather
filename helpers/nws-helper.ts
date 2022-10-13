@@ -31,6 +31,6 @@ export class NwsHelper {
       return lastReading ? lastReading + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY : 0;
     },
     true,
-    '[NwsHelper.current] '
+    '[NwsHelper.current]'
   );
 }

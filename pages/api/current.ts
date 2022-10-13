@@ -30,6 +30,7 @@ export default async function handler(_: NextApiRequest, res: NextApiResponse) {
     );
     res.status(200).json(response);
   } catch (err) {
+    console.log('[/api/current]', err);
     const errorResponse: Response<null> = { data: null, warnings: [], errors: ['Failed to fetch data'], validUntil: 0 };
     res.status(500).json(errorResponse);
   }

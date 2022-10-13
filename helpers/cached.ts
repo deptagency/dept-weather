@@ -36,7 +36,7 @@ export class Cached<T> {
 
   private log(message: string) {
     if (this.shouldLog) {
-      console.log(`${this.logPrefix}${message}`);
+      this.logPrefix ? console.log(this.logPrefix, message) : console.log(message);
     }
   }
 

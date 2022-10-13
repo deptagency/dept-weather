@@ -20,6 +20,6 @@ export class WeatherlinkHelper {
       return lastReading ? lastReading + recordingInterval + 10 : 0;
     },
     true,
-    '[WeatherlinkHelper.current] '
+    '[WeatherlinkHelper.current]'
   );
 }
