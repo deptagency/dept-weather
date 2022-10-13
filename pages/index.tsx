@@ -9,7 +9,7 @@ import { Observations, Response } from '../models/api';
 const fetcher = (key: string) => fetch(key).then(res => res.json());
 
 const useObservations = (): { observations?: Response<Observations>; isLoading: boolean; isError: boolean } => {
-  const { data, error } = useSWR<Response<Observations>>('/api/current', fetcher);
+  const { data, error } = useSWR<Response<Observations>>('/api/nws-current', fetcher);
 
   return {
     observations: data,
