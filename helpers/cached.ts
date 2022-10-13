@@ -8,7 +8,7 @@ export class Cached<T> {
   private cachedItemExpiration = 0;
 
   private get nowTimeInSeconds(): number {
-    return Math.ceil(new Date().getTime() / 1000);
+    return Math.ceil(new Date().getTime() / 1_000);
   }
   private get isCacheValid(): boolean {
     return (
