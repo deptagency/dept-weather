@@ -20,6 +20,7 @@ export interface Observation {
   dewpoint: QuantitativeValue;
   windDirection: QuantitativeValue;
   windSpeed: QuantitativeValue;
+  windGust: QuantitativeValue;
   Measurement: QuantitativeValue;
   barometricPressure: QuantitativeValue;
   seaLevelPressure: QuantitativeValue;

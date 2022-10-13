@@ -1,12 +1,12 @@
 export interface Observations {
-  temperature: number;
-  feelsLike: number;
-  humidity: number;
+  temperature: number | null;
+  feelsLike: number | null;
+  humidity: number | null;
   wind: Wind;
 }
 
 export interface Wind {
-  speed: number;
-  direction: number;
-  gustSpeed: number;
+  speed: number | null;
+  direction: number | null;
+  gustSpeed: number | null;
 }

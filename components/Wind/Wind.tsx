@@ -25,9 +25,9 @@ export default function Wind({ wind }: { wind: WindModel }) {
   return (
     <div>
       <h2>
-        {Math.round(wind.speed)}
+        {Math.round(wind.speed ?? 0)}
         <small>mph </small>
-        {getWindDirection(wind.direction)}
+        {wind.direction != null ? getWindDirection(wind.direction) : ''}
       </h2>
       <div className={styles.face}>
         <span className={`${styles.dir} ${styles.n}`}>N</span>
@@ -38,7 +38,7 @@ export default function Wind({ wind }: { wind: WindModel }) {
         <div
           className={styles.arrow}
           style={{
-            transform: `translateX(-50%) translateY(-100%) rotate(${wind.direction}deg)`
+            transform: `translateX(-50%) translateY(-100%) rotate(${wind.direction ?? 0}deg)`
           }}
         ></div>
       </div>

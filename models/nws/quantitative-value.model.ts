@@ -1,4 +1,4 @@
 export interface QuantitativeValue {
-  value?: number;
+  value: number | null;
   unitCode: string;
 }
