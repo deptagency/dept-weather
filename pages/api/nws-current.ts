@@ -3,19 +3,31 @@ import { NumberHelper, NwsHelper } from '../../helpers';
 import { Unit } from '../../models';
 import { Observations, Response } from '../../models/api';
 
-export default async function handler(_: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const current = (await NwsHelper.current.get()).properties;
 
+    const toTempUnit = (req.query['tempUnit'] as Unit) ?? Unit.F;
+    const toDistanceUnit = (req.query['distanceUnit'] as Unit) ?? Unit.MILES;
+    const toPressureUnit = (req.query['pressureUnit'] as Unit) ?? Unit.INCHES_OF_MERCURY;
+
     const response: Response<Observations> = {
       data: {
-        temperature: NumberHelper.convertNws(current.temperature, Unit.F),
-        feelsLike: NumberHelper.convertNws(current.heatIndex, Unit.F),
+        temperature: NumberHelper.convertNws(current.temperature, toTempUnit),
+        feelsLike: NumberHelper.convertNws(current.heatIndex, toTempUnit),
         humidity: NumberHelper.roundNws(current.relativeHumidity),
         wind: {
-          speed: NumberHelper.convertNws(current.windSpeed, Unit.MILES),
+          speed: NumberHelper.convertNws(current.windSpeed, toDistanceUnit),
           direction: current.windDirection.value,
-          gustSpeed: NumberHelper.convertNws(current.windGust, Unit.MILES)
+          gustSpeed: NumberHelper.convertNws(current.windGust, toDistanceUnit)
+        },
+        pressure: {
+          atSeaLevel: NumberHelper.convertNws(
+            current.seaLevelPressure,
+            toPressureUnit,
+            toPressureUnit === Unit.INCHES_OF_MERCURY ? 2 : 1
+          ),
+          trend: null
         }
       },
       warnings: [],
