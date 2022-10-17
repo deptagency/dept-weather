@@ -23,6 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         temperature: NumberHelper.convert(wlMain.temp, fromTempUnit, toTempUnit),
         feelsLike: NumberHelper.convert(wlMain.thsw_index ?? wlMain.thw_index, fromTempUnit, toTempUnit),
         humidity: NumberHelper.round(wlMain.hum, 0),
+        dewPoint: NumberHelper.convert(wlMain.dew_point, fromTempUnit, toTempUnit),
         wind: {
           speed: NumberHelper.convert(wlMain.wind_speed_avg_last_10_min, fromDistanceUnit, toDistanceUnit),
           direction: NumberHelper.round(wlMain.wind_dir_scalar_avg_last_10_min, 0),
