@@ -1,5 +1,10 @@
-import { Unit } from '../models';
-import { QuantitativeValue, UnitMappings } from '../models/nws';
+import { DEFAULT_UNITS } from '../constants';
+import { Unit, UnitMapping, Units, UnitType } from '../models';
+import { NwsUnits, QuantitativeValue } from '../models/nws';
+
+export type ReqQuery = Partial<{
+  [key: string]: string | string[];
+}>;
 
 export class NumberHelper {
   private static readonly CONVERSION_MAP = {
@@ -45,16 +50,44 @@ export class NumberHelper {
     return this.round(quantitativeValue.value, n);
   }
 
-  static convert(value: number | null, fromUnit: Unit, toUnit: Unit, roundN: number | undefined = 1) {
+  static convert(value: number | null, unitMapping: UnitMapping, roundN: number | undefined = 1) {
     if (value == null) {
       return null;
     }
 
-    const convertedValue = fromUnit === toUnit ? value : this.CONVERSION_MAP[fromUnit][toUnit](value);
+    const convertedValue =
+      unitMapping.from === unitMapping.to ? value : this.CONVERSION_MAP[unitMapping.from][unitMapping.to](value);
     return this.round(convertedValue, roundN);
   }
 
-  static convertNws(quantitativeValue: QuantitativeValue, toUnit: Unit, roundN: number | undefined = 1) {
-    return this.convert(quantitativeValue.value, UnitMappings[quantitativeValue.unitCode], toUnit, roundN);
+  static convertNws(
+    quantitativeValue: QuantitativeValue,
+    unitType: UnitType,
+    reqQuery: ReqQuery,
+    roundN: number | undefined = 1
+  ) {
+    return this.convert(
+      quantitativeValue.value,
+      this.getUnitMapping(unitType, NwsUnits[quantitativeValue.unitCode], reqQuery),
+      roundN
+    );
+  }
+
+  static getUnitMapping(unitType: UnitType, from: Unit, reqQuery: ReqQuery): UnitMapping {
+    const reqToUnit = reqQuery[`${unitType}Unit`];
+    return {
+      from,
+      to: reqToUnit != null ? ((reqToUnit as string).toLowerCase() as Unit) : DEFAULT_UNITS[unitType]
+    };
+  }
+
+  static getUnitMappings(fromUnits: Record<UnitType, Unit>, reqQuery: ReqQuery) {
+    const units = {} as Units;
+    for (const _key of Object.keys(fromUnits)) {
+      const unitType = _key as UnitType;
+      units[unitType] = this.getUnitMapping(unitType, fromUnits[unitType], reqQuery);
+    }
+
+    return units;
   }
 }

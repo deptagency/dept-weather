@@ -1,11 +1,26 @@
+import { DataSource } from '../data-source.enum';
+
 export interface Observations {
-  textDescription: string | null;
+  [DataSource.WEATHERLINK]?: WlObservations;
+  [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsObservations;
+}
+
+export interface BaseObservations {
   temperature: number | null;
-  feelsLike: number | null;
-  humidity: number | null;
+  heatIndex: number | null;
   dewPoint: number | null;
+  humidity: number | null;
   wind: Wind;
-  pressure: Pressure;
+  pressure: BasePressure;
+}
+
+export interface NwsObservations extends BaseObservations {
+  textDescription: string | null;
+}
+
+export interface WlObservations extends BaseObservations {
+  feelsLike: number | null;
+  pressure: WlPressure;
 }
 
 export interface Wind {
@@ -14,7 +29,10 @@ export interface Wind {
   gustSpeed: number | null;
 }
 
-export interface Pressure {
+export interface BasePressure {
   atSeaLevel: number | null;
+}
+
+export interface WlPressure extends BasePressure {
   trend: number | null;
 }

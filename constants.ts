@@ -1,3 +1,4 @@
+import { Unit, UnitType } from './models';
 import { StationsResponse } from './models/nws';
 
 export const AQ_LATITUDE = 42.35826159869919;
@@ -18,3 +19,9 @@ export const NWS_FALLBACK_STATION: StationsResponse = {
 };
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
 export const NWS_UPLOAD_DELAY = 20 * 60; // 20 minutes
+
+export const DEFAULT_UNITS: Record<UnitType, Unit> = {
+  [UnitType.temp]: Unit.F,
+  [UnitType.distance]: Unit.MILES,
+  [UnitType.pressure]: Unit.INCHES_OF_MERCURY
+};
