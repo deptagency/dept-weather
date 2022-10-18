@@ -1,4 +1,5 @@
 export interface Observations {
+  textDescription: string | null;
   temperature: number | null;
   feelsLike: number | null;
   humidity: number | null;

@@ -13,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const response: Response<Observations> = {
       data: {
+        textDescription: current.textDescription,
         temperature: NumberHelper.convertNws(current.temperature, toTempUnit),
         feelsLike: NumberHelper.convertNws(current.heatIndex, toTempUnit),
         humidity: NumberHelper.roundNws(current.relativeHumidity),
