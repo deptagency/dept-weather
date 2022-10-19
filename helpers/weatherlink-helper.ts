@@ -3,7 +3,7 @@ import { DEFAULT_UNITS } from '../constants';
 import { Unit, UnitType } from '../models';
 import { ReqQuery, WlObservations } from '../models/api';
 import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
-import { Cached } from './cached';
+import { Cached, CacheEntry } from './cached';
 import { NumberHelper } from './number-helper';
 
 export class WeatherlinkHelper {
@@ -16,7 +16,7 @@ export class WeatherlinkHelper {
     return (await this.getAllStationsPromise).stations[0];
   }
 
-  static readonly current = new Cached<CurrentConditions>(
+  private static readonly current = new Cached<CurrentConditions, undefined>(
     async () => this.wl.getCurrent({ stationId: (await this.getMainStation()).station_id }),
     async (newItem: CurrentConditions) => {
       const lastReading = newItem.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0]?.ts ?? 0;
@@ -26,21 +26,21 @@ export class WeatherlinkHelper {
     true,
     '[WeatherlinkHelper.current]'
   );
+  static async getCurrent() {
+    return this.current.get('default', undefined);
+  }
 
-  static mapCurrentToWlObservations(
-    response: CurrentConditions,
-    validUntil: number,
-    reqQuery: ReqQuery
-  ): WlObservations {
-    const wlMain = response.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)!.data[0] as MainSensorData;
-    const wlBarometer = response.sensors.find(sensor => sensor.sensor_type === SensorType.BAROMETER)!
+  static mapCurrentToWlObservations(cacheEntry: CacheEntry<CurrentConditions>, reqQuery: ReqQuery): WlObservations {
+    const wlMain = cacheEntry.item.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)!
+      .data[0] as MainSensorData;
+    const wlBarometer = cacheEntry.item.sensors.find(sensor => sensor.sensor_type === SensorType.BAROMETER)!
       .data[0] as BarometerSensorData;
 
     const units = NumberHelper.getUnitMappings(DEFAULT_UNITS, reqQuery);
 
     return {
       readTime: wlMain.ts ?? 0,
-      validUntil,
+      validUntil: cacheEntry.validUntil,
       temperature: NumberHelper.convert(wlMain.temp, units[UnitType.temp]),
       heatIndex: NumberHelper.convert(wlMain.heat_index, units[UnitType.temp]),
       dewPoint: NumberHelper.convert(wlMain.dew_point, units[UnitType.temp]),

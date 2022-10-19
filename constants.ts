@@ -1,24 +1,12 @@
-import { Unit, UnitType } from './models';
-import { StationsResponse } from './models/nws';
+import { Coordinates, Unit, UnitType } from './models';
 
-export const AQ_LATITUDE = 42.35826159869919;
-export const AQ_LONGITUDE = -71.05360507074275;
-
-export const NWS_FALLBACK_STATION: StationsResponse = {
-  id: 'https://api.weather.gov/stations/KBOS',
-  geometry: { coordinates: [-71.01056, 42.36056] },
-  properties: {
-    elevation: { unitCode: 'wmoUnit:m', value: 6.096 },
-    stationIdentifier: 'KBOS',
-    name: 'Boston, Logan International Airport',
-    timeZone: 'America/New_York',
-    forecast: 'https://api.weather.gov/zones/forecast/MAZ015',
-    county: 'https://api.weather.gov/zones/county/MAC025',
-    fireWeatherZone: 'https://api.weather.gov/zones/fire/MAZ015'
-  }
+export const AQ_COORDINATES: Coordinates = {
+  latitude: 42.35826159869919,
+  longitude: -71.05360507074275
 };
+
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
-export const NWS_UPLOAD_DELAY = 20 * 60; // 20 minutes
+export const NWS_UPLOAD_DELAY = 25 * 60; // 25 minutes
 
 export const DEFAULT_UNITS: Record<UnitType, Unit> = {
   [UnitType.temp]: Unit.F,

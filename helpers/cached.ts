@@ -1,30 +1,24 @@
-export class Cached<T> {
-  private getItemOnMiss: () => Promise<T>;
-  private calculateExpiration: (newItem: T) => Promise<number>;
+export interface CacheEntry<T> {
+  item: T;
+  maxAge: number;
+  validUntil: number;
+}
+
+export class Cached<Item, Opts> {
+  private getItemOnMiss: (opts: Opts) => Promise<Item>;
+  private calculateExpiration: (newItem: Item) => Promise<number>;
   private shouldLog: boolean;
   private logPrefix: string;
 
-  private cachedItem?: T;
-  private cachedItemExpiration = 0;
+  private cacheEntries = new Map<string, CacheEntry<Item>>();
 
   private get nowTimeInSeconds(): number {
     return Math.ceil(new Date().getTime() / 1_000);
   }
-  private get isCacheValid(): boolean {
-    return (
-      this.cachedItem !== null && this.cachedItem !== undefined && this.nowTimeInSeconds < this.cachedItemExpiration
-    );
-  }
-  get maxAge(): number {
-    return this.isCacheValid ? this.cachedItemExpiration - this.nowTimeInSeconds : 0;
-  }
-  get validUntil(): number {
-    return this.isCacheValid ? this.cachedItemExpiration : 0;
-  }
 
   constructor(
-    getItemOnMiss: () => Promise<T>,
-    calculateExpiration: (newItem: T) => Promise<number>,
+    getItemOnMiss: (opts: Opts) => Promise<Item>,
+    calculateExpiration: (newItem: Item) => Promise<number>,
     shouldLog?: boolean,
     logPrefix?: string
   ) {
@@ -40,24 +34,33 @@ export class Cached<T> {
     }
   }
 
-  async get(): Promise<T> {
-    if (!this.isCacheValid) {
-      this.log(
-        `cache MISS because ${this.nowTimeInSeconds} (now) >= ${this.cachedItemExpiration} (cachedItemExpiration)`
-      );
-      this.cachedItem = await this.getItemOnMiss();
+  private isCacheValidFor(key: string) {
+    const cacheEntry = this.cacheEntries.get(key);
+    return cacheEntry != null && cacheEntry.item != null && this.nowTimeInSeconds < cacheEntry.validUntil;
+  }
 
+  async get(key: string, opts: Opts): Promise<CacheEntry<Item>> {
+    if (!this.isCacheValidFor(key)) {
+      this.log(
+        `MISS - cache for "${key}" because ${this.nowTimeInSeconds} (now) >= ${
+          this.cacheEntries.get(key)?.validUntil
+        } (expiration)`
+      );
+      const item = await this.getItemOnMiss(opts);
+      let validUntil = 0;
       try {
-        this.cachedItemExpiration = await this.calculateExpiration(this.cachedItem);
+        validUntil = item != null ? await this.calculateExpiration(item) : 0;
       } catch (err) {
         this.log(`couldn't calculate cachedItemExpiration due to an exception: ${err}`);
-        this.cachedItemExpiration = 0;
       }
-      this.log(`cache now expires at ${this.cachedItemExpiration}`);
+      const maxAge = validUntil ? validUntil - this.nowTimeInSeconds : 0;
+
+      this.cacheEntries.set(key, { item, validUntil, maxAge });
+      this.log(`cache for "${key}" now expires at ${validUntil}`);
     } else {
-      this.log('cache HIT');
+      this.log(`HIT - cache for "${key}"`);
     }
 
-    return this.cachedItem!;
+    return this.cacheEntries.get(key)!;
   }
 }
