@@ -1,10 +1,7 @@
 import { DEFAULT_UNITS } from '../constants';
 import { Unit, UnitMapping, Units, UnitType } from '../models';
+import { ReqQuery } from '../models/api';
 import { NwsUnits, QuantitativeValue } from '../models/nws';
-
-export type ReqQuery = Partial<{
-  [key: string]: string | string[];
-}>;
 
 export class NumberHelper {
   private static readonly CONVERSION_MAP = {

@@ -25,3 +25,5 @@ export const DEFAULT_UNITS: Record<UnitType, Unit> = {
   [UnitType.distance]: Unit.MILES,
   [UnitType.pressure]: Unit.INCHES_OF_MERCURY
 };
+
+export const API_ROUTE_PATH = '/api';

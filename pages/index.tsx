@@ -4,12 +4,12 @@ import useSWR from 'swr';
 
 import Reading from '../components/Reading/Reading';
 import WindComp from '../components/Wind/Wind';
-import { Observations, Response } from '../models/api';
+import { APIRoute, Observations, Response } from '../models/api';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
 
 const useObservations = (): { observations?: Response<Observations>; isLoading: boolean; isError: boolean } => {
-  const { data, error } = useSWR<Response<Observations>>('/api/weatherlink-current', fetcher);
+  const { data, error } = useSWR<Response<Observations>>(APIRoute.CURRENT, fetcher);
 
   return {
     observations: data,
@@ -32,14 +32,17 @@ export default function Home() {
 
       {observations ? (
         !isError ? (
-          <div className={styles.main}>
-            <Reading title="Temp" value={`${observations.data.temperature}°`} />
-            <Reading title="Feels Like" value={`${observations.data.feelsLike ?? observations.data.temperature}°`} />
-            <Reading title="Humidity" value={`${observations.data.humidity}%`} />
-            <Reading title="Wind">
-              <WindComp wind={observations.data.wind} />
-            </Reading>
-          </div>
+          <>
+            <h1>{observations.data.nws?.textDescription}</h1>
+            <div className={styles.main}>
+              <Reading title="Temp" value={`${observations.data.wl?.temperature}°`} />
+              <Reading title="Feels Like" value={`${observations.data.wl?.feelsLike ?? '–'}°`} />
+              <Reading title="Humidity" value={`${observations.data.wl?.humidity}%`} />
+              <Reading title="Wind">
+                <WindComp wind={observations.data.wl?.wind} />
+              </Reading>
+            </div>
+          </>
         ) : (
           <>
             <h1>Something went wrong :(</h1>

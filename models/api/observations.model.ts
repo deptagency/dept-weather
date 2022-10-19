@@ -6,6 +6,8 @@ export interface Observations {
 }
 
 export interface BaseObservations {
+  readTime: number;
+  validUntil: number;
   temperature: number | null;
   heatIndex: number | null;
   dewPoint: number | null;

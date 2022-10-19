@@ -1,7 +1,7 @@
 import { Wind as WindModel } from '../../models/api';
 import styles from './Wind.module.css';
 
-export default function Wind({ wind }: { wind: WindModel }) {
+export default function Wind({ wind }: { wind?: WindModel }) {
   const getWindDirection = (deg: Number) => {
     if ((deg > 348.75 && deg < 11.25) || deg === 360) return 'N';
     else if (deg > 11.25 && deg < 33.75) return 'NNE';
@@ -25,9 +25,9 @@ export default function Wind({ wind }: { wind: WindModel }) {
   return (
     <div>
       <h2>
-        {Math.round(wind.speed ?? 0)}
+        {Math.round(wind?.speed ?? 0)}
         <small>mph </small>
-        {wind.direction != null ? getWindDirection(wind.direction) : ''}
+        {wind?.direction != null ? getWindDirection(wind.direction) : ''}
       </h2>
       <div className={styles.face}>
         <span className={`${styles.dir} ${styles.n}`}>N</span>
@@ -38,7 +38,7 @@ export default function Wind({ wind }: { wind: WindModel }) {
         <div
           className={styles.arrow}
           style={{
-            transform: `translateX(-50%) translateY(-100%) rotate(${wind.direction ?? 0}deg)`
+            transform: `translateX(-50%) translateY(-100%) rotate(${wind?.direction ?? 0}deg)`
           }}
         ></div>
       </div>

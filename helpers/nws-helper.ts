@@ -7,10 +7,10 @@ import {
   NWS_UPLOAD_DELAY
 } from '../constants';
 import { Unit, UnitMapping, UnitType } from '../models';
-import { NwsObservations } from '../models/api';
+import { NwsObservations, ReqQuery } from '../models/api';
 import { NwsUnits, ObservationResponse, StationsResponse } from '../models/nws';
 import { Cached } from './cached';
-import { NumberHelper, ReqQuery } from './number-helper';
+import { NumberHelper } from './number-helper';
 
 export class NwsHelper {
   private static readonly userAgent = process.env.NWS_USER_AGENT!;
@@ -37,7 +37,11 @@ export class NwsHelper {
     '[NwsHelper.current]'
   );
 
-  static mapCurrentToNwsObservations(response: ObservationResponse, reqQuery: ReqQuery): NwsObservations {
+  static mapCurrentToNwsObservations(
+    response: ObservationResponse,
+    validUntil: number,
+    reqQuery: ReqQuery
+  ): NwsObservations {
     const nwsCurrent = response.properties;
     const pressureUnitMapping: UnitMapping = NumberHelper.getUnitMapping(
       UnitType.pressure,
@@ -46,6 +50,8 @@ export class NwsHelper {
     );
 
     return {
+      readTime: Math.floor(new Date(nwsCurrent.timestamp).getTime() / 1_000),
+      validUntil,
       temperature: NumberHelper.convertNws(nwsCurrent.temperature, UnitType.temp, reqQuery),
       heatIndex: NumberHelper.convertNws(nwsCurrent.heatIndex, UnitType.temp, reqQuery),
       dewPoint: NumberHelper.convertNws(nwsCurrent.dewpoint, UnitType.temp, reqQuery),

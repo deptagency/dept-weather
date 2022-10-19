@@ -1,10 +1,10 @@
 import { default as WeatherLink } from 'weatherlink';
 import { DEFAULT_UNITS } from '../constants';
 import { Unit, UnitType } from '../models';
-import { WlObservations } from '../models/api';
+import { ReqQuery, WlObservations } from '../models/api';
 import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
 import { Cached } from './cached';
-import { NumberHelper, ReqQuery } from './number-helper';
+import { NumberHelper } from './number-helper';
 
 export class WeatherlinkHelper {
   private static readonly apiKey = process.env.WEATHERLINK_API_KEY!;
@@ -27,7 +27,11 @@ export class WeatherlinkHelper {
     '[WeatherlinkHelper.current]'
   );
 
-  static mapCurrentToWlObservations(response: CurrentConditions, reqQuery: ReqQuery): WlObservations {
+  static mapCurrentToWlObservations(
+    response: CurrentConditions,
+    validUntil: number,
+    reqQuery: ReqQuery
+  ): WlObservations {
     const wlMain = response.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)!.data[0] as MainSensorData;
     const wlBarometer = response.sensors.find(sensor => sensor.sensor_type === SensorType.BAROMETER)!
       .data[0] as BarometerSensorData;
@@ -35,6 +39,8 @@ export class WeatherlinkHelper {
     const units = NumberHelper.getUnitMappings(DEFAULT_UNITS, reqQuery);
 
     return {
+      readTime: wlMain.ts ?? 0,
+      validUntil,
       temperature: NumberHelper.convert(wlMain.temp, units[UnitType.temp]),
       heatIndex: NumberHelper.convert(wlMain.heat_index, units[UnitType.temp]),
       dewPoint: NumberHelper.convert(wlMain.dew_point, units[UnitType.temp]),
