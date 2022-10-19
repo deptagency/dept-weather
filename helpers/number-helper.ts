@@ -31,7 +31,7 @@ export class NumberHelper {
     }
   } as Record<Unit, Record<Unit, (value: number) => number>>;
 
-  static round(value: number | null, n: number | undefined = 1) {
+  static round(value: number | null, n: number | undefined = 1, method: 'floor' | 'ceil' | 'round' = 'round') {
     if (value == null) {
       return null;
     }
@@ -40,7 +40,17 @@ export class NumberHelper {
     }
 
     const multiple = n === 0 ? 1 : Math.pow(10, n);
-    return Math.round(value * multiple) / multiple;
+    const x = value * multiple;
+    let roundedX: number;
+    if (method === 'floor') {
+      roundedX = Math.floor(x);
+    } else if (method === 'ceil') {
+      roundedX = Math.ceil(x);
+    } else {
+      roundedX = Math.round(x);
+    }
+
+    return roundedX / multiple;
   }
 
   static roundNws(quantitativeValue: QuantitativeValue, n: number | undefined = 1) {
