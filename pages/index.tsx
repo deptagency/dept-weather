@@ -4,12 +4,12 @@ import useSWR from 'swr';
 
 import Reading from '../components/Reading/Reading';
 import WindComp from '../components/Wind/Wind';
-import { APIRoute, Observations, Response } from '../models/api';
+import { APIRoute, getPath, Observations, Response } from '../models/api';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
 
 const useObservations = (): { observations?: Response<Observations>; isLoading: boolean; isError: boolean } => {
-  const { data, error } = useSWR<Response<Observations>>(APIRoute.CURRENT, fetcher);
+  const { data, error } = useSWR<Response<Observations>>(getPath(APIRoute.CURRENT), fetcher);
 
   return {
     observations: data,

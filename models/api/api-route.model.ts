@@ -1,5 +1,8 @@
 import { API_ROUTE_PATH } from '../../constants';
 
-export const APIRoute = {
-  CURRENT: `${API_ROUTE_PATH}/current`
-};
+export enum APIRoute {
+  CURRENT = 'current',
+  HEALTH = 'health'
+}
+
+export const getPath = (route: APIRoute) => `${API_ROUTE_PATH}/${route}`;
