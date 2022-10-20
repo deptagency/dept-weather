@@ -41,7 +41,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0rem 3rem' }}>
-        <img src="skyline-sample.png" style={{ height: '8rem', objectFit: 'scale-down' }}></img>
+        <img src="skylines/boston.svg" style={{ height: '8rem', objectFit: 'scale-down' }}></img>
       </div>
       {observations ? (
         !isError ? (
@@ -50,15 +50,15 @@ export default function Home() {
               style={{
                 background: '#ffffff',
                 padding: '0rem 1rem 0rem',
-                margin: '1rem',
-                borderRadius: '1rem',
-                boxShadow: '8px 8px 32px #F3F3F3, -8px -8px 32px #ffffff'
+                margin: '1rem 0rem',
+                borderRadius: '2px',
+                boxShadow: '0px 0.25rem 0.5rem rgba(0, 0, 0, .15)'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
                 <p
                   style={{
-                    margin: '0.5rem 0.5rem 0rem 0rem',
+                    margin: '0.75rem 0.75rem 0rem 0rem',
                     fontSize: '1.5rem',
                     fontWeight: '700',
                     color: '#FF5353'
@@ -66,11 +66,20 @@ export default function Home() {
                 >
                   NOW
                 </p>
-                <p style={{ margin: '0rem', fontSize: '0.75rem', fontWeight: '400' }}>Updated 3m ago</p>
+                <p
+                  style={{
+                    margin: '0.75rem 0rem 0.75rem',
+                    fontSize: '1rem',
+                    fontWeight: '300',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Updated 3m ago
+                </p>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-                <div style={{ flex: '50%', marginBottom: '2rem' }}>
-                  <h1 style={{ margin: '0rem', fontSize: '6rem', fontWeight: '400' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: '0 1 auto', marginRight: '1rem' }}>
+                  <h1 style={{ margin: '1rem 0rem 0rem', fontSize: '7rem', fontWeight: '400' }}>
                     <span>
                       {observations.data.wl?.temperature != null ? Math.floor(observations.data.wl.temperature) : '–'}
                     </span>
@@ -81,39 +90,39 @@ export default function Home() {
                     </span>
                     <span style={{ marginLeft: '-0.5rem' }}>°</span>
                   </h1>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {observations.data.wl?.feelsLike ? (
+                    <p style={{ margin: '-0.25rem 0rem 0rem', fontSize: '1.25rem', fontWeight: '400' }}>
+                      Feels Like {observations.data.wl.feelsLike}°
+                    </p>
+                  ) : (
+                    <></>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0rem 1.25rem' }}>
                     <img
                       src="pcloudy.png"
                       style={{ width: '2rem', objectFit: 'scale-down', marginRight: '0.5rem' }}
                     ></img>
-                    <p style={{ margin: '0rem', fontSize: '2rem', fontWeight: '400' }}>
+                    <p style={{ margin: '0.25rem 0rem 0rem', fontSize: '2rem', fontWeight: '400' }}>
                       {observations.data.nws?.textDescription}
                     </p>
                   </div>
                 </div>
-                <div style={{ flex: '50%', display: 'flex', flexWrap: 'wrap' }}>
+                <div
+                  style={{ display: 'flex', flexWrap: 'wrap', flex: '1 1', maxWidth: '36rem', justifyContent: 'end' }}
+                >
                   <CardDetail
                     value={`${Math.round(observations.data.wl?.wind.speed ?? 0)} mph ${getWindDirection(
-                      observations.data.wl?.wind.direction
+                      observations.data.wl?.wind.direction ?? 0
                     )}`}
+                    secondaryValue={`${Math.round(observations.data.wl?.wind.gustSpeed ?? 0)} mph gusts`}
                     iconImgSrc="arrow.png"
                     label="Wind"
                   />
-                  <CardDetail
-                    value={`${observations.data.wl?.pressure.atSeaLevel} in`}
-                    iconImgSrc="arrow.png"
-                    label="Pressure"
-                  />
-                  <CardDetail
-                    value={`${Math.round(observations.data.wl?.humidity ?? 0)}%`}
-                    iconImgSrc="arrow.png"
-                    label="Humidity"
-                  />
-                  <CardDetail
-                    value={`${Math.round(observations.data.wl?.feelsLike ?? 0)}°`}
-                    iconImgSrc="arrow.png"
-                    label="Feels Like"
-                  />
+                  <CardDetail value={`5`} secondaryValue={`Moderate`} label="UV Index" />
+                  <CardDetail value={`47`} secondaryValue={`Good`} label="Air Quality" />
+                  <CardDetail value={`${Math.round(observations.data.wl?.humidity ?? 0)}%`} label="Humidity" />
+                  <CardDetail value={`${observations.data.wl?.pressure.atSeaLevel} in ↓`} label="Pressure" />
+                  <CardDetail value={`– in`} label="Last 24hr Precipitation" />
                 </div>
               </div>
             </div>
