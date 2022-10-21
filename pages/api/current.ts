@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const coordinates = CoordinatesHelper.normalize(AQ_COORDINATES);
     const [wlCurrent, nwsCurrent, airNowCurrent] = await Promise.all([
-      WeatherlinkHelper.getCurrent(),
+      WeatherlinkHelper.getCurrent(coordinates),
       NwsHelper.getCurrent(coordinates),
       AirNowHelper.getCurrent(coordinates)
     ]);

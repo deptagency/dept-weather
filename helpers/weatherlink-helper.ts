@@ -1,6 +1,6 @@
 import { default as WeatherLink } from 'weatherlink';
 import { DEFAULT_UNITS } from '../constants';
-import { Unit, UnitType } from '../models';
+import { Coordinates, Unit, UnitType } from '../models';
 import { ReqQuery, WlObservations } from '../models/api';
 import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
 import { Cached, CacheEntry } from './cached';
@@ -26,8 +26,8 @@ export class WeatherlinkHelper {
     true,
     '[WeatherlinkHelper.current]'
   );
-  static async getCurrent() {
-    return this.current.get('default', undefined);
+  static async getCurrent(coordinates: Coordinates) {
+    return this.current.get(`${coordinates.latitude},${coordinates.longitude}`, undefined);
   }
 
   static mapCurrentToWlObservations(cacheEntry: CacheEntry<CurrentConditions>, reqQuery: ReqQuery): WlObservations {

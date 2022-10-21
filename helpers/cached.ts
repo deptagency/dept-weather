@@ -56,7 +56,9 @@ export class Cached<Item, Opts> {
       const maxAge = validUntil ? validUntil - this.nowTimeInSeconds : 0;
 
       this.cacheEntries.set(key, { item, validUntil, maxAge });
-      this.log(`cache for "${key}" now expires at ${validUntil}`);
+      this.log(
+        `cache for "${key}" now expires at ${validUntil} (${new Date(validUntil * 1_000).toLocaleTimeString()})`
+      );
     } else {
       this.log(`HIT - cache for "${key}"`);
     }
