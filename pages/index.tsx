@@ -49,26 +49,33 @@ export default function Home() {
             <div
               style={{
                 background: '#ffffff',
-                padding: '0rem 1rem 0rem',
                 margin: '1rem 0rem',
                 borderRadius: '2px',
                 boxShadow: '0px 0.25rem 0.5rem rgba(0, 0, 0, .15)'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  backgroundColor: '#5115F7',
+                  color: '#FFFFFF'
+                }}
+              >
                 <p
                   style={{
-                    margin: '0.75rem 0.75rem 0rem 0rem',
+                    margin: '1rem 1rem 0.75rem',
                     fontSize: '1.5rem',
-                    fontWeight: '700',
-                    color: '#FF5353'
+                    fontWeight: '700'
                   }}
                 >
                   NOW
                 </p>
                 <p
                   style={{
-                    margin: '0.75rem 0rem 0.75rem',
+                    margin: '1rem',
                     fontSize: '1rem',
                     fontWeight: '300',
                     whiteSpace: 'nowrap'
@@ -83,7 +90,7 @@ export default function Home() {
                   flexWrap: 'wrap',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  paddingBottom: '0.5rem'
+                  padding: '0.5rem 1rem'
                 }}
               >
                 <div style={{ flex: '0 1 auto', marginRight: '1rem' }}>
