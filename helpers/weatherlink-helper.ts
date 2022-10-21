@@ -46,22 +46,27 @@ export class WeatherlinkHelper {
       dewPoint: NumberHelper.convert(wlMain.dew_point, units[UnitType.temp]),
       humidity: NumberHelper.round(wlMain.hum, 0),
       wind: {
-        speed: NumberHelper.convert(wlMain.wind_speed_avg_last_10_min, units[UnitType.distance]),
+        speed: NumberHelper.convert(wlMain.wind_speed_avg_last_10_min, units[UnitType.wind]),
         direction: NumberHelper.round(wlMain.wind_dir_scalar_avg_last_10_min, 0),
-        gustSpeed: NumberHelper.convert(wlMain.wind_speed_hi_last_10_min, units[UnitType.distance])
+        gustSpeed: NumberHelper.convert(wlMain.wind_speed_hi_last_10_min, units[UnitType.wind])
       },
       feelsLike: NumberHelper.convert(wlMain.thsw_index ?? wlMain.thw_index, units[UnitType.temp]),
       pressure: {
         atSeaLevel: NumberHelper.convert(
           wlBarometer.bar_sea_level,
           units[UnitType.pressure],
-          units[UnitType.pressure].to === Unit.INCHES_OF_MERCURY ? 2 : 1
+          units[UnitType.pressure].to === Unit.INCHES ? 2 : 1
         ),
         trend: NumberHelper.convert(
           wlBarometer.bar_trend,
           units[UnitType.pressure],
-          units[UnitType.pressure].to === Unit.INCHES_OF_MERCURY ? 3 : 1
+          units[UnitType.pressure].to === Unit.INCHES ? 3 : 1
         )
+      },
+      rainfall: {
+        last15Mins: NumberHelper.convert(wlMain.rainfall_last_15_min_in, units[UnitType.precipitation], 2),
+        last1Hrs: NumberHelper.convert(wlMain.rainfall_last_60_min_in, units[UnitType.precipitation], 2),
+        last24Hrs: NumberHelper.convert(wlMain.rainfall_last_24_hr_in, units[UnitType.precipitation], 2)
       }
     };
   }

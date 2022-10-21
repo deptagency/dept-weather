@@ -18,16 +18,26 @@ export class NumberHelper {
       [Unit.KM]: (value: number) => value * 1.609344
     },
     [Unit.PASCAL]: {
-      [Unit.INCHES_OF_MERCURY]: (value: number) => value / 3386,
+      [Unit.INCHES]: (value: number) => value / 3386,
       [Unit.MILLIBAR]: (value: number) => value / 100
-    },
-    [Unit.INCHES_OF_MERCURY]: {
-      [Unit.PASCAL]: (value: number) => value * 3386,
-      [Unit.MILLIBAR]: (value: number) => value * 33.864
     },
     [Unit.MILLIBAR]: {
       [Unit.PASCAL]: (value: number) => value * 100,
-      [Unit.INCHES_OF_MERCURY]: (value: number) => value / 33.864
+      [Unit.INCHES]: (value: number) => value / 33.864
+    },
+    [Unit.INCHES]: {
+      [Unit.PASCAL]: (value: number) => value * 3386,
+      [Unit.MILLIBAR]: (value: number) => value * 33.864,
+      [Unit.METERS]: (value: number) => value / 39.37,
+      [Unit.MILLIMETERS]: (value: number) => value * 25.4
+    },
+    [Unit.METERS]: {
+      [Unit.INCHES]: (value: number) => value * 39.37,
+      [Unit.MILLIMETERS]: (value: number) => value * 1000
+    },
+    [Unit.MILLIMETERS]: {
+      [Unit.INCHES]: (value: number) => value / 25.4,
+      [Unit.METERS]: (value: number) => value / 1000
     }
   } as Record<Unit, Record<Unit, (value: number) => number>>;
 

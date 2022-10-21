@@ -74,10 +74,18 @@ export default function Home() {
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  Updated 3m ago
+                  Updated Xm ago
                 </p>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingBottom: '0.5rem'
+                }}
+              >
                 <div style={{ flex: '0 1 auto', marginRight: '1rem' }}>
                   <h1 style={{ margin: '1rem 0rem 0rem', fontSize: '7rem', fontWeight: '400' }}>
                     <span>
@@ -97,7 +105,7 @@ export default function Home() {
                   ) : (
                     <></>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0rem 1.25rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0rem 1rem' }}>
                     <img
                       src="pcloudy.png"
                       style={{ width: '2rem', objectFit: 'scale-down', marginRight: '0.5rem' }}
@@ -118,11 +126,28 @@ export default function Home() {
                     iconImgSrc="arrow.png"
                     label="Wind"
                   />
-                  <CardDetail value={`5`} secondaryValue={`Moderate`} label="UV Index" />
-                  <CardDetail value={`47`} secondaryValue={`Good`} label="Air Quality" />
+                  <CardDetail value={`X`} secondaryValue={`XXX`} label="UV Index" />
+                  {observations.data.airnow?.observations?.length ? (
+                    <CardDetail
+                      value={String(observations.data.airnow.observations[0].aqi ?? '–')}
+                      secondaryValue={observations.data.airnow.observations[0].aqiLevelName ?? '–'}
+                      label={`Air Quality (${observations.data.airnow.observations[0].pollutant})`}
+                    />
+                  ) : (
+                    <CardDetail value={`–`} secondaryValue={`–`} label="Air Quality" />
+                  )}
+
                   <CardDetail value={`${Math.round(observations.data.wl?.humidity ?? 0)}%`} label="Humidity" />
-                  <CardDetail value={`${observations.data.wl?.pressure.atSeaLevel} in ↓`} label="Pressure" />
-                  <CardDetail value={`– in`} label="Last 24hr Precipitation" />
+                  <CardDetail
+                    value={`${observations.data.wl?.pressure.atSeaLevel?.toFixed(2) ?? '–'} in ${
+                      observations.data.wl?.pressure.trend ? (observations.data.wl.pressure.trend > 0 ? '↑' : '↓') : '→'
+                    }`}
+                    label="Pressure"
+                  />
+                  <CardDetail
+                    value={`${observations.data.wl?.rainfall.last24Hrs?.toFixed(2) ?? '–'} in`}
+                    label="Last 24hr Rainfall"
+                  />
                 </div>
               </div>
             </div>

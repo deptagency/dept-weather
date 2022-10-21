@@ -49,16 +49,21 @@ export class NwsHelper {
       dewPoint: NumberHelper.convertNws(nwsCurrent.dewpoint, UnitType.temp, reqQuery),
       humidity: NumberHelper.roundNws(nwsCurrent.relativeHumidity),
       wind: {
-        speed: NumberHelper.convertNws(nwsCurrent.windSpeed, UnitType.distance, reqQuery),
+        speed: NumberHelper.convertNws(nwsCurrent.windSpeed, UnitType.wind, reqQuery),
         direction: nwsCurrent.windDirection.value,
-        gustSpeed: NumberHelper.convertNws(nwsCurrent.windGust, UnitType.distance, reqQuery)
+        gustSpeed: NumberHelper.convertNws(nwsCurrent.windGust, UnitType.wind, reqQuery)
       },
       pressure: {
         atSeaLevel: NumberHelper.convert(
           nwsCurrent.seaLevelPressure.value,
           pressureUnitMapping,
-          pressureUnitMapping.to === Unit.INCHES_OF_MERCURY ? 2 : 1
+          pressureUnitMapping.to === Unit.INCHES ? 2 : 1
         )
+      },
+      precipitation: {
+        last1Hrs: NumberHelper.convertNws(nwsCurrent.precipitationLastHour, UnitType.precipitation, reqQuery, 2),
+        last3Hrs: NumberHelper.convertNws(nwsCurrent.precipitationLast3Hours, UnitType.precipitation, reqQuery, 2),
+        last6Hrs: NumberHelper.convertNws(nwsCurrent.precipitationLast6Hours, UnitType.precipitation, reqQuery, 2)
       },
       textDescription: nwsCurrent.textDescription
     };

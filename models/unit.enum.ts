@@ -4,14 +4,17 @@ export enum Unit {
   KM = 'km',
   MILES = 'miles',
   PASCAL = 'pa',
-  INCHES_OF_MERCURY = 'in',
-  MILLIBAR = 'mb'
+  MILLIBAR = 'mb',
+  INCHES = 'in',
+  METERS = 'm',
+  MILLIMETERS = 'mm'
 }
 
 export enum UnitType {
   temp = 'temp',
-  distance = 'distance',
-  pressure = 'pressure'
+  wind = 'wind',
+  pressure = 'pressure',
+  precipitation = 'precipitation'
 }
 
 export interface UnitMapping {

@@ -1,13 +1,18 @@
+import { AQILevelName } from '../airnow';
 import { DataSource } from '../data-source.enum';
 
 export interface Observations {
   [DataSource.WEATHERLINK]?: WlObservations;
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsObservations;
+  [DataSource.AIRNOW]?: AirNowObservations;
 }
 
 export interface BaseObservations {
   readTime: number;
   validUntil: number;
+}
+
+export interface WeatherObservations extends BaseObservations {
   temperature: number | null;
   heatIndex: number | null;
   dewPoint: number | null;
@@ -16,13 +21,25 @@ export interface BaseObservations {
   pressure: BasePressure;
 }
 
-export interface NwsObservations extends BaseObservations {
+export interface NwsObservations extends WeatherObservations {
   textDescription: string | null;
+  precipitation: NwsPrecipitation;
 }
 
-export interface WlObservations extends BaseObservations {
+export interface WlObservations extends WeatherObservations {
   feelsLike: number | null;
   pressure: WlPressure;
+  rainfall: WlPrecipitation;
+}
+
+export interface AirNowObservations extends BaseObservations {
+  observations: Array<AirNowObservation>;
+}
+
+export interface AirNowObservation {
+  pollutant: string | null;
+  aqi: number | null;
+  aqiLevelName: AQILevelName | null;
 }
 
 export interface Wind {
@@ -37,4 +54,17 @@ export interface BasePressure {
 
 export interface WlPressure extends BasePressure {
   trend: number | null;
+}
+
+export interface BasePrecipitation {
+  last1Hrs: number | null;
+}
+
+export interface WlPrecipitation extends BasePrecipitation {
+  last15Mins: number | null;
+  last24Hrs: number | null;
+}
+export interface NwsPrecipitation extends BasePrecipitation {
+  last3Hrs: number | null;
+  last6Hrs: number | null;
 }
