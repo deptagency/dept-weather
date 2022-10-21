@@ -1,36 +1,38 @@
 import { Client } from 'weathered';
 import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '../constants';
-import { Coordinates, Unit, UnitMapping, UnitType } from '../models';
+import { Unit, UnitMapping, UnitType } from '../models';
 import { NwsObservations, ReqQuery } from '../models/api';
 import { NwsUnits, ObservationResponse, StationsResponse } from '../models/nws';
 import { Cached, CacheEntry } from './cached';
+import { CoordinatesHelper } from './coordinates-helper';
 import { NumberHelper } from './number-helper';
 
 export class NwsHelper {
-  private static readonly userAgent = process.env.NWS_USER_AGENT!;
+  private static readonly userAgent = process.env.USER_AGENT!;
   private static readonly nws = new Client({ userAgent: NwsHelper.userAgent });
 
-  static async getNearestStation(coordinates: Coordinates) {
+  static async getNearestStation(coordinatesStr: string) {
+    const coordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
     return this.nws.getNearestStation(
-      coordinates.latitude,
-      coordinates.longitude
+      coordinatesNumArr[0],
+      coordinatesNumArr[1]
     ) as Promise<unknown> as Promise<StationsResponse>;
   }
 
-  private static readonly current = new Cached<ObservationResponse, Coordinates>(
-    async (coordinates: Coordinates) =>
+  private static readonly current = new Cached<ObservationResponse, string>(
+    async (coordinatesStr: string) =>
       this.nws.getLatestStationObservations(
-        (await this.getNearestStation(coordinates)).properties.stationIdentifier
+        (await this.getNearestStation(coordinatesStr)).properties.stationIdentifier
       ) as unknown as ObservationResponse,
-    async (newItem: ObservationResponse) => {
+    async (_: string, newItem: ObservationResponse) => {
       const lastReading = Math.floor(new Date(newItem.properties.timestamp).getTime() / 1_000);
       return lastReading ? lastReading + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY : 0;
     },
     true,
     '[NwsHelper.current]'
   );
-  static async getCurrent(coordinates: Coordinates) {
-    return this.current.get(`${coordinates.latitude},${coordinates.longitude}`, coordinates);
+  static async getCurrent(coordinatesStr: string) {
+    return this.current.get(coordinatesStr, coordinatesStr);
   }
 
   static mapCurrentToNwsObservations(cacheEntry: CacheEntry<ObservationResponse>, reqQuery: ReqQuery): NwsObservations {

@@ -1,6 +1,6 @@
 import { default as WeatherLink } from 'weatherlink';
 import { DEFAULT_UNITS } from '../constants';
-import { Coordinates, Unit, UnitType } from '../models';
+import { Unit, UnitType } from '../models';
 import { ReqQuery, WlObservations } from '../models/api';
 import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
 import { Cached, CacheEntry } from './cached';
@@ -18,7 +18,7 @@ export class WeatherlinkHelper {
 
   private static readonly current = new Cached<CurrentConditions, undefined>(
     async () => this.wl.getCurrent({ stationId: (await this.getMainStation()).station_id }),
-    async (newItem: CurrentConditions) => {
+    async (_: string, newItem: CurrentConditions) => {
       const lastReading = newItem.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0]?.ts ?? 0;
       const recordingInterval = (await this.getMainStation()).recording_interval * 60;
       return lastReading ? lastReading + recordingInterval + 10 : 0;
@@ -26,8 +26,8 @@ export class WeatherlinkHelper {
     true,
     '[WeatherlinkHelper.current]'
   );
-  static async getCurrent(coordinates: Coordinates) {
-    return this.current.get(`${coordinates.latitude},${coordinates.longitude}`, undefined);
+  static async getCurrent(coordinatesStr: string) {
+    return this.current.get(coordinatesStr, undefined);
   }
 
   static mapCurrentToWlObservations(cacheEntry: CacheEntry<CurrentConditions>, reqQuery: ReqQuery): WlObservations {

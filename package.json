@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "dayjs": "^1.11.6",
+    "geo-tz": "^7.0.2",
+    "geo2zip": "^4.0.1",
     "next": "^12.1.6",
     "node-fetch": "^3.2.10",
     "react": "17.0.2",

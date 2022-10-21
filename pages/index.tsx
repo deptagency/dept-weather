@@ -3,7 +3,7 @@ import TimeAgo, { Formatter, Suffix, Unit as TimeAgoUnit } from 'react-timeago';
 import useSWR from 'swr';
 
 import CardDetail from '../components/CardDetail/CardDetail';
-import { APIRoute, BaseObservations, getPath, Observations, Response } from '../models/api';
+import { APIRoute, EpaHourlyForecastItem, getPath, Observations, Response } from '../models/api';
 import styles from '../styles/Home.module.css';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
@@ -48,6 +48,9 @@ export default function Home() {
 
     return '';
   };
+
+  const epaHourlyForecastReducer = (prev: EpaHourlyForecastItem, current: EpaHourlyForecastItem) =>
+    current.time <= new Date().getTime() / 1_000 ? current : prev;
 
   return (
     <div className={styles.container}>
@@ -98,16 +101,7 @@ export default function Home() {
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  Updated{' '}
-                  {
-                    <TimeAgo
-                      date={
-                        Math.max(...Object.values(observations.data).map((data: BaseObservations) => data.readTime)) *
-                        1_000
-                      }
-                      formatter={timeAgoFormatter}
-                    />
-                  }
+                  Updated {<TimeAgo date={observations.latestReadTime * 1_000} formatter={timeAgoFormatter} />}
                 </p>
               </div>
               <div
@@ -159,7 +153,15 @@ export default function Home() {
                     iconImgSrc="arrow.png"
                     label="Wind"
                   />
-                  <CardDetail value={`X`} secondaryValue={`XXX`} label="UV Index" />
+                  <CardDetail
+                    value={String(
+                      observations.data.epa?.hourlyForecast.reduce(epaHourlyForecastReducer).uvIndex ?? '–'
+                    )}
+                    secondaryValue={
+                      observations.data.epa?.hourlyForecast.reduce(epaHourlyForecastReducer).uvLevelName ?? '–'
+                    }
+                    label="UV Index"
+                  />
                   {observations.data.airnow?.observations?.length ? (
                     <CardDetail
                       value={String(observations.data.airnow.observations[0].aqi ?? '–')}

@@ -12,3 +12,15 @@ declare module 'weatherlink' {
 
   export default WeatherLink;
 }
+
+declare module 'geo2zip' {
+  export declare type PointInput = string | number;
+  export interface Options {
+    limit: number;
+  }
+  export type ZIPCode = string;
+
+  function geo2zip(location: PointInput[], extraOptions: Partial<Options> = {}): Promise<ZIPCode[]>;
+
+  export default geo2zip;
+}

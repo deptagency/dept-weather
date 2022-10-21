@@ -1,12 +1,13 @@
-export interface CacheEntry<T> {
-  item: T;
+export interface CacheEntry<Item> {
+  item: Item;
   maxAge: number;
   validUntil: number;
+  key: string;
 }
 
 export class Cached<Item, Opts> {
   private getItemOnMiss: (opts: Opts) => Promise<Item>;
-  private calculateExpiration: (newItem: Item) => Promise<number>;
+  private calculateExpiration: (key: string, newItem: Item) => Promise<number>;
   private shouldLog: boolean;
   private logPrefix: string;
 
@@ -18,7 +19,7 @@ export class Cached<Item, Opts> {
 
   constructor(
     getItemOnMiss: (opts: Opts) => Promise<Item>,
-    calculateExpiration: (newItem: Item) => Promise<number>,
+    calculateExpiration: (key: string, newItem: Item) => Promise<number>,
     shouldLog?: boolean,
     logPrefix?: string
   ) {
@@ -49,13 +50,13 @@ export class Cached<Item, Opts> {
       const item = await this.getItemOnMiss(opts);
       let validUntil = 0;
       try {
-        validUntil = item != null ? await this.calculateExpiration(item) : 0;
+        validUntil = item != null ? await this.calculateExpiration(key, item) : 0;
       } catch (err) {
         this.log(`couldn't calculate cachedItemExpiration due to an exception: ${err}`);
       }
       const maxAge = validUntil ? validUntil - this.nowTimeInSeconds : 0;
 
-      this.cacheEntries.set(key, { item, validUntil, maxAge });
+      this.cacheEntries.set(key, { item, validUntil, maxAge, key });
       this.log(
         `cache for "${key}" now expires at ${validUntil} (${new Date(validUntil * 1_000).toLocaleTimeString()})`
       );
