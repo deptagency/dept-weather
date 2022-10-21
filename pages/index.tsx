@@ -1,11 +1,27 @@
 import Head from 'next/head';
-import styles from '../styles/Home.module.css';
+import TimeAgo, { Formatter, Suffix, Unit as TimeAgoUnit } from 'react-timeago';
 import useSWR from 'swr';
 
-import { APIRoute, getPath, Observations, Response } from '../models/api';
 import CardDetail from '../components/CardDetail/CardDetail';
+import { APIRoute, BaseObservations, getPath, Observations, Response } from '../models/api';
+import styles from '../styles/Home.module.css';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
+
+const timeAgoFormatter = ((
+  value: number,
+  unit: TimeAgoUnit,
+  suffix: Suffix,
+  epochMiliseconds: number,
+  nextFormatter: Formatter
+) => {
+  if (suffix === 'from now' || (unit === 'second' && value < 30)) {
+    return <>just now</>;
+  } else if ((unit === 'second' && value >= 30) || (unit === 'minute' && value < 2)) {
+    return <>a moment {suffix}</>;
+  }
+  return nextFormatter(value, unit, suffix, epochMiliseconds);
+}) as Formatter;
 
 const useObservations = (): { observations?: Response<Observations>; isLoading: boolean; isError: boolean } => {
   const { data, error } = useSWR<Response<Observations>>(getPath(APIRoute.CURRENT), fetcher);
@@ -60,6 +76,7 @@ export default function Home() {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   flexWrap: 'wrap',
+                  minHeight: '3.5rem',
                   backgroundColor: '#5115F7',
                   color: '#FFFFFF'
                 }}
@@ -81,7 +98,16 @@ export default function Home() {
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  Updated Xm ago
+                  Updated{' '}
+                  {
+                    <TimeAgo
+                      date={
+                        Math.max(...Object.values(observations.data).map((data: BaseObservations) => data.readTime)) *
+                        1_000
+                      }
+                      formatter={timeAgoFormatter}
+                    />
+                  }
                 </p>
               </div>
               <div
@@ -107,7 +133,7 @@ export default function Home() {
                   </h1>
                   {observations.data.wl?.feelsLike ? (
                     <p style={{ margin: '-0.25rem 0rem 0rem', fontSize: '1.25rem', fontWeight: '400' }}>
-                      Feels Like {observations.data.wl.feelsLike}°
+                      Feels Like {Math.round(observations.data.wl.feelsLike)}°
                     </p>
                   ) : (
                     <></>
@@ -158,14 +184,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            {/* <h1>{observations.data.nws?.textDescription}</h1>
-            <h1>{`feels like: ${observations.data.wl?.feelsLike}`}</h1>
-            <h1>{`humidity: ${observations.data.wl?.humidity}`}</h1>
-            <h1>{`wind.speed: ${observations.data.wl?.wind.speed}`}</h1>
-            <h1>{`wind.direction: ${observations.data.wl?.wind.direction}`}</h1>
-            <h1>{`wind.gustSpeed: ${observations.data.wl?.wind.gustSpeed}`}</h1>
-            <h1>{`pressure.atSeaLevel: ${observations.data.wl?.pressure.atSeaLevel}`}</h1>
-            <h1>{`pressure.trend: ${observations.data.wl?.pressure.trend}`}</h1> */}
           </>
         ) : (
           <>
