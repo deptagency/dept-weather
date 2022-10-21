@@ -48,10 +48,6 @@ export class AirNowHelper {
   }
 
   static mapCurrentToAirNowObservations(cacheEntry: CacheEntry<CurrentObservations>): AirNowObservations {
-    console.log(
-      `[AirNowHelper.getLatestReadTime()]`,
-      `At ${new Date()}, the observed hour was: ${cacheEntry.item[0].HourObserved}`
-    );
     return {
       readTime: this.getLatestReadTime(cacheEntry.item),
       validUntil: cacheEntry.validUntil,
