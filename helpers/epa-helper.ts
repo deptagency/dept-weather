@@ -5,7 +5,6 @@ import utc from 'dayjs/plugin/utc';
 import { find } from 'geo-tz';
 import geo2zip from 'geo2zip';
 import fetch from 'node-fetch';
-import { EPA_REPORTING_INTERVAL } from '../constants';
 import { EpaHourlyForecast, EpaHourlyForecastItem, UVLevelName } from '../models/api';
 import { UVHourlyForecast, UVHourlyForecastItem } from '../models/epa';
 import { Cached, CacheEntry } from './cached';
@@ -45,10 +44,6 @@ export class EpaHelper {
     return 0;
   }
 
-  private static getLatestReadTime(hourlyForecast: UVHourlyForecast, timeZone?: string) {
-    return hourlyForecast?.length > 0 ? this.getParsedUnixTime(hourlyForecast[0], timeZone) : 0;
-  }
-
   private static readonly hourly = new Cached<UVHourlyForecast, string>(
     async (coordinatesStr: string) => {
       const coordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
@@ -60,11 +55,7 @@ export class EpaHelper {
       ).json() as Promise<UVHourlyForecast>;
     },
     async (key: string, newItem: UVHourlyForecast) => {
-      const latestReadTime = this.getLatestReadTime(newItem, this.getTimeZone(key));
-      //  dayjs().add(1, 'hours').set('minutes', 0).set('seconds', 0).set('milliseconds', 0).unix()
-      return latestReadTime
-        ? latestReadTime + EPA_REPORTING_INTERVAL // TODO - determine how often the EPA updates the forecast
-        : 0;
+      return newItem?.length > 0 ? this.getParsedUnixTime(newItem[newItem.length - 1], this.getTimeZone(key)) : 0;
     },
     true,
     '[EpaHelper.hourly]'
@@ -84,15 +75,29 @@ export class EpaHelper {
     };
 
     const timeZone = this.getTimeZone(cacheEntry.key);
-    return {
-      hourlyForecast: cacheEntry.item.map(
+
+    const hourlyForecast =
+      cacheEntry.item?.map(
         (forecastItem: UVHourlyForecastItem): EpaHourlyForecastItem => ({
           time: this.getParsedUnixTime(forecastItem, timeZone),
           uvIndex: forecastItem.UV_VALUE,
           uvLevelName: uvValueToLevelName(forecastItem.UV_VALUE)
         })
-      ),
-      readTime: this.getLatestReadTime(cacheEntry.item, timeZone),
+      ) ?? [];
+
+    const hoursWithNonZeroUvIndex = hourlyForecast.filter(forecastItem => forecastItem.uvIndex);
+    const readTime = (
+      hoursWithNonZeroUvIndex.length > 0
+        ? dayjs
+            .unix(hoursWithNonZeroUvIndex[hoursWithNonZeroUvIndex.length - 1].time)
+            .subtract(1, 'day')
+            .add(1, 'hour')
+        : dayjs().startOf('day')
+    ).unix();
+
+    return {
+      hourlyForecast,
+      readTime,
       validUntil: cacheEntry.validUntil
     };
   }
