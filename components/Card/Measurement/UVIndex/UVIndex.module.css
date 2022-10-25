@@ -1,0 +1,7 @@
+.uvindex__icon path {
+  fill: var(--onyx);
+}
+
+.uvindex__icon__path--hidden {
+  visibility: hidden;
+}

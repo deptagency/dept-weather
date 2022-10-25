@@ -1,0 +1,18 @@
+.current-temp__temp {
+  margin: 1rem 0rem 0rem;
+  font-size: 7rem;
+  font-weight: 400;
+}
+
+.current-temp__temp__decimal {
+  font-size: 2rem;
+}
+
+.current-temp__temp__degree-symbol {
+  margin-left: -0.5rem;
+}
+
+.current-temp__feels-like {
+  margin: -0.25rem 0rem 0rem;
+  font-size: 1.25rem;
+}

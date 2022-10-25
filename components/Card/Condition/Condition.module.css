@@ -1,0 +1,13 @@
+.condition {
+  display: flex;
+  align-items: center;
+}
+
+.condition--large {
+  margin: 1rem 0rem;
+}
+
+.condition__label {
+  margin: 0.25rem 0rem 0rem;
+  font-size: 2rem;
+}

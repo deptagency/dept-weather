@@ -1,0 +1,30 @@
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+
+  min-height: 3.5rem;
+
+  color: var(--white);
+}
+
+.card-header--now {
+  background-color: var(--indigo);
+}
+
+.card-header--forecast {
+  background-color: var(--onyx);
+}
+
+.card-header > * {
+  margin: 1rem;
+}
+
+.card-header__title {
+  margin-bottom: 0.75rem;
+}
+
+.card-header__last-updated {
+  font-weight: 300;
+}

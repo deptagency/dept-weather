@@ -1,0 +1,31 @@
+.measurement {
+  width: 12.5rem;
+  margin: 1rem 0rem;
+}
+
+.measurement__value {
+  margin: 0rem;
+  font-size: 2rem;
+}
+
+.measurement__secondary-value {
+  margin: 0.25rem 0rem 0rem;
+}
+
+.measurement__description {
+  display: flex;
+  align-items: center;
+
+  margin-top: 0.5rem;
+}
+
+.measurement__description__icon {
+  width: 1rem;
+  height: 1rem;
+  margin: 0rem 0.25rem 0.125rem 0rem;
+}
+
+.measurement__description__label {
+  margin: 0rem;
+  font-weight: 700;
+}

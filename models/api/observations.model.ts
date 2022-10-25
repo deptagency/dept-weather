@@ -77,13 +77,4 @@ export interface AirNowObservation {
 export interface EpaHourlyForecastItem {
   time: number;
   uvIndex: number | null;
-  uvLevelName: UVLevelName | null;
-}
-
-export enum UVLevelName {
-  LOW = 'Low',
-  MODERATE = 'Moderate',
-  HIGH = 'High',
-  VERY_HIGH = 'Very High',
-  EXTREME = 'Extreme'
 }

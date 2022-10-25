@@ -1,7 +1,13 @@
+:root {
+  --white: #fff;
+  --onyx: #121212;
+  --indigo: #5115f7;
+}
+
 html,
 body {
-  background: #fff;
-  color: #121212;
+  background: var(--white);
+  color: var(--onyx);
   padding: 0;
   margin: 0;
   font-family: 'Maison Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,

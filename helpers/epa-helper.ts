@@ -65,23 +65,13 @@ export class EpaHelper {
   }
 
   static mapHourlyToEpaHourlyForecast(cacheEntry: CacheEntry<UVHourlyForecast>): EpaHourlyForecast {
-    const uvValueToLevelName = (uvValue: number) => {
-      if (uvValue < 0) return null;
-      else if (uvValue <= 2) return UVLevelName.LOW;
-      else if (uvValue <= 5) return UVLevelName.MODERATE;
-      else if (uvValue <= 7) return UVLevelName.HIGH;
-      else if (uvValue <= 10) return UVLevelName.VERY_HIGH;
-      else return UVLevelName.EXTREME;
-    };
-
     const timeZone = this.getTimeZone(cacheEntry.key);
 
     const hourlyForecast =
       cacheEntry.item?.map(
         (forecastItem: UVHourlyForecastItem): EpaHourlyForecastItem => ({
           time: this.getParsedUnixTime(forecastItem, timeZone),
-          uvIndex: forecastItem.UV_VALUE,
-          uvLevelName: uvValueToLevelName(forecastItem.UV_VALUE)
+          uvIndex: forecastItem.UV_VALUE
         })
       ) ?? [];
 

@@ -1,0 +1,8 @@
+.wind__icon path {
+  fill: var(--onyx);
+}
+
+.wind__icon__arrow {
+  transform-box: fill-box;
+  transform-origin: 50% calc(50% + 0.5px);
+}
