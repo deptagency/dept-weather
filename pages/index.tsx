@@ -6,7 +6,7 @@ import {
   Condition,
   CurrentTemp,
   Humidity,
-  Measurement,
+  Precipitation,
   Pressure,
   UVIndex,
   Wind
@@ -70,11 +70,10 @@ export default function Home() {
                   <AirQuality airnowData={observations.data.airnow}></AirQuality>
                   <Humidity humidity={observations.data.wl?.humidity}></Humidity>
                   <Pressure pressure={observations.data.wl?.pressure}></Pressure>
-
-                  <Measurement
-                    value={`${observations.data.wl?.rainfall.last24Hrs?.toFixed(2) ?? '–'} in`}
+                  <Precipitation
+                    precipitation={observations.data.wl?.rainfall?.last24Hrs}
                     label="Last 24hr Rainfall"
-                  />
+                  ></Precipitation>
                 </div>
               </div>
             </article>
