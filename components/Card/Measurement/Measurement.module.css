@@ -25,6 +25,11 @@
   margin: 0rem 0.25rem 0.125rem 0rem;
 }
 
+.measurement__description__icon path,
+.measurement__description__icon rect {
+  fill: var(--onyx);
+}
+
 .measurement__description__label {
   margin: 0rem;
   font-weight: 700;

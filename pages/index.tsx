@@ -1,6 +1,16 @@
 import Head from 'next/head';
 import useSWR from 'swr';
-import { CardHeader, Condition, CurrentTemp, Measurement, UVIndex, Wind } from '../components/Card';
+import {
+  AirQuality,
+  CardHeader,
+  Condition,
+  CurrentTemp,
+  Humidity,
+  Measurement,
+  Pressure,
+  UVIndex,
+  Wind
+} from '../components/Card';
 
 import { APIRoute, getPath, Observations, Response } from '../models/api';
 import styles from '../styles/Home.module.css';
@@ -50,39 +60,17 @@ export default function Home() {
                   padding: '0.5rem 1rem'
                 }}
               >
-                <div style={{ flexGrow: '1', maxWidth: '24.5rem' }}>
+                <div style={{ flexGrow: '1', flexBasis: '24.5rem' }}>
                   <CurrentTemp observations={observations}></CurrentTemp>
                   <Condition condition={observations.data.nws?.textDescription}></Condition>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', flexBasis: '37.5rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', flexBasis: '37.5rem', alignItems: 'end' }}>
                   <Wind wind={observations.data.wl?.wind}></Wind>
                   <UVIndex epaData={observations.data.epa}></UVIndex>
-                  {/* <Measurement
-                    value={String(
-                      observations.data.epa?.hourlyForecast.reduce(epaHourlyForecastReducer).uvIndex ?? '–'
-                    )}
-                    secondaryValue={
-                      observations.data.epa?.hourlyForecast.reduce(epaHourlyForecastReducer).uvLevelName ?? '–'
-                    }
-                    label="UV Index"
-                  /> */}
-                  {observations.data.airnow?.observations?.length ? (
-                    <Measurement
-                      value={String(observations.data.airnow.observations[0].aqi ?? '–')}
-                      secondaryValue={observations.data.airnow.observations[0].aqiLevelName ?? '–'}
-                      label={`Air Quality (${observations.data.airnow.observations[0].pollutant})`}
-                    />
-                  ) : (
-                    <Measurement value={`–`} secondaryValue={`–`} label="Air Quality" />
-                  )}
+                  <AirQuality airnowData={observations.data.airnow}></AirQuality>
+                  <Humidity humidity={observations.data.wl?.humidity}></Humidity>
+                  <Pressure pressure={observations.data.wl?.pressure}></Pressure>
 
-                  <Measurement value={`${Math.round(observations.data.wl?.humidity ?? 0)}%`} label="Humidity" />
-                  <Measurement
-                    value={`${observations.data.wl?.pressure.atSeaLevel?.toFixed(2) ?? '–'} in ${
-                      observations.data.wl?.pressure.trend ? (observations.data.wl.pressure.trend > 0 ? '↑' : '↓') : '→'
-                    }`}
-                    label="Pressure"
-                  />
                   <Measurement
                     value={`${observations.data.wl?.rainfall.last24Hrs?.toFixed(2) ?? '–'} in`}
                     label="Last 24hr Rainfall"
