@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { find } from 'geo-tz';
 import { getSunrise, getSunset } from 'sunrise-sunset-js';
 import { SunriseSunsetObservations } from '../models/api';
@@ -6,6 +8,9 @@ import { SunriseSunset } from '../models/sunrise-sunset';
 import { Cached, CacheEntry } from './cached';
 import { CoordinatesHelper } from './coordinates-helper';
 import { NumberHelper } from './number-helper';
+
+dayjs.extend(timezone);
+dayjs.extend(utc);
 
 export class SunriseSunsetHelper {
   static getSunrise(coordinatesStr: string) {
@@ -36,13 +41,22 @@ export class SunriseSunsetHelper {
     }
   }
 
+  private static getNow(timeZone: string | null) {
+    try {
+      return timeZone ? dayjs().tz(timeZone) : dayjs();
+    } catch (err) {
+      console.log(`[SunriseSunsetHelper.getNow()]`, `Couldn't interpret timezone "${timeZone}"`, err);
+    }
+    return dayjs();
+  }
+
   private static readonly sunrisesunset = new Cached<SunriseSunset, string>(
     async (coordinatesStr: string) => ({
       timezone: this.getTimeZone(coordinatesStr) ?? null,
       sunrise: this.getSunrise(coordinatesStr) ?? null,
       sunset: this.getSunset(coordinatesStr) ?? null
     }),
-    async (_: string, __: SunriseSunset) => dayjs().endOf('day').unix(),
+    async (_: string, newItem: SunriseSunset) => this.getNow(newItem.timezone).endOf('day').unix(),
     true,
     '[SunriseSunsetHelper.sunrisesunset]'
   );
@@ -53,7 +67,7 @@ export class SunriseSunsetHelper {
   static mapSunriseSunsetToSunriseSunsetObservations(cacheEntry: CacheEntry<SunriseSunset>): SunriseSunsetObservations {
     return {
       ...cacheEntry.item,
-      readTime: dayjs().startOf('day').unix(),
+      readTime: this.getNow(cacheEntry.item.timezone).startOf('day').unix(),
       validUntil: cacheEntry.validUntil
     };
   }
