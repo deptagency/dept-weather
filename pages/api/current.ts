@@ -1,6 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { AQ_COORDINATES_STR } from '../../constants';
-import { AirNowHelper, CoordinatesHelper, EpaHelper, NwsHelper, WeatherlinkHelper } from '../../helpers';
+import {
+  AirNowHelper,
+  CoordinatesHelper,
+  EpaHelper,
+  NwsHelper,
+  SunriseSunsetHelper,
+  WeatherlinkHelper
+} from '../../helpers';
 import { DataSource } from '../../models';
 import { APIRoute, BaseObservations, getPath, Observations, Response } from '../../models/api';
 
@@ -11,7 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       WeatherlinkHelper.getCurrent(coordinatesStr),
       NwsHelper.getCurrent(coordinatesStr),
       AirNowHelper.getCurrent(coordinatesStr),
-      EpaHelper.getHourly(coordinatesStr)
+      EpaHelper.getHourly(coordinatesStr),
+      SunriseSunsetHelper.getSunriseSunset(coordinatesStr)
     ]);
     const validUntil = Math.min(...promises.map(promise => promise.validUntil));
     const maxAge = Math.min(...promises.map(promise => promise.maxAge));
@@ -19,7 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       [DataSource.WEATHERLINK]: WeatherlinkHelper.mapCurrentToWlObservations(promises[0], req.query),
       [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapCurrentToNwsObservations(promises[1], req.query),
       [DataSource.AIRNOW]: AirNowHelper.mapCurrentToAirNowObservations(promises[2]),
-      [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]: EpaHelper.mapHourlyToEpaHourlyForecast(promises[3])
+      [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]: EpaHelper.mapHourlyToEpaHourlyForecast(promises[3]),
+      [DataSource.SUNRISE_SUNSET]: SunriseSunsetHelper.mapSunriseSunsetToSunriseSunsetObservations(promises[4])
     };
     const latestReadTime = Math.max(
       ...Object.values(data).map((observation: BaseObservations) => observation.readTime)

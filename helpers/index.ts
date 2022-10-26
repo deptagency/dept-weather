@@ -4,4 +4,5 @@ export * from './coordinates-helper';
 export * from './epa-helper';
 export * from './number-helper';
 export * from './nws-helper';
+export * from './sunrise-sunset-helper';
 export * from './weatherlink-helper';

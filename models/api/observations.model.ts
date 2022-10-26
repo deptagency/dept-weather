@@ -1,11 +1,13 @@
 import { AQILevelName } from '../airnow';
 import { DataSource } from '../data-source.enum';
+import { SunriseSunset } from '../sunrise-sunset/sunrise-sunset';
 
 export interface Observations {
   [DataSource.WEATHERLINK]?: WlObservations;
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsObservations;
   [DataSource.AIRNOW]?: AirNowObservations;
   [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]?: EpaHourlyForecast;
+  [DataSource.SUNRISE_SUNSET]?: SunriseSunsetObservations;
 }
 
 export interface BaseObservations {
@@ -40,6 +42,8 @@ export interface AirNowObservations extends BaseObservations {
 export interface EpaHourlyForecast extends BaseObservations {
   hourlyForecast: Array<EpaHourlyForecastItem>;
 }
+
+export interface SunriseSunsetObservations extends BaseObservations, SunriseSunset {}
 
 export interface Wind {
   speed: number | null;

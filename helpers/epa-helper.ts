@@ -2,13 +2,13 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import { find } from 'geo-tz';
 import geo2zip from 'geo2zip';
 import fetch from 'node-fetch';
-import { EpaHourlyForecast, EpaHourlyForecastItem, UVLevelName } from '../models/api';
+import { EpaHourlyForecast, EpaHourlyForecastItem } from '../models/api';
 import { UVHourlyForecast, UVHourlyForecastItem } from '../models/epa';
 import { Cached, CacheEntry } from './cached';
 import { CoordinatesHelper } from './coordinates-helper';
+import { SunriseSunsetHelper } from './sunrise-sunset-helper';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
@@ -19,16 +19,6 @@ export class EpaHelper {
 
   private static getRequestUrlFor(zipCode: string) {
     return `https://data.epa.gov/efservice/getEnvirofactsUVHOURLY/ZIP/${zipCode}/JSON`;
-  }
-
-  private static getTimeZone(coordinatesStr: string) {
-    try {
-      const coordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
-      const timeZones = find(coordinatesNumArr[0], coordinatesNumArr[1]);
-      return timeZones?.length > 0 ? timeZones[0] : undefined;
-    } catch (err) {
-      console.log(`[EpaHelper.getTimeZone()]`, `Couldn't find timezone for "${coordinatesStr}"`, err);
-    }
   }
 
   private static getParsedUnixTime(hourlyForecastItem: UVHourlyForecastItem, timeZone?: string) {
@@ -55,7 +45,9 @@ export class EpaHelper {
       ).json() as Promise<UVHourlyForecast>;
     },
     async (key: string, newItem: UVHourlyForecast) => {
-      return newItem?.length > 0 ? this.getParsedUnixTime(newItem[newItem.length - 1], this.getTimeZone(key)) : 0;
+      return newItem?.length > 0
+        ? this.getParsedUnixTime(newItem[newItem.length - 1], SunriseSunsetHelper.getTimeZone(key))
+        : 0;
     },
     true,
     '[EpaHelper.hourly]'
@@ -65,7 +57,7 @@ export class EpaHelper {
   }
 
   static mapHourlyToEpaHourlyForecast(cacheEntry: CacheEntry<UVHourlyForecast>): EpaHourlyForecast {
-    const timeZone = this.getTimeZone(cacheEntry.key);
+    const timeZone = SunriseSunsetHelper.getTimeZone(cacheEntry.key);
 
     const hourlyForecast =
       cacheEntry.item?.map(
