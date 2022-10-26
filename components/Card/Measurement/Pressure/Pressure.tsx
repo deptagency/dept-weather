@@ -1,4 +1,5 @@
 import { WlPressure } from '../../../../models/api';
+import { toFixedOrEmDash } from '../../../../utils';
 import Measurement from '../Measurement';
 type PressureArg = (Pick<WlPressure, 'atSeaLevel'> & Partial<Pick<WlPressure, 'trend'>>) | null | undefined;
 
@@ -17,22 +18,22 @@ enum PressureTrend {
 
 const LOW_PRESSURE = 29.7;
 const HIGH_PRESSURE = 30.1;
-const STABLE_PRESSURE_TREND = 0.089;
-const PressureIcon = (pressure?: PressureArg) => {
-  let level = PressureLevel.MEDIUM;
-  if (pressure?.atSeaLevel != null) {
-    if (pressure.atSeaLevel < LOW_PRESSURE) level = PressureLevel.LOW;
-    else if (pressure.atSeaLevel > HIGH_PRESSURE) level = PressureLevel.HIGH;
-    else level = PressureLevel.MEDIUM;
-  }
+const getPressureLevel = (pressure?: PressureArg): PressureLevel => {
+  if (pressure?.atSeaLevel == null) return PressureLevel.MEDIUM;
+  else if (pressure.atSeaLevel < LOW_PRESSURE) return PressureLevel.LOW;
+  else if (pressure.atSeaLevel > HIGH_PRESSURE) return PressureLevel.HIGH;
+  else return PressureLevel.MEDIUM;
+};
 
-  let trend = PressureTrend.UNKNOWN;
-  if (pressure?.trend != null) {
-    if (pressure.trend < STABLE_PRESSURE_TREND * -1) trend = PressureTrend.DECREASING;
-    else if (pressure.trend > STABLE_PRESSURE_TREND) trend = PressureTrend.INCREASING;
-    else trend = PressureTrend.STABLE;
-  }
+const STABLE_PRESSURE_TREND = 0.059; // ≈ 2 mb
+const getPressureTrend = (pressure?: PressureArg): PressureTrend => {
+  if (pressure?.trend == null) return PressureTrend.UNKNOWN;
+  else if (pressure.trend < STABLE_PRESSURE_TREND * -1) return PressureTrend.DECREASING;
+  else if (pressure.trend > STABLE_PRESSURE_TREND) return PressureTrend.INCREASING;
+  else return PressureTrend.STABLE;
+};
 
+const PressureIcon = (level: PressureLevel, trend: PressureTrend) => {
   return (
     <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M1.5 16C0.672667 16 0 15.3273 0 14.5V1.5C0 0.672667 0.672667 0 1.5 0H5.5C5.776 0 6 0.224 6 0.5C6 0.776 5.776 1 5.5 1H1.5C1.224 1 1 1.224 1 1.5V14.5C1 14.776 1.224 15 1.5 15H5.5C5.776 15 6 14.776 6 14.5V11.5C6 11.224 6.224 11 6.5 11C6.776 11 7 11.224 7 11.5V14.5C7 15.3273 6.32733 16 5.5 16H1.5Z" />
@@ -73,20 +74,19 @@ const PressureIcon = (pressure?: PressureArg) => {
 };
 
 export default function Pressure({ pressure }: { pressure?: PressureArg }) {
+  const level = getPressureLevel(pressure);
+  const trend = getPressureTrend(pressure);
+
+  let trendArrow = '';
+  if (trend === PressureTrend.DECREASING) trendArrow = ' ↓';
+  else if (trend === PressureTrend.STABLE) trendArrow = ' →';
+  else if (trend === PressureTrend.INCREASING) trendArrow = ' ↓';
+
   return (
     <Measurement
-      value={`${pressure?.atSeaLevel?.toFixed(2) ?? '–'} in`}
+      value={`${toFixedOrEmDash(pressure?.atSeaLevel)} in${trendArrow}`}
       label="Pressure"
-      icon={PressureIcon(pressure)}
+      icon={PressureIcon(level, trend)}
     ></Measurement>
   );
 }
-
-/*
-  <Measurement
-    value={`${observations.data.wl?.pressure.atSeaLevel?.toFixed(2) ?? '–'} in ${
-      observations.data.wl?.pressure.trend ? (observations.data.wl.pressure.trend > 0 ? '↑' : '↓') : '→'
-    }`}
-    label="Pressure"
-  />
-*/
