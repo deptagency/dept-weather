@@ -16,9 +16,17 @@ const getWeatherIconSrc = (condition: string, sunData?: SunriseSunsetObservation
     }
   }
 
-  // TODO - check sunrise & sunset time and compare
-  //  just return day icons for now
-  return match != undefined ? `/weather-icons/default/${typeof match === 'string' ? match : match['day']}` : undefined;
+  let isDay = true;
+  if (sunData?.sunrise != null && sunData?.sunset != null) {
+    const now = new Date();
+    const sunrise = new Date(sunData.sunrise * 1_000);
+    const sunset = new Date(sunData.sunset * 1_000);
+    isDay = sunrise <= now && now <= sunset;
+  }
+
+  return match != undefined
+    ? `/weather-icons/default/${typeof match === 'string' ? match : match[isDay ? 'day' : 'night']}`
+    : undefined;
 };
 
 const WeatherIcon = (condition: string, sunData?: SunriseSunsetObservations) => {
