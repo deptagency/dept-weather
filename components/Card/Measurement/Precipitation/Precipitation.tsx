@@ -15,6 +15,14 @@ export default function Precipitation({
   label: string;
 }) {
   return (
-    <Measurement value={`${toFixedOrEmDash(precipitation)} in`} label={label} icon={PrecipitationIcon()}></Measurement>
+    <Measurement
+      value={
+        <>
+          {toFixedOrEmDash(precipitation)} <span>in</span>
+        </>
+      }
+      label={label}
+      icon={PrecipitationIcon()}
+    ></Measurement>
   );
 }

@@ -7,7 +7,7 @@ export default function Measurement({
   icon,
   label
 }: {
-  value?: string | number;
+  value?: string | number | ReactElement;
   secondaryValue?: string | number;
   icon?: ReactElement;
   label?: string;

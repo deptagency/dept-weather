@@ -11,5 +11,16 @@ const HumidityIcon = () => (
 );
 
 export default function Humidity({ humidity }: { humidity?: number | null | undefined }) {
-  return <Measurement value={`${roundOrEmDash(humidity)}%`} label="Humidity" icon={HumidityIcon()}></Measurement>;
+  return (
+    <Measurement
+      value={
+        <>
+          {roundOrEmDash(humidity)}
+          <span>%</span>
+        </>
+      }
+      label="Humidity"
+      icon={HumidityIcon()}
+    ></Measurement>
+  );
 }

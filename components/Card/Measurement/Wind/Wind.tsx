@@ -32,9 +32,12 @@ const WindIcon = (directionDeg: number | null | undefined) => (
 export default function Wind({ wind }: { wind?: WindModel }) {
   return (
     <Measurement
-      value={`${roundOrEmDash(wind?.speed)} mph${
-        wind?.direction != null ? ` ${getWindDirection(wind.direction)}` : ''
-      }`}
+      value={
+        <>
+          {roundOrEmDash(wind?.speed)} <span>mph</span>
+          {wind?.direction != null ? ` ${getWindDirection(wind.direction)}` : ''}
+        </>
+      }
       secondaryValue={`${roundOrEmDash(wind?.gustSpeed)} mph gusts`}
       label="Wind"
       icon={WindIcon(wind?.direction)}

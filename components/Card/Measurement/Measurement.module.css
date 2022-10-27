@@ -8,6 +8,10 @@
   font-size: 2rem;
 }
 
+.measurement__value span {
+  font-size: 1.5rem;
+}
+
 .measurement__secondary-value {
   margin: 0.25rem 0rem 0rem;
 }

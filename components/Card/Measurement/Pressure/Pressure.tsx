@@ -84,7 +84,12 @@ export default function Pressure({ pressure }: { pressure?: PressureArg }) {
 
   return (
     <Measurement
-      value={`${toFixedOrEmDash(pressure?.atSeaLevel)} in${trendArrow}`}
+      value={
+        <>
+          {toFixedOrEmDash(pressure?.atSeaLevel)} <span>in</span>
+          {trendArrow}
+        </>
+      }
       label="Pressure"
       icon={PressureIcon(level, trend)}
     ></Measurement>

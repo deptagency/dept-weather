@@ -12,3 +12,9 @@
   flex-wrap: wrap;
   flex-direction: row;
 }
+
+@media screen and (max-width: 576px) {
+  .container {
+    padding: 0rem 0.5rem;
+  }
+}

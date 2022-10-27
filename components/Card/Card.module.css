@@ -25,6 +25,11 @@
   align-items: flex-end;
   justify-content: space-between;
 
-  min-width: 20rem;
   max-width: 37.5rem;
+}
+
+@media screen and (min-width: 360px) {
+  .card-contents__measurements {
+    min-width: 20rem;
+  }
 }
