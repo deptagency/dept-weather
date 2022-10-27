@@ -80,7 +80,7 @@ export default function Pressure({ pressure }: { pressure?: PressureArg }) {
   let trendArrow = '';
   if (trend === PressureTrend.DECREASING) trendArrow = ' ↓';
   else if (trend === PressureTrend.STABLE) trendArrow = ' →';
-  else if (trend === PressureTrend.INCREASING) trendArrow = ' ↓';
+  else if (trend === PressureTrend.INCREASING) trendArrow = ' ↑';
 
   return (
     <Measurement
