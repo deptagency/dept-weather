@@ -1,9 +1,11 @@
+import turf from '@turf/distance';
 import { default as WeatherLink } from 'weatherlink';
-import { DEFAULT_UNITS } from '../constants';
+import { AQ_COORDINATES_STR, DEFAULT_UNITS } from '../constants';
 import { Unit, UnitType } from '../models';
 import { ReqQuery, WlObservations } from '../models/api';
 import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
 import { Cached, CacheEntry } from './cached';
+import { CoordinatesHelper } from './coordinates-helper';
 import { NumberHelper } from './number-helper';
 
 export class WeatherlinkHelper {
@@ -14,6 +16,17 @@ export class WeatherlinkHelper {
   private static readonly getAllStationsPromise = this.wl.getAllStations();
   private static async getMainStation() {
     return (await this.getAllStationsPromise).stations[0];
+  }
+
+  static shouldUse(coordinatesStr: string) {
+    const distanceToAQ = turf(
+      CoordinatesHelper.strToNumArr(AQ_COORDINATES_STR),
+      CoordinatesHelper.strToNumArr(coordinatesStr),
+      {
+        units: Unit.MILES
+      }
+    );
+    return distanceToAQ < 5;
   }
 
   private static readonly current = new Cached<CurrentConditions, undefined>(

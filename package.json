@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@turf/distance": "^6.5.0",
     "dayjs": "^1.11.6",
     "geo-tz": "^7.0.2",
     "geo2zip": "^4.0.1",

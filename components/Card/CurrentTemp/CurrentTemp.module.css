@@ -8,11 +8,11 @@
   font-size: 2rem;
 }
 
-.current-temp__temp__degree-symbol {
+.current-temp__temp__degree-symbol--fractional {
   margin-left: -0.5rem;
 }
 
 .current-temp__feels-like {
-  margin: -0.25rem 0rem 0rem;
+  margin: -0.25rem 0rem 1rem;
   font-size: 1.25rem;
 }

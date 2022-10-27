@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { AQ_COORDINATES_STR } from '../../constants';
 import {
   AirNowHelper,
+  CacheEntry,
   CoordinatesHelper,
   EpaHelper,
   NwsHelper,
@@ -14,22 +15,29 @@ import { APIRoute, BaseObservations, getPath, Observations, Response } from '../
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const coordinatesStr = CoordinatesHelper.adjustPrecision(AQ_COORDINATES_STR);
-    const promises = await Promise.all([
-      WeatherlinkHelper.getCurrent(coordinatesStr),
+    const promises: Array<Promise<CacheEntry<any>>> = [
       NwsHelper.getCurrent(coordinatesStr),
       AirNowHelper.getCurrent(coordinatesStr),
       EpaHelper.getHourly(coordinatesStr),
       SunriseSunsetHelper.getSunriseSunset(coordinatesStr)
-    ]);
-    const validUntil = Math.min(...promises.map(promise => promise.validUntil));
-    const maxAge = Math.min(...promises.map(promise => promise.maxAge));
+    ];
+    if (WeatherlinkHelper.shouldUse(coordinatesStr)) {
+      promises.push(WeatherlinkHelper.getCurrent(coordinatesStr));
+    }
+
+    const results = await Promise.all(promises);
+    const validUntil = Math.min(...results.map(result => result.validUntil));
+    const maxAge = Math.min(...results.map(result => result.maxAge));
+
     const data: Observations = {
-      [DataSource.WEATHERLINK]: WeatherlinkHelper.mapCurrentToWlObservations(promises[0], req.query),
-      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapCurrentToNwsObservations(promises[1], req.query),
-      [DataSource.AIRNOW]: AirNowHelper.mapCurrentToAirNowObservations(promises[2]),
-      [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]: EpaHelper.mapHourlyToEpaHourlyForecast(promises[3]),
-      [DataSource.SUNRISE_SUNSET]: SunriseSunsetHelper.mapSunriseSunsetToSunriseSunsetObservations(promises[4])
+      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapCurrentToNwsObservations(results[0], req.query),
+      [DataSource.AIRNOW]: AirNowHelper.mapCurrentToAirNowObservations(results[1]),
+      [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]: EpaHelper.mapHourlyToEpaHourlyForecast(results[2]),
+      [DataSource.SUNRISE_SUNSET]: SunriseSunsetHelper.mapSunriseSunsetToSunriseSunsetObservations(results[3])
     };
+    if (results.length > 4) {
+      data[DataSource.WEATHERLINK] = WeatherlinkHelper.mapCurrentToWlObservations(results[4], req.query);
+    }
     const latestReadTime = Math.max(
       ...Object.values(data).map((observation: BaseObservations) => observation.readTime)
     );

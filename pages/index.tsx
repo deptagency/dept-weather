@@ -61,22 +61,36 @@ export default function Home() {
                 }}
               >
                 <div style={{ flexGrow: '1', flexBasis: '24.5rem' }}>
-                  <CurrentTemp observations={observations}></CurrentTemp>
+                  {observations.data.wl?.temperature != null ? (
+                    <CurrentTemp
+                      temperature={observations.data.wl.temperature}
+                      feelsLike={observations.data.wl.feelsLike}
+                    ></CurrentTemp>
+                  ) : (
+                    <CurrentTemp temperature={observations.data.nws?.temperature}></CurrentTemp>
+                  )}
                   <Condition
                     condition={observations.data.nws?.textDescription}
                     sunData={observations.data?.sun}
                   ></Condition>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', flexBasis: '37.5rem', alignItems: 'end' }}>
-                  <Wind wind={observations.data.wl?.wind}></Wind>
+                  <Wind wind={observations.data.wl?.wind ?? observations.data.nws?.wind}></Wind>
                   <UVIndex epaData={observations.data.epa}></UVIndex>
                   <AirQuality airnowData={observations.data.airnow}></AirQuality>
-                  <Humidity humidity={observations.data.wl?.humidity}></Humidity>
-                  <Pressure pressure={observations.data.wl?.pressure}></Pressure>
-                  <Precipitation
-                    precipitation={observations.data.wl?.rainfall?.last24Hrs}
-                    label="Last 24hr Rainfall"
-                  ></Precipitation>
+                  <Humidity humidity={observations.data.wl?.humidity ?? observations.data.nws?.humidity}></Humidity>
+                  <Pressure pressure={observations.data.wl?.pressure ?? observations.data.nws?.pressure}></Pressure>
+                  {observations.data.wl?.rainfall?.last24Hrs != null ? (
+                    <Precipitation
+                      precipitation={observations.data.wl.rainfall.last24Hrs}
+                      label="Last 24hr Rainfall"
+                    ></Precipitation>
+                  ) : (
+                    <Precipitation
+                      precipitation={observations.data.nws?.precipitation?.last6Hrs}
+                      label="Last 6hr Precipitation"
+                    ></Precipitation>
+                  )}
                 </div>
               </div>
             </article>
