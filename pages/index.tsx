@@ -1,16 +1,6 @@
 import Head from 'next/head';
 import useSWR from 'swr';
-import {
-  AirQuality,
-  CardHeader,
-  Condition,
-  CurrentTemp,
-  Humidity,
-  Precipitation,
-  Pressure,
-  UVIndex,
-  Wind
-} from '../components/Card';
+import { Card } from '../components/Card';
 
 import { APIRoute, getPath, Observations, Response } from '../models/api';
 import styles from '../styles/Home.module.css';
@@ -42,59 +32,7 @@ export default function Home() {
       </div>
       {observations ? (
         !isError && observations.data ? (
-          <>
-            <article
-              style={{
-                background: '#ffffff',
-                margin: '1rem 0rem',
-                borderRadius: '0.25rem',
-                boxShadow: '0px 0.25rem 0.5rem rgba(0, 0, 0, .15)'
-              }}
-            >
-              <CardHeader lastUpdatedTime={observations.latestReadTime * 1_000}></CardHeader>
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  padding: '0.5rem 1rem'
-                }}
-              >
-                <div style={{ flexGrow: '1', flexBasis: '24.5rem' }}>
-                  {observations.data.wl?.temperature != null ? (
-                    <CurrentTemp
-                      temperature={observations.data.wl.temperature}
-                      feelsLike={observations.data.wl.feelsLike}
-                    ></CurrentTemp>
-                  ) : (
-                    <CurrentTemp temperature={observations.data.nws?.temperature}></CurrentTemp>
-                  )}
-                  <Condition
-                    condition={observations.data.nws?.textDescription}
-                    sunData={observations.data?.sun}
-                  ></Condition>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', flexBasis: '37.5rem', alignItems: 'end' }}>
-                  <Wind wind={observations.data.wl?.wind ?? observations.data.nws?.wind}></Wind>
-                  <UVIndex epaData={observations.data.epa}></UVIndex>
-                  <AirQuality airnowData={observations.data.airnow}></AirQuality>
-                  <Humidity humidity={observations.data.wl?.humidity ?? observations.data.nws?.humidity}></Humidity>
-                  <Pressure pressure={observations.data.wl?.pressure ?? observations.data.nws?.pressure}></Pressure>
-                  {observations.data.wl?.rainfall?.last24Hrs != null ? (
-                    <Precipitation
-                      precipitation={observations.data.wl.rainfall.last24Hrs}
-                      label="Last 24hr Rainfall"
-                    ></Precipitation>
-                  ) : (
-                    <Precipitation
-                      precipitation={observations.data.nws?.precipitation?.last6Hrs}
-                      label="Last 6hr Precipitation"
-                    ></Precipitation>
-                  )}
-                </div>
-              </div>
-            </article>
-          </>
+          <Card observations={observations}></Card>
         ) : (
           <>
             <h1>Something went wrong :(</h1>

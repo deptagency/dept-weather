@@ -40,7 +40,7 @@ const WeatherIcon = (condition: string, sunData?: SunriseSunsetObservations) => 
   );
 };
 
-const MAXIMUM_CONDITION_TEXT_LENGTH = 23;
+const MAXIMUM_CONDITION_TEXT_LENGTH = 20;
 export default function Condition({
   condition,
   sunData
