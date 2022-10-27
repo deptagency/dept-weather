@@ -2,16 +2,17 @@ import { roundOrEmDash } from '../../../../utils';
 import { Wind as WindModel } from '../../../../models/api';
 import Measurement from '../Measurement';
 import styles from './Wind.module.css';
+import { WindDirection } from '../../../../models';
 
 const getWindDirection = (deg: number) => {
-  if (deg > 337.5 || deg <= 22.5) return 'N';
-  else if (deg <= 67.5) return 'NE';
-  else if (deg <= 112.5) return 'E';
-  else if (deg <= 157.5) return 'SE';
-  else if (deg <= 202.5) return 'S';
-  else if (deg <= 247.5) return 'SW';
-  else if (deg <= 292.5) return 'W';
-  else if (deg <= 337.5) return 'NW';
+  if (deg > 337.5 || deg <= 22.5) return WindDirection.N;
+  else if (deg <= 67.5) return WindDirection.NE;
+  else if (deg <= 112.5) return WindDirection.E;
+  else if (deg <= 157.5) return WindDirection.SE;
+  else if (deg <= 202.5) return WindDirection.S;
+  else if (deg <= 247.5) return WindDirection.SW;
+  else if (deg <= 292.5) return WindDirection.W;
+  else if (deg <= 337.5) return WindDirection.NW;
 
   return '';
 };

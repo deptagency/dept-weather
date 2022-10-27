@@ -1,9 +1,19 @@
 import dayjs from 'dayjs';
-import fetch from 'node-fetch';
+import fetch, { HeadersInit } from 'node-fetch';
 import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '../constants';
-import { Unit, UnitMapping, UnitType } from '../models';
-import { NwsObservations, ReqQuery } from '../models/api';
-import { NwsUnits, ObservationResponse, PointsResponse, StationsResponse } from '../models/nws';
+import { Unit, UnitMapping, UnitType, WindDirection } from '../models';
+import { NwsForecast, NwsForecastPeriod, NwsObservations, ReqQuery, WindForecast } from '../models/api';
+import {
+  DetailedWindDirection,
+  ForecastPeriod,
+  ForecastResponse,
+  NwsUnits,
+  ObservationResponse,
+  PointsResponse,
+  QuantitativeMinMaxValue,
+  QuantitativeValue,
+  StationsResponse
+} from '../models/nws';
 import { Cached, CacheEntry } from './cached';
 import { NumberHelper } from './number-helper';
 
@@ -11,8 +21,8 @@ export class NwsHelper {
   private static readonly BASE_URL = 'https://api.weather.gov/';
   private static readonly userAgent = process.env.USER_AGENT!;
 
-  private static async fetch(url: string) {
-    return fetch(url, { headers: { 'User-Agent': this.userAgent } });
+  private static async fetch(url: string, headers?: HeadersInit) {
+    return fetch(url, { headers: { ...(headers ?? {}), 'User-Agent': this.userAgent } });
   }
 
   private static readonly points = new Cached<PointsResponse, string>(
@@ -93,6 +103,110 @@ export class NwsHelper {
         last6Hrs: NumberHelper.convertNws(nwsCurrent.precipitationLast6Hours, UnitType.precipitation, reqQuery, 2)
       },
       textDescription: nwsCurrent.textDescription
+    };
+  }
+
+  private static readonly forecast = new Cached<ForecastResponse, string>(
+    async (forecastUrl: string) =>
+      (
+        await this.fetch(forecastUrl, { 'Feature-Flags': 'forecast_temperature_qv,forecast_wind_speed_qv' })
+      ).json() as Promise<ForecastResponse>,
+    async (_: string, newItem: any) => {
+      const lastReading = Math.floor(new Date(newItem.properties.updateTime).getTime() / 1_000);
+      return lastReading; // TODO - figure out how often forecast gets updated
+      // return lastReading ? lastReading + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY : 0;
+    },
+    true,
+    '[NwsHelper.forecast]'
+  );
+  static async getForecast(coordinatesStr: string) {
+    const points = await this.getPoints(coordinatesStr);
+    const forecastUrl = points.item.properties.forecast;
+    return this.forecast.get(forecastUrl, forecastUrl);
+  }
+
+  static mapForecastToNwsForecast(cacheEntry: CacheEntry<ForecastResponse>, reqQuery: ReqQuery): NwsForecast {
+    const forecast = cacheEntry.item.properties;
+
+    const getWind = (period: ForecastPeriod): WindForecast => {
+      let wind: WindForecast = {
+        speed: null,
+        minSpeed: null,
+        maxSpeed: null,
+        gustSpeed: null,
+        minGustSpeed: null,
+        maxGustSpeed: null,
+        direction: null
+      };
+
+      const speedAsMinMax = period.windSpeed as QuantitativeMinMaxValue;
+      const speedAsValue = period.windSpeed as QuantitativeValue;
+      if (speedAsMinMax?.minValue != null && speedAsMinMax?.maxValue != null) {
+        wind.minSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
+          speedAsMinMax.minValue,
+          speedAsMinMax.unitCode,
+          UnitType.wind,
+          reqQuery
+        );
+        wind.maxSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
+          speedAsMinMax.maxValue,
+          speedAsMinMax.unitCode,
+          UnitType.wind,
+          reqQuery
+        );
+      } else if (speedAsValue?.value != null) {
+        wind.speed = NumberHelper.convertNws(speedAsValue, UnitType.wind, reqQuery);
+      }
+
+      const gustSpeedAsMinMax = period.windGust as QuantitativeMinMaxValue;
+      const gustSpeedAsValue = period.windGust as QuantitativeValue;
+      if (gustSpeedAsMinMax?.minValue != null && gustSpeedAsMinMax?.maxValue != null) {
+        wind.minGustSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
+          gustSpeedAsMinMax.minValue,
+          gustSpeedAsMinMax.unitCode,
+          UnitType.wind,
+          reqQuery
+        );
+        wind.maxGustSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
+          gustSpeedAsMinMax.maxValue,
+          gustSpeedAsMinMax.unitCode,
+          UnitType.wind,
+          reqQuery
+        );
+      } else if (gustSpeedAsValue?.value != null) {
+        wind.gustSpeed = NumberHelper.convertNws(gustSpeedAsValue, UnitType.wind, reqQuery);
+      }
+
+      if (period.windDirection === DetailedWindDirection.NNE || period.windDirection === DetailedWindDirection.ENE)
+        wind.direction = WindDirection.NE;
+      else if (period.windDirection === DetailedWindDirection.ESE || period.windDirection === DetailedWindDirection.SSE)
+        wind.direction = WindDirection.SE;
+      else if (period.windDirection === DetailedWindDirection.SSW || period.windDirection === DetailedWindDirection.WSW)
+        wind.direction = WindDirection.SW;
+      else if (period.windDirection === DetailedWindDirection.WNW || period.windDirection === DetailedWindDirection.NNW)
+        wind.direction = WindDirection.NW;
+      else wind.direction = period.windDirection;
+
+      return wind;
+    };
+
+    const forecasts = forecast.periods.map(
+      (period): NwsForecastPeriod => ({
+        name: period.name,
+        periodStart: Math.floor(new Date(period.startTime).getTime() / 1_000),
+        periodEnd: Math.floor(new Date(period.endTime).getTime() / 1_000),
+        isDaytime: period.isDaytime,
+        temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
+        wind: getWind(period),
+        shortForecast: period.shortForecast,
+        detailedForecast: period.detailedForecast
+      })
+    );
+
+    return {
+      readTime: Math.floor(new Date(forecast.updateTime).getTime() / 1_000),
+      validUntil: cacheEntry.validUntil,
+      forecasts
     };
   }
 }

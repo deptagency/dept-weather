@@ -1,4 +1,5 @@
 export * from './cloud-layer.model';
+export * from './forecast.model';
 export * from './geometry.model';
 export * from './metar-phenomenon.model';
 export * from './nws-units';
