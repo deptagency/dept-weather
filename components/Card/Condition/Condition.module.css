@@ -7,6 +7,14 @@
   margin: 1rem 0rem;
 }
 
+.condition__icon {
+  position: relative;
+  margin-right: 0.5rem;
+
+  height: 3rem;
+  width: 3rem;
+}
+
 .condition__label {
   margin: 0.25rem 0rem 0rem;
   font-size: 2rem;

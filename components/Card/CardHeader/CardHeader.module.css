@@ -5,6 +5,8 @@
   flex-wrap: wrap;
 
   min-height: 3.5rem;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
 
   color: var(--white);
 }

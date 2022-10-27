@@ -47,7 +47,7 @@ export default function Home() {
               style={{
                 background: '#ffffff',
                 margin: '1rem 0rem',
-                borderRadius: '2px',
+                borderRadius: '0.25rem',
                 boxShadow: '0px 0.25rem 0.5rem rgba(0, 0, 0, .15)'
               }}
             >
@@ -62,7 +62,10 @@ export default function Home() {
               >
                 <div style={{ flexGrow: '1', flexBasis: '24.5rem' }}>
                   <CurrentTemp observations={observations}></CurrentTemp>
-                  <Condition condition={observations.data.nws?.textDescription}></Condition>
+                  <Condition
+                    condition={observations.data.nws?.textDescription}
+                    sunData={observations.data?.sun}
+                  ></Condition>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', flexBasis: '37.5rem', alignItems: 'end' }}>
                   <Wind wind={observations.data.wl?.wind}></Wind>
