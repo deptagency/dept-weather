@@ -2,12 +2,17 @@ import { Geometry } from './geometry.model';
 import { QuantitativeValue } from './quantitative-value.model';
 
 export interface StationsResponse {
-  id: string;
-  geometry: Geometry;
-  properties: Stations;
+  features: Array<Feature>;
+  observationStations: string[];
 }
 
-export interface Stations {
+export interface Feature {
+  id: string;
+  geometry: Geometry;
+  properties: Station;
+}
+
+export interface Station {
   elevation: QuantitativeValue;
   stationIdentifier: string;
   name: string;

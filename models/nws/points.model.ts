@@ -1,13 +1,13 @@
 import { Geometry } from './geometry.model';
 import { QuantitativeValue } from './quantitative-value.model';
 
-export interface PointResponse {
+export interface PointsResponse {
   id: string;
-  properties: Point;
+  geometry: Geometry;
+  properties: Points;
 }
 
-export interface Point {
-  geometry: Geometry;
+export interface Points {
   cwa: string;
   forecastOffice: string;
   gridId: string;
@@ -17,7 +17,7 @@ export interface Point {
   forecastHourly: string;
   forecastGridData: string;
   observationStations: string;
-  relativeLocation: RelativeLocationResponse;
+  relativeLocation: RelativeLocation;
   forecastZone: string;
   county: string;
   fireWeatherZone: string;
@@ -25,13 +25,13 @@ export interface Point {
   radarStation: string;
 }
 
-export interface RelativeLocationResponse {
-  id: string;
+export interface RelativeLocation {
+  type: string;
   geometry: Geometry;
-  properties: RelativeLocation;
+  properties: RelativeLocationProperties;
 }
 
-export interface RelativeLocation {
+export interface RelativeLocationProperties {
   city: string;
   state: string;
   distance: QuantitativeValue;
