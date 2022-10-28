@@ -77,15 +77,27 @@ export class NumberHelper {
     return this.round(convertedValue, roundN);
   }
 
+  static convertNwsRawValueAndUnitCode(
+    value: number | null,
+    unitCode: string,
+    unitType: UnitType,
+    reqQuery: ReqQuery,
+    roundN: number | undefined = 1
+  ) {
+    return this.convert(value, this.getUnitMapping(unitType, NwsUnits[unitCode], reqQuery), roundN);
+  }
+
   static convertNws(
     quantitativeValue: QuantitativeValue,
     unitType: UnitType,
     reqQuery: ReqQuery,
     roundN: number | undefined = 1
   ) {
-    return this.convert(
+    return this.convertNwsRawValueAndUnitCode(
       quantitativeValue.value,
-      this.getUnitMapping(unitType, NwsUnits[quantitativeValue.unitCode], reqQuery),
+      quantitativeValue.unitCode,
+      unitType,
+      reqQuery,
       roundN
     );
   }
