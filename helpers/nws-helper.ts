@@ -112,9 +112,10 @@ export class NwsHelper {
         await this.fetch(forecastUrl, { 'Feature-Flags': 'forecast_temperature_qv,forecast_wind_speed_qv' })
       ).json() as Promise<ForecastResponse>,
     async (_: string, newItem: any) => {
-      const lastReading = Math.floor(new Date(newItem.properties.updateTime).getTime() / 1_000);
-      return lastReading; // TODO - figure out how often forecast gets updated
-      // return lastReading ? lastReading + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY : 0;
+      const lastReading = dayjs(newItem.properties.updateTime);
+      const oneHourFromLastReading = lastReading.add(1, 'hour').unix();
+      const fifteenMinsFromNow = dayjs().add(15, 'minutes').unix();
+      return Math.max(oneHourFromLastReading, fifteenMinsFromNow);
     },
     true,
     '[NwsHelper.forecast]'
