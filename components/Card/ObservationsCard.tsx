@@ -3,12 +3,12 @@ import CardHeader from './CardHeader/CardHeader';
 import Condition from './Condition/Condition';
 import CurrentTemp from './CurrentTemp/CurrentTemp';
 import { AirQuality, Humidity, Precipitation, Pressure, UVIndex, Wind } from './Measurement';
-import styles from './Card.module.css';
+import styles from './ObservationsCard.module.css';
 
-export default function Card({ observations }: { observations: Response<Observations> }) {
+export default function ObservationsCard({ observations }: { observations: Response<Observations> }) {
   return (
     <article className={styles.card}>
-      <CardHeader lastUpdatedTime={observations.latestReadTime * 1_000}></CardHeader>
+      <CardHeader lastUpdatedTime={observations.latestReadTime * 1_000} label="NOW" useIndigo={true}></CardHeader>
       <div className={styles['card-contents']}>
         <div className={styles['card-contents__overview']}>
           {observations.data.wl?.temperature != null ? (

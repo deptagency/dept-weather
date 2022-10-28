@@ -16,10 +16,22 @@ const timeAgoFormatter = ((
   return nextFormatter(value, unit, suffix, epochMiliseconds);
 }) as Formatter;
 
-export default function CardHeader({ lastUpdatedTime }: { lastUpdatedTime: number }) {
+export default function CardHeader({
+  lastUpdatedTime,
+  label,
+  secondaryLabel,
+  useIndigo
+}: {
+  lastUpdatedTime: number;
+  label: string;
+  secondaryLabel?: string;
+  useIndigo?: boolean;
+}) {
   return (
-    <header className={`${styles['card-header']} ${styles['card-header--now']}`}>
-      <h2 className={styles['card-header__title']}>NOW</h2>
+    <header
+      className={`${styles['card-header']} ${useIndigo ? styles['card-header--indigo'] : styles['card-header--onyx']}`}
+    >
+      <h2 className={styles['card-header__title']}>{label}</h2>
       <p className={styles['card-header__last-updated']}>
         Updated {<TimeAgo date={lastUpdatedTime} formatter={timeAgoFormatter} />}
       </p>

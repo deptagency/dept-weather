@@ -1,0 +1,17 @@
+.forecast-temps__temps {
+  margin: 0rem;
+  font-size: 6rem;
+  font-weight: 400;
+}
+
+.forecast-temps__temps__high {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.forecast-temps__temps__low {
+  display: inline-block;
+  vertical-align: bottom;
+  margin-left: -1.5rem;
+  font-size: 3rem;
+}

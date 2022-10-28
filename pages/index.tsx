@@ -1,8 +1,8 @@
 import Head from 'next/head';
 import useSWR from 'swr';
-import { Card } from '../components/Card';
+import { ForecastCard, ObservationsCard } from '../components/Card';
 
-import { APIRoute, getPath, Observations, Response } from '../models/api';
+import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response } from '../models/api';
 import styles from '../styles/Home.module.css';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
@@ -17,8 +17,47 @@ const useObservations = (): { observations?: Response<Observations>; isLoading: 
   };
 };
 
+const useForecast = (): { forecast?: Response<Forecast>; forecastIsLoading: boolean; forecastIsError: boolean } => {
+  const { data, error } = useSWR<Response<Forecast>>(getPath(APIRoute.FORECAST), fetcher);
+
+  return {
+    forecast: data,
+    forecastIsLoading: !error && !data,
+    forecastIsError: error
+  };
+};
+
+const ForecastCards = ({
+  latestReadTime,
+  forecasts
+}: {
+  latestReadTime: number;
+  forecasts: Array<NwsForecastPeriod>;
+}) => {
+  const cards = [];
+
+  let i = 0;
+  if (!forecasts[0].isDaytime) {
+    cards.push(<ForecastCard nightForecast={forecasts[0]} latestReadTime={latestReadTime} key={i++} />);
+  }
+
+  for (; i < forecasts.length; i += 2) {
+    console.log('i is:', i);
+    cards.push(
+      <ForecastCard
+        dayForecast={forecasts[i]}
+        nightForecast={i + 1 < forecasts.length ? forecasts[i + 1] : undefined}
+        latestReadTime={latestReadTime}
+        key={i}
+      />
+    );
+  }
+  return cards;
+};
+
 export default function Home() {
   const { observations, isLoading, isError } = useObservations();
+  const { forecast, forecastIsLoading, forecastIsError } = useForecast();
 
   return (
     <div className={styles.container}>
@@ -32,7 +71,7 @@ export default function Home() {
       </div>
       {observations ? (
         !isError && observations.data ? (
-          <Card observations={observations}></Card>
+          <ObservationsCard observations={observations}></ObservationsCard>
         ) : (
           <>
             <h1>Something went wrong :(</h1>
@@ -43,7 +82,25 @@ export default function Home() {
           </>
         )
       ) : (
-        <h1>Loading...</h1>
+        <h1>Loading observations...</h1>
+      )}
+      {forecast ? (
+        !forecastIsError && forecast.data?.nws?.forecasts?.length ? (
+          ForecastCards({
+            latestReadTime: forecast.latestReadTime,
+            forecasts: forecast.data.nws.forecasts
+          })
+        ) : (
+          <>
+            <h1>Something went wrong :(</h1>
+            <br />
+            {forecast?.errors.map(error => (
+              <h3 key={error}>{error}</h3>
+            ))}
+          </>
+        )
+      ) : (
+        <h1>Loading forecast...</h1>
       )}
     </div>
   );

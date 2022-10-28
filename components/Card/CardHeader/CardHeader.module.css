@@ -11,11 +11,11 @@
   color: var(--white);
 }
 
-.card-header--now {
+.card-header--indigo {
   background-color: var(--indigo);
 }
 
-.card-header--forecast {
+.card-header--onyx {
   background-color: var(--onyx);
 }
 
