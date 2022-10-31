@@ -58,8 +58,10 @@ export class NwsHelper {
         await this.fetch(`${this.BASE_URL}stations/${stationId}/observations/latest`)
       ).json() as Promise<ObservationResponse>,
     async (_: string, newItem: ObservationResponse) => {
-      const lastReading = Math.floor(new Date(newItem.properties.timestamp).getTime() / 1_000);
-      return lastReading ? lastReading + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY : 0;
+      const lastReadingTimestamp = newItem.properties?.timestamp;
+      return lastReadingTimestamp != null
+        ? dayjs(lastReadingTimestamp).unix() + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY
+        : 0;
     },
     true,
     '[NwsHelper.current]'
@@ -78,7 +80,7 @@ export class NwsHelper {
     );
 
     return {
-      readTime: Math.floor(new Date(nwsCurrent.timestamp).getTime() / 1_000),
+      readTime: dayjs(nwsCurrent.timestamp).unix(),
       validUntil: cacheEntry.validUntil,
       temperature: NumberHelper.convertNws(nwsCurrent.temperature, UnitType.temp, reqQuery),
       heatIndex: NumberHelper.convertNws(nwsCurrent.heatIndex, UnitType.temp, reqQuery),
@@ -183,7 +185,7 @@ export class NwsHelper {
     const forecasts = forecast.periods.map((period): NwsForecastPeriod => {
       const start = dayjs(period.startTime);
       return {
-        dayName: start.isBefore(dayjs().endOf('day')) ? 'Today' : period.name,
+        dayName: start.isBefore(dayjs().endOf('day')) ? 'Today' : period.name?.split(' ')[0],
         shortDateName: start.format('MMM D'),
         periodStart: start.unix(),
         periodEnd: dayjs(period.endTime).unix(),
@@ -196,7 +198,7 @@ export class NwsHelper {
     });
 
     return {
-      readTime: Math.floor(new Date(forecast.updateTime).getTime() / 1_000),
+      readTime: dayjs(forecast.updateTime).unix(),
       validUntil: cacheEntry.validUntil,
       forecasts
     };

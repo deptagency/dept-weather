@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export interface CacheEntry<Item> {
   item: Item;
   maxAge: number;
@@ -14,7 +16,7 @@ export class Cached<Item, Opts> {
   private cacheEntries = new Map<string, CacheEntry<Item>>();
 
   private get nowTimeInSeconds(): number {
-    return Math.ceil(new Date().getTime() / 1_000);
+    return dayjs().unix();
   }
 
   constructor(
@@ -57,7 +59,7 @@ export class Cached<Item, Opts> {
       const maxAge = validUntil ? validUntil - this.nowTimeInSeconds : 0;
 
       this.cacheEntries.set(key, { item, validUntil, maxAge, key });
-      this.log(`cache for "${key}" now expires at ${validUntil} (${new Date(validUntil * 1_000).toISOString()})`);
+      this.log(`cache for "${key}" now expires at ${validUntil} (${dayjs.unix(validUntil).format('HH:mm')})`);
     } else {
       this.log(`HIT - cache for "${key}"`);
     }
