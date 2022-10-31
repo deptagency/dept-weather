@@ -1,11 +1,10 @@
 import Image from 'next/image';
 import { DefaultIconMapping, DefaultIcons, IconCondition } from '../../../models';
-import { SunriseSunsetObservations } from '../../../models/api';
 import styles from './Condition.module.css';
 
 type ConditionSize = 'small' | 'large';
 
-const getWeatherIconSrc = (condition: string, sunData?: SunriseSunsetObservations) => {
+const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
   const conditionUpped = condition.toUpperCase();
   let match: DefaultIconMapping = DefaultIcons[conditionUpped as IconCondition] ?? undefined;
   if (match == undefined) {
@@ -18,21 +17,13 @@ const getWeatherIconSrc = (condition: string, sunData?: SunriseSunsetObservation
     }
   }
 
-  let isDay = true;
-  if (sunData?.sunrise != null && sunData?.sunset != null) {
-    const now = new Date();
-    const sunrise = new Date(sunData.sunrise * 1_000);
-    const sunset = new Date(sunData.sunset * 1_000);
-    isDay = sunrise <= now && now <= sunset;
-  }
-
   return match != undefined
-    ? `/weather-icons/default/${typeof match === 'string' ? match : match[isDay ? 'day' : 'night']}`
+    ? `/weather-icons/default/${typeof match === 'string' ? match : match[isNight ? 'night' : 'day']}`
     : undefined;
 };
 
-const WeatherIcon = (condition: string, size: ConditionSize, sunData?: SunriseSunsetObservations) => {
-  const iconSrc = getWeatherIconSrc(condition, sunData);
+const WeatherIcon = (condition: string, size: ConditionSize, isNight?: boolean) => {
+  const iconSrc = getWeatherIconSrc(condition, isNight);
   return iconSrc ? (
     <div className={`${styles['condition__icon']}  ${size === 'small' ? styles['condition__icon--small'] : ''}`}>
       <Image src={iconSrc} layout="fill" objectFit="contain" alt=""></Image>
@@ -46,15 +37,15 @@ const MAXIMUM_CONDITION_TEXT_LENGTH = 20;
 export default function Condition({
   condition,
   size,
-  sunData
+  isNight
 }: {
   condition: string | null | undefined;
   size: ConditionSize;
-  sunData?: SunriseSunsetObservations;
+  isNight?: boolean;
 }) {
   return condition ? (
     <div className={styles.condition}>
-      {WeatherIcon(condition, size, sunData)}
+      {WeatherIcon(condition, size, isNight)}
       <p className={`${styles['condition__label']} ${size === 'small' ? styles['condition__label--small'] : ''}`}>
         {condition.length > MAXIMUM_CONDITION_TEXT_LENGTH ? condition.split(' and ')[0] : condition}
       </p>

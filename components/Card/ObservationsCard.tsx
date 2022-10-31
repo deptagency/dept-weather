@@ -1,9 +1,20 @@
-import { Observations, Response } from '../../models/api';
+import { Observations, Response, SunriseSunsetObservations } from '../../models/api';
 import CardHeader from './CardHeader/CardHeader';
 import Condition from './Condition/Condition';
 import CurrentTemp from './CurrentTemp/CurrentTemp';
 import { AirQuality, Humidity, Precipitation, Pressure, UVIndex, Wind } from './Measurement';
 import styles from './ObservationsCard.module.css';
+
+const getIsNight = (sunData?: SunriseSunsetObservations) => {
+  let isNight = false;
+  if (sunData?.sunrise != null && sunData?.sunset != null) {
+    const now = new Date();
+    const sunrise = new Date(sunData.sunrise * 1_000);
+    const sunset = new Date(sunData.sunset * 1_000);
+    isNight = now < sunrise || sunset < now;
+  }
+  return isNight;
+};
 
 export default function ObservationsCard({ observations }: { observations: Response<Observations> }) {
   return (
@@ -22,7 +33,7 @@ export default function ObservationsCard({ observations }: { observations: Respo
           <Condition
             condition={observations.data.nws?.textDescription}
             size="large"
-            sunData={observations.data?.sun}
+            isNight={getIsNight(observations.data?.sun)}
           ></Condition>
         </div>
         <div className={styles['card-contents__measurements']}>
