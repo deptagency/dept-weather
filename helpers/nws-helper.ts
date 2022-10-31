@@ -1,10 +1,9 @@
 import dayjs from 'dayjs';
 import fetch, { HeadersInit } from 'node-fetch';
 import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '../constants';
-import { Unit, UnitMapping, UnitType, WindDirection } from '../models';
+import { Unit, UnitMapping, UnitType } from '../models';
 import { NwsForecast, NwsForecastPeriod, NwsObservations, ReqQuery, WindForecast } from '../models/api';
 import {
-  DetailedWindDirection,
   ForecastPeriod,
   ForecastResponse,
   NwsUnits,
@@ -181,18 +180,20 @@ export class NwsHelper {
       return wind;
     };
 
-    const forecasts = forecast.periods.map(
-      (period): NwsForecastPeriod => ({
-        name: period.name,
-        periodStart: Math.floor(new Date(period.startTime).getTime() / 1_000),
-        periodEnd: Math.floor(new Date(period.endTime).getTime() / 1_000),
+    const forecasts = forecast.periods.map((period): NwsForecastPeriod => {
+      const start = dayjs(period.startTime);
+      return {
+        dayName: start.isBefore(dayjs().endOf('day')) ? 'Today' : period.name,
+        shortDateName: start.format('MMM D'),
+        periodStart: start.unix(),
+        periodEnd: dayjs(period.endTime).unix(),
         isDaytime: period.isDaytime,
         temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
         wind: getWind(period),
         shortForecast: period.shortForecast,
         detailedForecast: period.detailedForecast
-      })
-    );
+      };
+    });
 
     return {
       readTime: Math.floor(new Date(forecast.updateTime).getTime() / 1_000),

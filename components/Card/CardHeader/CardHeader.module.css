@@ -27,6 +27,11 @@
   margin-bottom: 0.75rem;
 }
 
+.card-header__title span {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
 .card-header__last-updated {
   font-weight: 300;
 }

@@ -31,7 +31,17 @@ export default function CardHeader({
     <header
       className={`${styles['card-header']} ${useIndigo ? styles['card-header--indigo'] : styles['card-header--onyx']}`}
     >
-      <h2 className={styles['card-header__title']}>{label}</h2>
+      <h2 className={styles['card-header__title']}>
+        {label}
+        {secondaryLabel != null ? (
+          <>
+            {' '}
+            <span>{secondaryLabel}</span>
+          </>
+        ) : (
+          <></>
+        )}
+      </h2>
       <p className={styles['card-header__last-updated']}>
         Updated {<TimeAgo date={lastUpdatedTime} formatter={timeAgoFormatter} />}
       </p>

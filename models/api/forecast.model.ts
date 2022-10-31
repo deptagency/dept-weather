@@ -17,7 +17,8 @@ export interface NwsForecast extends BaseForecast {
 }
 
 export interface NwsForecastPeriod {
-  name: string | null;
+  dayName: string | null;
+  shortDateName: string | null;
   periodStart: number | null;
   periodEnd: number | null;
   isDaytime: boolean | null;
