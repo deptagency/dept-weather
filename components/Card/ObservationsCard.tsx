@@ -19,7 +19,11 @@ export default function ObservationsCard({ observations }: { observations: Respo
           ) : (
             <CurrentTemp temperature={observations.data.nws?.temperature}></CurrentTemp>
           )}
-          <Condition condition={observations.data.nws?.textDescription} sunData={observations.data?.sun}></Condition>
+          <Condition
+            condition={observations.data.nws?.textDescription}
+            size="large"
+            sunData={observations.data?.sun}
+          ></Condition>
         </div>
         <div className={styles['card-contents__measurements']}>
           <Wind wind={observations.data.wl?.wind ?? observations.data.nws?.wind}></Wind>

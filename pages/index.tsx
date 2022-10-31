@@ -42,7 +42,6 @@ const ForecastCards = ({
   }
 
   for (; i < forecasts.length; i += 2) {
-    console.log('i is:', i);
     cards.push(
       <ForecastCard
         dayForecast={forecasts[i]}

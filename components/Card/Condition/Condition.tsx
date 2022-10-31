@@ -3,13 +3,15 @@ import { DefaultIconMapping, DefaultIcons, IconCondition } from '../../../models
 import { SunriseSunsetObservations } from '../../../models/api';
 import styles from './Condition.module.css';
 
+type ConditionSize = 'small' | 'large';
+
 const getWeatherIconSrc = (condition: string, sunData?: SunriseSunsetObservations) => {
   const conditionUpped = condition.toUpperCase();
   let match: DefaultIconMapping = DefaultIcons[conditionUpped as IconCondition] ?? undefined;
   if (match == undefined) {
-    const conditions = conditionUpped.split(' and ');
-    for (const condition of conditions) {
-      match = DefaultIcons[condition as IconCondition] ?? undefined;
+    const subConditions = conditionUpped.split(new RegExp(` *and *`, 'i'));
+    for (const subCon of subConditions) {
+      match = DefaultIcons[subCon.trim() as IconCondition] ?? undefined;
       if (match != null) {
         break;
       }
@@ -29,10 +31,10 @@ const getWeatherIconSrc = (condition: string, sunData?: SunriseSunsetObservation
     : undefined;
 };
 
-const WeatherIcon = (condition: string, sunData?: SunriseSunsetObservations) => {
+const WeatherIcon = (condition: string, size: ConditionSize, sunData?: SunriseSunsetObservations) => {
   const iconSrc = getWeatherIconSrc(condition, sunData);
   return iconSrc ? (
-    <div className={styles['condition__icon']}>
+    <div className={`${styles['condition__icon']}  ${size === 'small' ? styles['condition__icon--small'] : ''}`}>
       <Image src={iconSrc} layout="fill" objectFit="contain" alt=""></Image>
     </div>
   ) : (
@@ -43,15 +45,17 @@ const WeatherIcon = (condition: string, sunData?: SunriseSunsetObservations) => 
 const MAXIMUM_CONDITION_TEXT_LENGTH = 20;
 export default function Condition({
   condition,
+  size,
   sunData
 }: {
   condition: string | null | undefined;
+  size: ConditionSize;
   sunData?: SunriseSunsetObservations;
 }) {
   return condition ? (
-    <div className={`${styles.condition} ${styles['condition--large']}`}>
-      {WeatherIcon(condition, sunData)}
-      <p className={styles['condition__label']}>
+    <div className={styles.condition}>
+      {WeatherIcon(condition, size, sunData)}
+      <p className={`${styles['condition__label']} ${size === 'small' ? styles['condition__label--small'] : ''}`}>
         {condition.length > MAXIMUM_CONDITION_TEXT_LENGTH ? condition.split(' and ')[0] : condition}
       </p>
     </div>

@@ -15,8 +15,7 @@ export default function Humidity({ humidity }: { humidity?: number | null | unde
     <Measurement
       value={
         <>
-          {roundOrEmDash(humidity)}
-          <span>%</span>
+          {roundOrEmDash(humidity)} <span>%</span>
         </>
       }
       label="Humidity"
