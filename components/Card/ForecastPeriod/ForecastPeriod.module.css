@@ -1,0 +1,29 @@
+.forecast-period {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.forecast-period__overview {
+  margin: 0rem 1rem 0rem 0.25rem;
+  min-width: 12rem;
+}
+
+@media screen and (max-width: 880px) {
+  .forecast-period__overview {
+    width: 100%;
+  }
+}
+
+.forecast-period__overview__label {
+  margin: 1rem 0rem 0.5rem;
+}
+
+.forecast-period__measurements {
+  display: flex;
+  flex: 1 1;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  max-width: 23.75rem;
+}

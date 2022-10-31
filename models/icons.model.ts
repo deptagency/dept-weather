@@ -17,12 +17,17 @@ export enum IconCondition {
   RAIN = 'RAIN',
   RAIN_HEAVY = 'HEAVY RAIN',
   RAIN_LIGHT = 'LIGHT RAIN',
+  RAIN_SHOWERS = 'RAIN SHOWERS',
   RAINBOW = 'RAINBOW',
   SMOKE = 'SMOKE',
   SNOW = 'SNOW',
   SNOW_HEAVY = 'HEAVY SNOW',
   SNOW_LIGHT = 'LIGHT SNOW',
+  SNOW_SHOWERS = 'SNOW SHOWERS',
   SQUALLS = 'SQUALLS',
+  SUNNY = 'SUNNY',
+  SUNNY_MOSTLY = 'MOSTLY SUNNY',
+  SUNNY_PARTLY = 'PARTLY SUNNY',
   THUNDERSHOWERS = 'THUNDERSHOWERS',
   THUNDERSNOW = 'THUNDERSNOW',
   THUNDERSTORMS = 'THUNDERSTORMS',
@@ -55,22 +60,23 @@ export enum DefaultSetIcon {
 
 export type DefaultIconMapping = { day: DefaultSetIcon; night: DefaultSetIcon } | DefaultSetIcon;
 
+const DEFAULT_CLEAR_ICONS: DefaultIconMapping = {
+  day: DefaultSetIcon.CLEAR_DAY,
+  night: DefaultSetIcon.CLEAR_NIGHT
+};
+
+const DEFAULT_PARTLY_CLOUDY_ICONS: DefaultIconMapping = {
+  day: DefaultSetIcon.CLOUDY_PARTLY_DAY,
+  night: DefaultSetIcon.CLOUDY_PARTLY_NIGHT
+};
+
 export const DefaultIcons: Record<IconCondition, DefaultIconMapping> = {
   [IconCondition.BREEZY]: DefaultSetIcon.WINDY,
-  [IconCondition.CLEAR]: {
-    day: DefaultSetIcon.CLEAR_DAY,
-    night: DefaultSetIcon.CLEAR_NIGHT
-  },
-  [IconCondition.CLEAR_MOSTLY]: {
-    day: DefaultSetIcon.CLEAR_DAY,
-    night: DefaultSetIcon.CLEAR_NIGHT
-  },
+  [IconCondition.CLEAR]: DEFAULT_CLEAR_ICONS,
+  [IconCondition.CLEAR_MOSTLY]: DEFAULT_CLEAR_ICONS,
   [IconCondition.CLOUDY]: DefaultSetIcon.CLOUDY,
   [IconCondition.CLOUDY_MOSTLY]: DefaultSetIcon.CLOUDY_MOSTLY,
-  [IconCondition.CLOUDY_PARTLY]: {
-    day: DefaultSetIcon.CLOUDY_PARTLY_DAY,
-    night: DefaultSetIcon.CLOUDY_PARTLY_NIGHT
-  },
+  [IconCondition.CLOUDY_PARTLY]: DEFAULT_PARTLY_CLOUDY_ICONS,
   [IconCondition.DRIZZLE]: DefaultSetIcon.RAIN,
   [IconCondition.DRIZZLE_LIGHT]: DefaultSetIcon.RAIN,
   [IconCondition.FOG]: DefaultSetIcon.FOG,
@@ -83,12 +89,17 @@ export const DefaultIcons: Record<IconCondition, DefaultIconMapping> = {
   [IconCondition.RAIN]: DefaultSetIcon.RAIN,
   [IconCondition.RAIN_HEAVY]: DefaultSetIcon.RAIN,
   [IconCondition.RAIN_LIGHT]: DefaultSetIcon.RAIN,
+  [IconCondition.RAIN_SHOWERS]: DefaultSetIcon.RAIN,
   [IconCondition.RAINBOW]: DefaultSetIcon.RAINBOW,
   [IconCondition.SMOKE]: DefaultSetIcon.FOG,
   [IconCondition.SNOW]: DefaultSetIcon.SNOW,
   [IconCondition.SNOW_HEAVY]: DefaultSetIcon.SNOW,
   [IconCondition.SNOW_LIGHT]: DefaultSetIcon.SNOW,
+  [IconCondition.SNOW_SHOWERS]: DefaultSetIcon.SNOW,
   [IconCondition.SQUALLS]: DefaultSetIcon.SNOW,
+  [IconCondition.SUNNY]: DEFAULT_CLEAR_ICONS,
+  [IconCondition.SUNNY_MOSTLY]: DEFAULT_CLEAR_ICONS,
+  [IconCondition.SUNNY_PARTLY]: DEFAULT_PARTLY_CLOUDY_ICONS,
   [IconCondition.THUNDERSHOWERS]: DefaultSetIcon.THUNDERSHOWERS,
   [IconCondition.THUNDERSNOW]: DefaultSetIcon.THUNDERSNOW,
   [IconCondition.THUNDERSTORMS]: DefaultSetIcon.THUNDERSTORMS,

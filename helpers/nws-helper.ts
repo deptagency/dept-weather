@@ -137,7 +137,7 @@ export class NwsHelper {
         gustSpeed: null,
         minGustSpeed: null,
         maxGustSpeed: null,
-        direction: null
+        direction: period.windDirection
       };
 
       const speedAsMinMax = period.windSpeed as QuantitativeMinMaxValue;
@@ -177,16 +177,6 @@ export class NwsHelper {
       } else if (gustSpeedAsValue?.value != null) {
         wind.gustSpeed = NumberHelper.convertNws(gustSpeedAsValue, UnitType.wind, reqQuery);
       }
-
-      if (period.windDirection === DetailedWindDirection.NNE || period.windDirection === DetailedWindDirection.ENE)
-        wind.direction = WindDirection.NE;
-      else if (period.windDirection === DetailedWindDirection.ESE || period.windDirection === DetailedWindDirection.SSE)
-        wind.direction = WindDirection.SE;
-      else if (period.windDirection === DetailedWindDirection.SSW || period.windDirection === DetailedWindDirection.WSW)
-        wind.direction = WindDirection.SW;
-      else if (period.windDirection === DetailedWindDirection.WNW || period.windDirection === DetailedWindDirection.NNW)
-        wind.direction = WindDirection.NW;
-      else wind.direction = period.windDirection;
 
       return wind;
     };

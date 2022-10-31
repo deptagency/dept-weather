@@ -1,11 +1,10 @@
 import { DataSource } from '../data-source.enum';
+import { DetailedWindDirection } from '../detailed-wind-direction.enum';
 import { WindDirection } from '../wind-direction.enum';
 import { Wind } from './observations.model';
 
 export interface Forecast {
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsForecast;
-  // [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]?: EpaHourlyForecast;
-  // [DataSource.SUNRISE_SUNSET]?: SunriseSunsetObservations;
 }
 
 export interface BaseForecast {
@@ -23,7 +22,7 @@ export interface NwsForecastPeriod {
   periodEnd: number | null;
   isDaytime: boolean | null;
   temperature: number | null;
-  wind: WindForecast | null;
+  wind: WindForecast;
   shortForecast: string | null;
   detailedForecast: string | null;
 }
@@ -33,5 +32,5 @@ export interface WindForecast extends Omit<Wind, 'direction'> {
   maxSpeed: number | null;
   minGustSpeed: number | null;
   maxGustSpeed: number | null;
-  direction: WindDirection | null;
+  direction: WindDirection | DetailedWindDirection | null;
 }

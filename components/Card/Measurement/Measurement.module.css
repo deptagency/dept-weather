@@ -6,6 +6,7 @@
 .measurement__value {
   margin: 0rem;
   font-size: 2rem;
+  white-space: nowrap;
 }
 
 .measurement__value span {

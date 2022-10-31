@@ -17,3 +17,19 @@
 .card-contents__overview {
   margin: 1rem 2rem 1rem 0.25rem;
 }
+
+@media screen and (max-width: 656px) {
+  .card-contents__overview {
+    width: 100%;
+  }
+}
+
+.card-contents__forecasts {
+  flex: 1 1 0%;
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+
+  max-width: 40rem;
+}

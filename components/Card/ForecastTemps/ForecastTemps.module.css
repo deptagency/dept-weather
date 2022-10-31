@@ -1,7 +1,10 @@
 .forecast-temps__temps {
-  margin: 0rem;
+  min-width: 15rem;
   font-size: 6rem;
   font-weight: 400;
+  white-space: nowrap;
+
+  margin: 0rem;
 }
 
 .forecast-temps__temps__high {
@@ -12,6 +15,7 @@
 .forecast-temps__temps__low {
   display: inline-block;
   vertical-align: bottom;
-  margin-left: -1.5rem;
   font-size: 3rem;
+
+  margin: 3.5rem 0rem 0rem -1.5rem;
 }
