@@ -1,6 +1,7 @@
 import { API_ROUTE_PATH } from '../../constants';
 
 export enum APIRoute {
+  CITY_SEARCH = 'city-search',
   CURRENT = 'current',
   FORECAST = 'forecast',
   HEALTH = 'health'

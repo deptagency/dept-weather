@@ -1,5 +1,6 @@
 export * from './airnow-helper';
 export * from './cached';
+export * from './cities-helper';
 export * from './coordinates-helper';
 export * from './epa-helper';
 export * from './number-helper';
