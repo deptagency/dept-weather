@@ -25,7 +25,7 @@ const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
 const WeatherIcon = (condition: string, size: ConditionSize, isNight?: boolean) => {
   const iconSrc = getWeatherIconSrc(condition, isNight);
   return iconSrc ? (
-    <div className={`${styles['condition__icon']}  ${size === 'small' ? styles['condition__icon--small'] : ''}`}>
+    <div className={`${styles.condition__icon}  ${size === 'small' ? styles['condition__icon--small'] : ''}`}>
       <Image src={iconSrc} layout="fill" objectFit="contain" alt=""></Image>
     </div>
   ) : (
@@ -46,7 +46,7 @@ export default function Condition({
   return condition ? (
     <div className={styles.condition}>
       {WeatherIcon(condition, size, isNight)}
-      <p className={`${styles['condition__label']} ${size === 'small' ? styles['condition__label--small'] : ''}`}>
+      <p className={`${styles.condition__label} ${size === 'small' ? styles['condition__label--small'] : ''}`}>
         {condition.length > MAXIMUM_CONDITION_TEXT_LENGTH ? condition.split(' and ')[0] : condition}
       </p>
     </div>

@@ -14,15 +14,15 @@ export default function Measurement({
 }) {
   return (
     <div className={styles.measurement}>
-      <p className={styles['measurement__value']}>{value}</p>
+      <p className={styles.measurement__value}>{value}</p>
       {secondaryValue ? <p className={styles['measurement__secondary-value']}>{secondaryValue}</p> : <></>}
-      <div className={styles['measurement__description']}>
+      <div className={styles.measurement__description}>
         {icon != null ? (
-          cloneElement(icon, { className: `${icon.props.className ?? ''} ${styles['measurement__description__icon']}` })
+          cloneElement(icon, { className: `${icon.props.className ?? ''} ${styles.measurement__description__icon}` })
         ) : (
           <></>
         )}
-        <p className={styles['measurement__description__label']}>{label}</p>
+        <p className={styles.measurement__description__label}>{label}</p>
       </div>
     </div>
   );
