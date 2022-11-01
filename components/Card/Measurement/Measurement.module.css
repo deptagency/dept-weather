@@ -33,7 +33,7 @@
 
 .measurement__description__icon path,
 .measurement__description__icon rect {
-  fill: var(--onyx);
+  fill: var(--black);
 }
 
 .measurement__description__label {

@@ -32,6 +32,10 @@
   margin-right: 0.5rem;
 }
 
+.header__branding__logo path {
+  fill: var(--black);
+}
+
 .header__text {
   vertical-align: middle;
   font-size: 1.5rem;
