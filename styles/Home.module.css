@@ -1,20 +1,25 @@
 .container {
-  margin: 0 auto;
-  padding: 0rem 1rem;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
   width: 100%;
-  max-width: 1056px;
-  height: 100vh;
+  min-height: 100vh;
+
+  margin: 0 auto;
 }
 
-.main {
-  height: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
+.container__content {
+  width: 100%;
+  max-width: 1056px;
+
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 @media screen and (max-width: 576px) {
-  .container {
-    padding: 0rem 0.5rem;
+  .container__content {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 }

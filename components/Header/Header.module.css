@@ -1,0 +1,39 @@
+.header__container {
+  background: var(--white);
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+@media screen and (max-width: 576px) {
+  .header {
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+.header__branding,
+.header__location {
+  margin: 0rem;
+}
+
+.header__branding__logo {
+  width: 73px;
+  height: 20px;
+  margin-right: 0.5rem;
+}
+
+.header__text {
+  vertical-align: middle;
+  font-size: 1.5rem;
+  font-weight: 300;
+}
