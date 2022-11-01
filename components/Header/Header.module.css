@@ -21,23 +21,49 @@
   }
 }
 
-.header__branding,
-.header__location {
+.header__text {
+  font-size: 1.5rem;
+  font-weight: 300;
+}
+
+.header__branding {
   margin: 0rem;
 }
 
 .header__branding__logo {
   width: 73px;
   height: 20px;
-  margin-right: 0.5rem;
+  margin-right: 0.25rem;
 }
 
-.header__branding__logo path {
-  fill: var(--black);
-}
-
-.header__text {
+.header__branding__text {
   vertical-align: middle;
-  font-size: 1.5rem;
-  font-weight: 300;
+}
+
+.header__location {
+  display: flex;
+  align-items: baseline;
+  column-gap: 0.5rem;
+
+  background: none;
+  border: none;
+  padding: 0rem;
+}
+
+.header__location__arrow {
+  width: 1rem;
+}
+
+.header__location__input {
+  text-align: right;
+  border: none;
+}
+
+.header__location__input:focus {
+  outline: none;
+}
+
+.header__branding__logo path,
+.header__location__arrow path {
+  fill: var(--black);
 }

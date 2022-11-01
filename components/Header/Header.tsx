@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import homeStyles from '../../styles/Home.module.css';
 import styles from './Header.module.css';
 
@@ -17,17 +18,41 @@ const DEPTLogo = () => (
   </svg>
 );
 
+const ArrowIcon = ({ ariaLabel }: { ariaLabel?: string }) => (
+  <svg
+    aria-label={ariaLabel}
+    className={styles.header__location__arrow}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 18.999C11.6 18.999 11.224 18.843 10.941 18.561L0.22 7.841C0.078 7.699 0 7.511 0 7.31C0 7.11 0.078 6.921 0.22 6.78C0.362 6.638 0.55 6.56 0.75 6.56C0.95 6.56 1.139 6.638 1.28 6.78L12 17.499L22.72 6.78C22.862 6.638 23.05 6.56 23.25 6.56C23.45 6.56 23.639 6.638 23.78 6.78C23.922 6.922 24 7.11 24 7.31C24 7.51 23.922 7.699 23.78 7.84L13.06 18.56C12.778 18.843 12.401 18.999 12 18.999Z" />
+  </svg>
+);
+
 export default function Header() {
+  const [locationInput, setLocationInput] = useState('Boston, MA');
+
   return (
     <div className={styles.header__container}>
       <header className={`${styles.header} ${homeStyles.container__content}`}>
         <h1 className={styles.header__branding}>
           <DEPTLogo></DEPTLogo>
-          <span className={styles.header__text}>Weather</span>
+          <span className={`${styles.header__text} ${styles.header__branding__text}`}>Weather</span>
         </h1>
-        <h1 className={styles.header__location}>
-          <span className={styles.header__text}>Boston, MA</span>
-        </h1>
+        <button className={styles.header__location}>
+          <input
+            className={`${styles.header__text} ${styles.header__location__input}`}
+            type="text"
+            value={locationInput}
+            onChange={e => {
+              // TODO - call API?
+              console.log(e.target.value);
+              setLocationInput(e.target.value);
+            }}
+          ></input>
+          <ArrowIcon></ArrowIcon>
+        </button>
       </header>
     </div>
   );
