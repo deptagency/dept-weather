@@ -19,7 +19,7 @@ const getIsNight = (sunData?: SunriseSunsetObservations) => {
 export default function ObservationsCard({ observations }: { observations: Response<Observations> }) {
   return (
     <article className={styles.card}>
-      <CardHeader lastUpdatedTime={observations.latestReadTime * 1_000} label="NOW" useIndigo={true}></CardHeader>
+      <CardHeader lastUpdatedTime={observations.latestReadTime} label="NOW" useIndigo={true}></CardHeader>
       <div className={styles['card-contents']}>
         <div className={styles['card-contents__overview']}>
           {observations.data.wl?.temperature != null ? (

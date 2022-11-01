@@ -16,7 +16,7 @@ export default function ForecastCard({
   return (
     <article className={styles.card}>
       <CardHeader
-        lastUpdatedTime={latestReadTime * 1_000}
+        lastUpdatedTime={latestReadTime}
         label={(dayForecast?.dayName ?? nightForecast?.dayName ?? '').toUpperCase()}
         secondaryLabel={(dayForecast?.shortDateName ?? nightForecast?.shortDateName ?? '').toUpperCase()}
         useIndigo={false}

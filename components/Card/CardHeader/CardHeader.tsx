@@ -43,7 +43,7 @@ export default function CardHeader({
         )}
       </h2>
       <p className={styles['card-header__last-updated']}>
-        Updated {<TimeAgo date={lastUpdatedTime} formatter={timeAgoFormatter} />}
+        Updated {<TimeAgo date={lastUpdatedTime * 1_000} formatter={timeAgoFormatter} />}
       </p>
     </header>
   );
