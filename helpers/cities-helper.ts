@@ -1,20 +1,17 @@
 import Fuse from 'fuse.js';
-import fetch from 'node-fetch';
-import { CITY_SEARCH_RESULT_LIMIT } from '../constants';
+import { readFile } from 'fs/promises';
+import path from 'path';
+import {
+  CITY_SEARCH_FUSE_OPTIONS,
+  CITY_SEARCH_POPULATION_SORT_THRESHOLD,
+  CITY_SEARCH_RESULT_LIMIT
+} from '../constants';
 import { ReqQuery } from '../models/api';
-import { City, FullCity, InputCity } from '../models/cities';
+import { CitiesQueryCache, City, FullCity, InputCity } from '../models/cities';
 
 export class CitiesHelper {
-  private static readonly fuseOptions: Fuse.IFuseOptions<FullCity> = {
-    includeScore: true,
-    keys: [
-      { name: 'cityName', weight: 0.4 },
-      { name: 'cityAndStateCode', weight: 0.6 }
-    ]
-  };
-
-  private static US_FULL_CITIES?: FullCity[];
-  private static US_SORTED_TOP_CITIES?: City[];
+  private static US_CITIES?: FullCity[];
+  private static US_TOP_CITIES?: FullCity[];
 
   private static sortByPopulation(a: FullCity, b: FullCity) {
     return b.population - a.population;
@@ -30,25 +27,49 @@ export class CitiesHelper {
     };
   }
 
+  private static async getFile(fName: string) {
+    const jsonDirectory = path.join(process.cwd(), 'data');
+    const fileContents = await readFile(`${jsonDirectory}/${fName}`, 'utf8');
+    return JSON.parse(fileContents);
+  }
+
+  private static fuseIndexPromise: Promise<Fuse.FuseIndex<FullCity>> = (async () =>
+    Fuse.parseIndex(await this.getFile('cities-index.json')))();
+
   private static fusePromise: Promise<Fuse<FullCity>> = (async () => {
-    const inputCities = (await (await fetch('http://localhost:3000/cities.json')).json()) as InputCity[];
-    this.US_FULL_CITIES = inputCities.map(
+    const fuseIndex = await this.fuseIndexPromise;
+    const inputCities = (await this.getFile('cities.json')) as InputCity[];
+    this.US_CITIES = inputCities.map(
       (inputCity: InputCity): FullCity => ({
         ...inputCity,
         cityAndStateCode: `${inputCity.cityName}, ${inputCity.stateCode}`
       })
     );
-    this.US_SORTED_TOP_CITIES = this.US_FULL_CITIES.sort(this.sortByPopulation)
-      .slice(0, CITY_SEARCH_RESULT_LIMIT)
-      .map(this.mapFullCityToCity);
+    this.US_TOP_CITIES = [...this.US_CITIES].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
 
-    return new Fuse(this.US_FULL_CITIES, this.fuseOptions);
+    return new Fuse(this.US_CITIES, CITY_SEARCH_FUSE_OPTIONS, fuseIndex);
   })();
+
+  private static queryCachePromise: Promise<CitiesQueryCache> = (async () =>
+    this.getFile('cities-query-cache-top250.json'))();
+
+  private static getFromCache = async (query: string) => {
+    const queryCache = await this.queryCachePromise;
+
+    const item = queryCache[query.toLowerCase()];
+    if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
+      return item.map(refIndex => this.US_CITIES![refIndex]);
+    }
+
+    return undefined;
+  };
 
   private static getTopResults(results: Fuse.FuseResult<FullCity>[]) {
     const topResults = results.slice(0, Math.min(results.length, CITY_SEARCH_RESULT_LIMIT));
-    // Sort results that score below threshold by population
-    const firstBeyondThreshold = topResults.findIndex(result => !result.score || result.score >= 0.03);
+    // Sort results that score below (i.e., numerically greater than) threshold by population
+    const firstBeyondThreshold = topResults.findIndex(
+      result => !result.score || result.score > CITY_SEARCH_POPULATION_SORT_THRESHOLD
+    );
     const resultsBeyondThreshold = firstBeyondThreshold >= 0 ? topResults.splice(firstBeyondThreshold) : [];
     resultsBeyondThreshold.sort((a, b) => this.sortByPopulation(a.item, b.item));
     topResults.push(...resultsBeyondThreshold);
@@ -58,16 +79,20 @@ export class CitiesHelper {
   static async searchFor(reqQuery: ReqQuery) {
     const fuse = await this.fusePromise;
 
-    const queryStr = (typeof reqQuery.query === 'string' ? reqQuery.query : '').trim().replaceAll('  ', ' ');
-    console.time(`search for "${queryStr}"`);
-    if (!queryStr?.length) {
-      return this.US_SORTED_TOP_CITIES!;
+    const query = (typeof reqQuery.query === 'string' ? reqQuery.query : '').trim().replaceAll('  ', ' ');
+    console.time(query);
+    if (!query?.length) {
+      return this.US_TOP_CITIES!;
     }
 
-    const results = fuse.search(queryStr);
-    const topResults = this.getTopResults(results);
-    console.timeEnd(`search for "${queryStr}"`);
+    let cities = await this.getFromCache(query);
+    if (cities == null) {
+      const results = fuse.search(query);
+      const topResults = this.getTopResults(results);
+      cities = topResults.map(result => result.item);
+    }
 
-    return topResults.map(result => result.item).map(this.mapFullCityToCity);
+    console.timeEnd(query);
+    return cities.map(this.mapFullCityToCity);
   }
 }
