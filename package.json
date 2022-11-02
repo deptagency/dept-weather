@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@turf/distance": "^6.5.0",
-    "country-state-city": "^3.1.2",
     "dayjs": "^1.11.6",
     "fuse.js": "^6.6.2",
     "geo-tz": "^7.0.2",
