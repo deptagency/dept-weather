@@ -15,6 +15,7 @@ export const CITY_SEARCH_FUSE_OPTIONS: Fuse.IFuseOptions<FullCity> = {
     { name: 'alternateCityNames', weight: 0.1 }
   ]
 };
+export const CITY_SEARCH_DEBOUNCE_MS = 250;
 
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
 export const NWS_UPLOAD_DELAY = 27 * 60; // 27 minutes

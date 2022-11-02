@@ -1,4 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { CITY_SEARCH_DEBOUNCE_MS } from '../../constants';
+import { CoordinatesHelper } from '../../helpers/coordinates-helper';
+import { useDebounce } from '../../hooks';
+import { APIRoute, getPath } from '../../models/api';
+import { City } from '../../models/cities';
 import homeStyles from '../../styles/Home.module.css';
 import styles from './Header.module.css';
 
@@ -31,29 +36,90 @@ const ArrowIcon = ({ ariaLabel }: { ariaLabel?: string }) => (
 );
 
 export default function Header() {
-  const [locationInput, setLocationInput] = useState('Boston, MA');
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [results, setResults] = useState<City[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const controllerRef = useRef<AbortController | undefined>();
+
+  const debouncedSearchQuery: string = useDebounce<string>(searchQuery, CITY_SEARCH_DEBOUNCE_MS);
+
+  const onSearchQueryChange = async (query: string) => {
+    setSearchQuery(query);
+  };
+
+  useEffect(() => {
+    const search = async (query: string) => {
+      if (controllerRef.current) {
+        controllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      controllerRef.current = controller;
+
+      try {
+        setIsSearching(true);
+        const res = await fetch(`${getPath(APIRoute.CITY_SEARCH)}?query=${query}`, {
+          signal: controllerRef.current?.signal
+        });
+        const resJSON = await res.json();
+        setResults(resJSON.data);
+        setIsSearching(false);
+      } catch (e) {
+        if (e instanceof Error && e?.name !== 'AbortError') {
+          setResults([]);
+          setIsSearching(false);
+        }
+      }
+    };
+
+    if (debouncedSearchQuery) {
+      search(debouncedSearchQuery);
+    } else {
+      setResults([]);
+    }
+  }, [debouncedSearchQuery]);
 
   return (
-    <div className={styles.header__container}>
-      <header className={`${styles.header} ${homeStyles.container__content}`}>
-        <h1 className={styles.header__branding}>
-          <DEPTLogo></DEPTLogo>
-          <span className={`${styles.header__text} ${styles.header__branding__text}`}>Weather</span>
-        </h1>
-        <button className={styles.header__location}>
-          <input
-            className={`${styles.header__text} ${styles.header__location__input}`}
-            type="text"
-            value={locationInput}
-            onChange={e => {
-              // TODO - call API?
-              console.log(e.target.value);
-              setLocationInput(e.target.value);
-            }}
-          ></input>
-          <ArrowIcon></ArrowIcon>
-        </button>
-      </header>
-    </div>
+    <>
+      <div className={styles.header__container}>
+        <header className={`${styles.header} ${homeStyles.container__content}`}>
+          <h1 className={styles.header__branding}>
+            <DEPTLogo></DEPTLogo>
+            <span className={`${styles.header__text} ${styles.header__branding__text}`}>Weather</span>
+          </h1>
+          <button className={styles.header__location}>
+            <input
+              className={`${styles.header__text} ${styles.header__location__input}`}
+              type="text"
+              value={searchQuery}
+              onChange={e => onSearchQueryChange(e.target.value)}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(false)}
+            ></input>
+            <ArrowIcon></ArrowIcon>
+          </button>
+        </header>
+      </div>
+      <div
+        className={`${homeStyles.container__overlay} ${
+          isInputFocused ? homeStyles['container__overlay--visible'] : homeStyles['container__overlay--hidden']
+        }`}
+      >
+        <div className={homeStyles.container__overlay__inner}>
+          {results.map((result, idx) => (
+            // TODO - create css classes for the paragragh styles
+            <p
+              key={CoordinatesHelper.numArrToStr([result.latitude, result.longitude])}
+              style={{
+                textAlign: 'right',
+                fontSize: '1.5rem',
+                margin: '1rem 2.5rem 1rem',
+                fontWeight: idx === 0 ? 700 : 300
+              }}
+            >{`${result.cityName}, ${result.stateCode}`}</p>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }

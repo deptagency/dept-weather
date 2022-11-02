@@ -51,7 +51,7 @@ export class CitiesHelper {
   })();
 
   private static queryCachePromise: Promise<CitiesQueryCache> = (async () =>
-    this.getFile('cities-query-cache-top250.json'))();
+    this.getFile('cities-query-cache-top500.json'))();
 
   private static getFromCache = async (query: string) => {
     const queryCache = await this.queryCachePromise;

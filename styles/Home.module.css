@@ -8,11 +8,14 @@
   margin: 0 auto;
 }
 
-.container__content {
+.container__content,
+.container__overlay__inner {
   width: 100%;
   max-width: 1056px;
-
   margin: 0 auto;
+}
+
+.container__content {
   padding-left: 1rem;
   padding-right: 1rem;
 }
@@ -22,4 +25,29 @@
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
+}
+
+.container__overlay {
+  position: fixed;
+  top: 72px; /* TODO - re-organize so that container__overlay only covers non-header portion of screen */
+  height: calc(100vh - 72px);
+  width: 100vw;
+  z-index: 1;
+}
+
+.container__overlay--hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.container__overlay--visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.container__overlay__inner {
+  height: 100%;
+  background: linear-gradient(235deg, rgba(255, 255, 255), rgba(255, 255, 255, 0.95));
 }
