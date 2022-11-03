@@ -34,8 +34,13 @@ const readIndex = async () => {
 };
 
 const readQueryCache = async n => {
-  const queryCacheStr = await readFile(`./data/cities-query-cache-top${n}.json`, 'utf-8');
+  const queryCacheStr = await readFile(`./data/cities-top${n}-query-cache.json`, 'utf-8');
   return JSON.parse(queryCacheStr);
+};
+
+const readCityAndStateCodeCache = async n => {
+  const cityAndStateCodeCacheStr = await readFile(`./data/cities-top${n}-cityAndStateCode-cache.json`, 'utf-8');
+  return JSON.parse(cityAndStateCodeCacheStr);
 };
 
 const citySorter = (city1, city2) => city2.population - city1.population;
@@ -50,7 +55,19 @@ const searchFor = (fuse, query) => {
 };
 
 const getTopResults = results => {
-  const topResults = results.slice(0, Math.min(results.length, RESULT_LIMIT));
+  const desiredSize = Math.min(results.length, RESULT_LIMIT);
+  let idxOfNextElem = desiredSize;
+  const topResults = results.slice(0, idxOfNextElem);
+
+  // Greedily remove duplicates from topResults and replace them if there are more elements in results
+  let idxOfDuplicateToRemove;
+  while ((idxOfDuplicateToRemove = getIdxOfDuplicateToRemove(topResults)) !== undefined) {
+    topResults.splice(idxOfDuplicateToRemove, 1);
+    if (results.length > idxOfNextElem) {
+      topResults.push(results[idxOfNextElem++]);
+    }
+  }
+
   // Sort results that score below (i.e., numerically greater than) threshold by population
   const firstBeyondThreshold = topResults.findIndex(
     result => !result.score || result.score > POPULATION_SORT_THRESHOLD
@@ -59,6 +76,23 @@ const getTopResults = results => {
   resultsBeyondThreshold.sort((result1, result2) => citySorter(result1.item, result2.item));
   topResults.push(...resultsBeyondThreshold);
   return topResults;
+};
+
+const getIdxOfDuplicateToRemove = topResults => {
+  // Loop through array backwards and compare i index with first occurring element with the same cityAndStateCode
+  for (let i = topResults.length - 1; i > 0; --i) {
+    const firstMatchIdxInArr = topResults.findIndex(
+      result => result.item.cityAndStateCode === topResults[i].item.cityAndStateCode
+    );
+    if (firstMatchIdxInArr !== i) {
+      // There is more than one element with the same cityAndStateCode
+      //  Return the index of the first occurring element if the population of the last occurring element is greater
+      const idxToRemove =
+        topResults[firstMatchIdxInArr].item.population < topResults[i].item.population ? firstMatchIdxInArr : i;
+      return idxToRemove;
+    }
+  }
+  return undefined;
 };
 
 const buildQueryCache = async (fuse, cities, startIdx, queryCache) => {
@@ -77,59 +111,94 @@ const buildQueryCache = async (fuse, cities, startIdx, queryCache) => {
   }
 };
 
-const orderAndWriteQueryCache = async (queryCache, level) => {
-  const orderedQueryCache = Object.keys(queryCache)
+const getOrderedQueryCache = async queryCache => {
+  return Object.keys(queryCache)
     .sort()
     .reduce((obj, key) => {
       obj[key] = queryCache[key];
       return obj;
     }, {});
+};
 
-  const orderedQueryCacheStr = JSON.stringify(orderedQueryCache);
-  const fName = `./data/cities-query-cache-top${level}.json`;
-  await writeFile(fName, orderedQueryCacheStr);
+const buildCityAndStateCodeCache = async (cityAndStateCodeCache, allCities, queryCache) => {
+  const queryCacheArrs = Object.values(queryCache);
+  for (const queryCacheArr of queryCacheArrs) {
+    for (const idx of queryCacheArr) {
+      const idxStr = String(idx);
+      if (cityAndStateCodeCache[idxStr] == null) {
+        cityAndStateCodeCache[idxStr] = allCities[idx].cityAndStateCode;
+      }
+    }
+  }
+};
+
+const write = async (object, fName) => {
+  const objectStr = JSON.stringify(object);
+  await writeFile(fName, objectStr);
 };
 
 const generateIndex = async () => {
   console.time('generate index');
-  const usCities = await readCities();
-  const index = createIndex(usCities);
+  const usAllCities = await readCities();
+  const index = createIndex(usAllCities);
   await writeFile('./data/cities-index.json', JSON.stringify(index));
   console.timeEnd('generate index');
 };
 
-const generateQueryCache = async (queryCache = {}, startIdx = 0) => {
+const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, startIdx = 0) => {
   console.time('setup');
-  const usCities = await readCities();
-  const usSortedCities = getSortedCities(usCities);
+  const usAllCities = await readCities();
+  const usSortedCities = getSortedCities(usAllCities);
 
   const index = await readIndex();
-  const fuse = getFuse(usCities, index);
+  const fuse = getFuse(usAllCities, index);
   console.timeEnd('setup');
 
   const levels = QUERY_CACHE_LEVELS.sort((a, b) => a - b).filter(level => level > startIdx);
   const usTopCities = usSortedCities.slice(0, levels[levels.length - 1]);
-  console.log('generating query cache for levels:', levels.join(', '));
+  console.log('generating query cache & cityAndStateCode cache for levels:', levels.join(', '));
   console.log();
 
   for (const level of levels) {
-    const timeLabel = `generate query cache for level ${level}`;
-    console.time(timeLabel);
+    const generateLabel = `L${level} - build query cache`;
+    console.time(generateLabel);
     await buildQueryCache(fuse, usTopCities.slice(0, level), startIdx, queryCache);
     startIdx = level;
-    console.timeEnd(timeLabel);
-    console.log();
+    console.timeEnd(generateLabel);
 
-    await orderAndWriteQueryCache(queryCache, level);
+    const qcLabel = `L${level} - order & write query cache`;
+    console.time(qcLabel);
+    const orderedQueryCache = await getOrderedQueryCache(queryCache);
+    await write(orderedQueryCache, `./data/cities-top${level}-query-cache.json`);
+    console.timeEnd(qcLabel);
+
+    const cascLabel = `L${level} - build & write cityAndStateCode cache`;
+    console.time(cascLabel);
+    await buildCityAndStateCodeCache(cityAndStateCodeCache, usAllCities, queryCache);
+    await write(cityAndStateCodeCache, `./data/cities-top${level}-cityAndStateCode-cache.json`);
+    console.timeEnd(cascLabel);
+
+    const combinedLabel = `L${level} - build & write combined cache`;
+    console.time(combinedLabel);
+    await write(
+      { queryCache: orderedQueryCache, cityAndStateCodeCache: cityAndStateCodeCache },
+      `./data/cities-top${level}-cache.json`
+    );
+    console.timeEnd(combinedLabel);
+
+    console.log();
   }
 };
 
 const run = async () => {
-  // await generateIndex();
+  await generateIndex();
+  await generateCaches();
 
-  const topN = 5000;
-  const queryCache = await readQueryCache(topN);
-  await generateQueryCache(queryCache, topN);
+  // Uncomment for building upon existing caches
+  // const topN = 1;
+  // const queryCache = await readQueryCache(topN);
+  // const cityAndStateCodeCache = await readCityAndStateCodeCache(topN);
+  // await generateCaches(queryCache, cityAndStateCodeCache, topN);
 };
 
 run();
