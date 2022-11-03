@@ -4,7 +4,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import Fuse from 'fuse.js';
 
-const QUERY_CACHE_LEVELS = [3, 10, 50, 100, 250, 500, 1_000];
+const QUERY_CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000];
 
 const RESULT_LIMIT = 5;
 const POPULATION_SORT_THRESHOLD = 10e-4;
@@ -33,6 +33,11 @@ const readIndex = async () => {
   return Fuse.parseIndex(JSON.parse(indexFile));
 };
 
+const readQueryCache = async n => {
+  const queryCacheStr = await readFile(`./data/cities-query-cache-top${n}.json`, 'utf-8');
+  return JSON.parse(queryCacheStr);
+};
+
 const citySorter = (city1, city2) => city2.population - city1.population;
 const getSortedCities = cities => [...cities].sort(citySorter);
 
@@ -56,8 +61,8 @@ const getTopResults = results => {
   return topResults;
 };
 
-const buildQueryCache = async (fuse, cities, queryCache) => {
-  for (const i = 0; i < cities.length; i++) {
+const buildQueryCache = async (fuse, cities, startIdx, queryCache) => {
+  for (let i = startIdx; i < cities.length; i++) {
     const fullQuery = cities[i].cityAndStateCode.toLowerCase();
     const consoleTimeLabel = `${i}: ${fullQuery}`;
     console.time(consoleTimeLabel);
@@ -93,7 +98,7 @@ const generateIndex = async () => {
   console.timeEnd('generate index');
 };
 
-const generateQueryCache = async () => {
+const generateQueryCache = async (queryCache = {}, startIdx = 0) => {
   console.time('setup');
   const usCities = await readCities();
   const usSortedCities = getSortedCities(usCities);
@@ -102,18 +107,16 @@ const generateQueryCache = async () => {
   const fuse = getFuse(usCities, index);
   console.timeEnd('setup');
 
-  const levels = QUERY_CACHE_LEVELS.sort((a, b) => a - b);
+  const levels = QUERY_CACHE_LEVELS.sort((a, b) => a - b).filter(level => level > startIdx);
   const usTopCities = usSortedCities.slice(0, levels[levels.length - 1]);
   console.log('generating query cache for levels:', levels.join(', '));
   console.log();
 
-  const queryCache = {};
-  let sliceStart = 0;
   for (const level of levels) {
     const timeLabel = `generate query cache for level ${level}`;
     console.time(timeLabel);
-    await buildQueryCache(fuse, usTopCities.slice(sliceStart, level), queryCache);
-    sliceStart = level;
+    await buildQueryCache(fuse, usTopCities.slice(0, level), startIdx, queryCache);
+    startIdx = level;
     console.timeEnd(timeLabel);
     console.log();
 
@@ -123,7 +126,10 @@ const generateQueryCache = async () => {
 
 const run = async () => {
   // await generateIndex();
-  await generateQueryCache();
+
+  const topN = 5000;
+  const queryCache = await readQueryCache(topN);
+  await generateQueryCache(queryCache, topN);
 };
 
 run();

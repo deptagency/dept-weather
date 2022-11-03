@@ -11,7 +11,7 @@ import { readFile, writeFile } from 'fs/promises';
 //   MP = Northern Mariana Islands
 //   PR = Puerto Rico
 //   UM = United States Minor Outlying Islands
-//   VI = Virgin Islands, U.S.
+//   VI = Virgin Islands
 const COUNTRY_CODES = ['US', 'AS', 'GU', 'MP', 'PR', 'UM', 'VI'];
 
 // See http://www.geonames.org/export/codes.html
