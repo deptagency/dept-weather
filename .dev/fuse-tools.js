@@ -1,10 +1,10 @@
 // Script to create index and/or generate query cache (uncomment/comment in run() function at end of file)
-//  Required: ./data/cities.json file
-//  Set "type": "module" in package.json, then run "node .dev/fuse-tools.js" in the terminal
+//  Required: ./data/cities.json file(s)
+//  Run "node .dev/fuse-tools.js" in the terminal
 import { readFile, writeFile } from 'fs/promises';
 import Fuse from 'fuse.js';
 
-const QUERY_CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000];
+const QUERY_CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000];
 
 const RESULT_LIMIT = 5;
 const POPULATION_SORT_THRESHOLD = 10e-4;

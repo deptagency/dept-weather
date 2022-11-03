@@ -1,7 +1,7 @@
 // Script to process GeoNames data into JSON format with selected relevant fields
-//  Files are sourced from: http://download.geonames.org/export/dump/
-//  Set "type": "module" in package.json, then run "node .dev/process-cities.js" in the terminal
-//  After running, "cities-formatted.json" can be formatted using "NODE_OPTIONS=--max_old_space_size=8192 npx prettier --write cities-formatted.json"
+//  Required: *.txt files for each code in COUNTRY_CODES, sourced from: http://download.geonames.org/export/dump/
+//  Run "node .dev/process-cities.js" in the terminal
+//  To format "cities-formatted.json", run "NODE_OPTIONS=--max_old_space_size=8192 npx prettier --write cities-formatted.json"
 import { readFile, writeFile } from 'fs/promises';
 
 // The following country codes are associated with the United States:
