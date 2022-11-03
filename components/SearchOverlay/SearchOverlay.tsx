@@ -1,37 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { CITY_SEARCH_DEBOUNCE_MS } from '../../constants';
-import { CoordinatesHelper } from '../../helpers/coordinates-helper';
+import { CoordinatesHelper, QueryHelper } from '../../helpers';
 import { useDebounce } from '../../hooks';
 import { APIRoute, getPath } from '../../models/api';
 import { City } from '../../models/cities';
 import styles from './SearchOverlay.module.css';
 import homeStyles from '../../styles/Home.module.css';
-import { US_STATE_CODES } from './us-state-codes';
-
-const replaceLastSeparated = (query: string, splitOn: string) => {
-  let fullStateName: string;
-  const separatedQuery = query.split(splitOn);
-  const lastIdx = separatedQuery.length - 1;
-  if (
-    separatedQuery.length > 1 &&
-    Object.keys(US_STATE_CODES).includes((fullStateName = separatedQuery[lastIdx].trim().toUpperCase()))
-  ) {
-    console.log('found', fullStateName);
-    separatedQuery[lastIdx] = separatedQuery[lastIdx].replace(
-      new RegExp(fullStateName, 'i'),
-      US_STATE_CODES[fullStateName]
-    );
-    console.log(separatedQuery[lastIdx]);
-    const returnVal = separatedQuery.join(splitOn);
-    console.log(returnVal);
-    return returnVal;
-  }
-};
-
-const formatQuery = (query: string) => {
-  const formattedQuery = query.replaceAll('  ', ' ');
-  return replaceLastSeparated(formattedQuery, ',') ?? replaceLastSeparated(formattedQuery, ' ') ?? formattedQuery;
-};
 
 export default function SearchOverlay({
   isInputFocused,
@@ -46,7 +20,7 @@ export default function SearchOverlay({
   const controllerRef = useRef<AbortController | undefined>();
 
   useEffect(() => {
-    setFormattedQuery(formatQuery(rawSearchQuery));
+    setFormattedQuery(QueryHelper.formatQuery(rawSearchQuery));
   }, [rawSearchQuery]);
 
   const debouncedSearchQuery: string = useDebounce<string>(formattedQuery, CITY_SEARCH_DEBOUNCE_MS);

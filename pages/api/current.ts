@@ -1,14 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { AQ_COORDINATES_STR } from '../../constants';
+import { CoordinatesHelper } from '../../helpers';
 import {
   AirNowHelper,
   CacheEntry,
-  CoordinatesHelper,
   EpaHelper,
   NwsHelper,
   SunriseSunsetHelper,
   WeatherlinkHelper
-} from '../../helpers';
+} from '../../helpers/api';
 import { DataSource } from '../../models';
 import { APIRoute, BaseObservations, getPath, Observations, Response } from '../../models/api';
 

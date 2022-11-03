@@ -5,9 +5,9 @@ import {
   CITY_SEARCH_FUSE_OPTIONS,
   CITY_SEARCH_POPULATION_SORT_THRESHOLD,
   CITY_SEARCH_RESULT_LIMIT
-} from '../constants';
-import { ReqQuery } from '../models/api';
-import { CitiesQueryCache, City, FullCity, InputCity } from '../models/cities';
+} from '../../constants';
+import { ReqQuery } from '../../models/api';
+import { CitiesQueryCache, City, FullCity, InputCity } from '../../models/cities';
 
 export class CitiesHelper {
   private static US_CITIES?: FullCity[];

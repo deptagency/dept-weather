@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 import fetch, { HeadersInit } from 'node-fetch';
-import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '../constants';
-import { Unit, UnitMapping, UnitType } from '../models';
-import { NwsForecast, NwsForecastPeriod, NwsObservations, ReqQuery, WindForecast } from '../models/api';
+import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '../../constants';
+import { Unit, UnitMapping, UnitType } from '../../models';
+import { NwsForecast, NwsForecastPeriod, NwsObservations, ReqQuery, WindForecast } from '../../models/api';
 import {
   ForecastPeriod,
   ForecastResponse,
@@ -12,9 +12,9 @@ import {
   QuantitativeMinMaxValue,
   QuantitativeValue,
   StationsResponse
-} from '../models/nws';
+} from '../../models/nws';
 import { Cached, CacheEntry } from './cached';
-import { NumberHelper } from './number-helper';
+import { NumberHelper } from '../';
 
 export class NwsHelper {
   private static readonly BASE_URL = 'https://api.weather.gov/';

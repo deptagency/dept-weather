@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CITY_SEARCH_RESULTS_MAX_AGE } from '../../constants';
-import { CitiesHelper } from '../../helpers';
+import { CitiesHelper } from '../../helpers/api';
 import { APIRoute, getPath, Response } from '../../models/api';
 import { City } from '../../models/cities';
 

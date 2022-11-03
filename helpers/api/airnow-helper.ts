@@ -3,11 +3,11 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import fetch from 'node-fetch';
-import { AIRNOW_RECORDING_INTERVAL, AIRNOW_UPLOAD_DELAY } from '../constants';
-import { CurrentObservations } from '../models/airnow';
-import { AirNowObservations } from '../models/api';
+import { AIRNOW_RECORDING_INTERVAL, AIRNOW_UPLOAD_DELAY } from '../../constants';
+import { CurrentObservations } from '../../models/airnow';
+import { AirNowObservations } from '../../models/api';
 import { Cached, CacheEntry } from './cached';
-import { CoordinatesHelper } from './coordinates-helper';
+import { CoordinatesHelper } from '../';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);

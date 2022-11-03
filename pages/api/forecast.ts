@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { AQ_COORDINATES_STR } from '../../constants';
-import { CoordinatesHelper, NwsHelper } from '../../helpers';
+import { CoordinatesHelper } from '../../helpers';
+import { NwsHelper } from '../../helpers/api';
 import { DataSource } from '../../models';
 import { APIRoute, Forecast, getPath, Response } from '../../models/api';
 

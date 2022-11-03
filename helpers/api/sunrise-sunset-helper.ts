@@ -3,11 +3,10 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { find } from 'geo-tz';
 import { getSunrise, getSunset } from 'sunrise-sunset-js';
-import { SunriseSunsetObservations } from '../models/api';
-import { SunriseSunset } from '../models/sunrise-sunset';
+import { SunriseSunsetObservations } from '../../models/api';
+import { SunriseSunset } from '../../models/sunrise-sunset';
 import { Cached, CacheEntry } from './cached';
-import { CoordinatesHelper } from './coordinates-helper';
-import { NumberHelper } from './number-helper';
+import { CoordinatesHelper, NumberHelper } from '../';
 
 dayjs.extend(timezone);
 dayjs.extend(utc);

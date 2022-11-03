@@ -1,6 +1,7 @@
 import Head from 'next/head';
+import { useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { Footer, ForecastCard, Header, ObservationsCard } from '../components';
+import { Footer, ForecastCard, Header, ObservationsCard, SearchOverlay } from '../components';
 
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response } from '../models/api';
 import styles from '../styles/Home.module.css';
@@ -58,8 +59,19 @@ export default function Home() {
   const { observations, isLoading, isError } = useObservations();
   const { forecast, forecastIsLoading, forecastIsError } = useForecast();
 
+  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
+  const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
+
+  const onInputFocusChange = (newIsFocusedVal: boolean) => setIsInputFocused(newIsFocusedVal);
+  const onSearchQueryChange = (newQueryVal: string) => setRawSearchQuery(newQueryVal);
+
+  useEffect(() => {
+    const className = 'overflow-y-hidden';
+    isInputFocused ? document.body.classList.add(className) : document.body.classList.remove(className);
+  }, [isInputFocused]);
+
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${isInputFocused ? styles['container--overlay-visible'] : ''}`}>
       <Head>
         <title>DEPT® Weather</title>
         <meta
@@ -68,7 +80,8 @@ export default function Home() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header></Header>
+      <Header onInputFocusChange={onInputFocusChange} onSearchQueryChange={onSearchQueryChange}></Header>
+      <SearchOverlay isInputFocused={isInputFocused} rawSearchQuery={rawSearchQuery}></SearchOverlay>
       <main className={styles.container__content}>
         {observations ? (
           !isError && observations.data ? (

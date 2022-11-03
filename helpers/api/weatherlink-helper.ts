@@ -1,12 +1,11 @@
 import turf from '@turf/distance';
 import { default as WeatherLink } from 'weatherlink';
-import { AQ_COORDINATES_STR, DEFAULT_UNITS } from '../constants';
-import { Unit, UnitType } from '../models';
-import { ReqQuery, WlObservations } from '../models/api';
-import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../models/weatherlink';
+import { AQ_COORDINATES_STR, DEFAULT_UNITS } from '../../constants';
+import { Unit, UnitType } from '../../models';
+import { ReqQuery, WlObservations } from '../../models/api';
+import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../../models/weatherlink';
 import { Cached, CacheEntry } from './cached';
-import { CoordinatesHelper } from './coordinates-helper';
-import { NumberHelper } from './number-helper';
+import { CoordinatesHelper, NumberHelper } from '../';
 
 export class WeatherlinkHelper {
   private static readonly apiKey = process.env.WEATHERLINK_API_KEY!;
