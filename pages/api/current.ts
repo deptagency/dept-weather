@@ -49,8 +49,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       validUntil,
       latestReadTime
     };
-
-    res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${maxAge}`);
+    if (process.env.NODE_ENV !== 'development') {
+      res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${maxAge}`);
+    }
     res.status(200).json(response);
   } catch (err) {
     console.log(`[${getPath(APIRoute.CURRENT)}]`, err);

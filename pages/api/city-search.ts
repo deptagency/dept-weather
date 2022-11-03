@@ -16,8 +16,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       validUntil: dayjs().unix() + CITY_SEARCH_RESULTS_MAX_AGE,
       latestReadTime: dayjs().unix()
     };
-
-    res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${CITY_SEARCH_RESULTS_MAX_AGE}`);
+    if (process.env.NODE_ENV !== 'development') {
+      res.setHeader(
+        'Cache-Control',
+        `public, immutable, stale-while-revalidate, max-age=${CITY_SEARCH_RESULTS_MAX_AGE}`
+      );
+    }
     res.status(200).json(response);
   } catch (err) {
     console.log(`[${getPath(APIRoute.CITY_SEARCH)}]`, err);

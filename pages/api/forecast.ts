@@ -22,7 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       latestReadTime: data.nws!.readTime
     };
 
-    res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${forecast.maxAge}`);
+    if (process.env.NODE_ENV !== 'development') {
+      res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${forecast.maxAge}`);
+    }
     res.status(200).json(response);
   } catch (err) {
     console.log(`[${getPath(APIRoute.FORECAST)}]`, err);
