@@ -15,6 +15,10 @@ body {
     'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+.overflow-y-hidden {
+  overflow-y: hidden;
+}
+
 button,
 input {
   font-family: unset;
