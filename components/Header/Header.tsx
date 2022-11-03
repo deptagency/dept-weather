@@ -43,16 +43,17 @@ export default function Header({
           <DEPTLogo></DEPTLogo>
           <span className={`${styles.header__text} ${styles.header__branding__text}`}>Weather</span>
         </h1>
-        <button className={styles.header__location}>
+        <div className={styles.header__location}>
           <input
             className={`${styles.header__text} ${styles.header__location__input}`}
             type="text"
+            onClick={e => e.preventDefault()}
             onChange={e => onSearchQueryChange(e.target.value)}
             onFocus={() => onInputFocusChange(true)}
             onBlur={() => onInputFocusChange(false)}
           ></input>
           <ArrowIcon></ArrowIcon>
-        </button>
+        </div>
       </header>
     </div>
   );

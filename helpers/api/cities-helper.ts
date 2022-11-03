@@ -3,7 +3,9 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import {
   CITY_SEARCH_FUSE_OPTIONS,
+  CITY_SEARCH_INDEX_FILENAME,
   CITY_SEARCH_POPULATION_SORT_THRESHOLD,
+  CITY_SEARCH_QUERY_CACHE_FILENAME,
   CITY_SEARCH_RESULT_LIMIT
 } from '../../constants';
 import { ReqQuery } from '../../models/api';
@@ -45,11 +47,11 @@ export class CitiesHelper {
     return [...usCities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
   })();
   private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {
-    return this.getFile('cities-query-cache-top5000.json');
+    return this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME);
   })();
 
   private static fuseIndexPromise: Promise<Fuse.FuseIndex<FullCity>> = (async () => {
-    const unparsedIndex = await this.getFile('cities-index.json');
+    const unparsedIndex = await this.getFile(CITY_SEARCH_INDEX_FILENAME);
     return Fuse.parseIndex(unparsedIndex);
   })();
   private static fusePromise: Promise<Fuse<FullCity>> = (async () => {

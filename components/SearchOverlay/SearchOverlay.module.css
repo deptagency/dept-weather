@@ -1,6 +1,6 @@
 .search__overlay {
   position: fixed;
-  top: 4.5rem;
+  top: 4rem;
   right: 0rem;
   bottom: 0rem;
   left: 0rem;
@@ -16,7 +16,7 @@
 
 @media screen and (max-width: 460px) {
   .search__overlay {
-    top: 5.5rem;
+    top: 5rem;
   }
 }
 
