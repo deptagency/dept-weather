@@ -77,7 +77,7 @@ export class QueryHelper {
   }
 
   static formatQuery(query: string) {
-    const formattedQuery = query.replaceAll('  ', ' ').trim();
+    const formattedQuery = query.replaceAll(new RegExp(' {2,}', 'g'), ' ').trim();
     return (
       this.replaceLastSeparated(formattedQuery, ',') ?? this.replaceLastSeparated(formattedQuery, ' ') ?? formattedQuery
     );
