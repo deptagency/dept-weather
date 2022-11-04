@@ -43,14 +43,12 @@ export default function Condition({
   size: ConditionSize;
   isNight?: boolean;
 }) {
-  return condition ? (
+  return (
     <div className={styles.condition}>
-      {WeatherIcon(condition, size, isNight)}
+      {condition ? WeatherIcon(condition, size, isNight) : <></>}
       <p className={`${styles.condition__label} ${size === 'small' ? styles['condition__label--small'] : ''}`}>
-        {condition.length > MAXIMUM_CONDITION_TEXT_LENGTH ? condition.split(' and ')[0] : condition}
+        {condition ? (condition.length > MAXIMUM_CONDITION_TEXT_LENGTH ? condition.split(' and ')[0] : condition) : '–'}
       </p>
     </div>
-  ) : (
-    <></>
   );
 }
