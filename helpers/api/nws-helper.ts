@@ -184,8 +184,13 @@ export class NwsHelper {
 
     const forecasts = forecast.periods.map((period): NwsForecastPeriod => {
       const start = dayjs(period.startTime);
+      const dayName = start.isBefore(dayjs().endOf('day'))
+        ? period.isDaytime
+          ? 'Today'
+          : 'Tonight'
+        : period.name?.split(' ')[0];
       return {
-        dayName: start.isBefore(dayjs().endOf('day')) ? 'Today' : period.name?.split(' ')[0],
+        dayName,
         shortDateName: start.format('MMM D'),
         periodStart: start.unix(),
         periodEnd: dayjs(period.endTime).unix(),
