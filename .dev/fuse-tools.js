@@ -4,7 +4,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import Fuse from 'fuse.js';
 
-const QUERY_CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000];
+const QUERY_CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000, 12_500, 15_000];
 
 const RESULT_LIMIT = 5;
 const POPULATION_SORT_THRESHOLD = 10e-4;
@@ -191,14 +191,14 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
 };
 
 const run = async () => {
-  await generateIndex();
-  await generateCaches();
+  // await generateIndex();
+  // await generateCaches();
 
-  // Uncomment for building upon existing caches
-  // const topN = 1;
-  // const queryCache = await readQueryCache(topN);
-  // const cityAndStateCodeCache = await readCityAndStateCodeCache(topN);
-  // await generateCaches(queryCache, cityAndStateCodeCache, topN);
+  // Use for building upon existing caches
+  const topN = 1500;
+  const queryCache = await readQueryCache(topN);
+  const cityAndStateCodeCache = await readCityAndStateCodeCache(topN);
+  await generateCaches(queryCache, cityAndStateCodeCache, topN);
 };
 
 run();
