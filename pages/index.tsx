@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { Footer, ForecastCard, Header, ObservationsCard, SearchOverlay } from '../components';
+import { Footer, ForecastCard, Header, ObservationsCard } from '../components';
 
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response } from '../models/api';
 import styles from '../styles/Home.module.css';
