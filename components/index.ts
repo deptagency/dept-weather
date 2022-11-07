@@ -1,4 +1,3 @@
 export * from './Card';
 export { default as Footer } from './Footer/Footer';
-export { default as Header } from './Header/Header';
-export { default as SearchOverlay } from './SearchOverlay/SearchOverlay';
+export * from './Header/Header';

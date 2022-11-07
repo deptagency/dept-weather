@@ -1,24 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
-import { CITY_SEARCH_DEBOUNCE_MS } from '../../constants';
-import { CoordinatesHelper, QueryHelper } from '../../helpers';
-import { useDebounce } from '../../hooks';
-import { APIRoute, getPath } from '../../models/api';
-import { City } from '../../models/cities';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { CITY_SEARCH_DEBOUNCE_MS } from '../../../constants';
+import { CoordinatesHelper, QueryHelper } from '../../../helpers';
+import { useDebounce } from '../../../hooks';
+import { APIRoute, getPath } from '../../../models/api';
+import { City } from '../../../models/cities';
 import styles from './SearchOverlay.module.css';
-import homeStyles from '../../styles/Home.module.css';
+import homeStyles from '../../../styles/Home.module.css';
 
 export default function SearchOverlay({
-  showSearchOverlay,
-  onShowSearchOverlayChange,
   rawSearchQuery,
+  showSearchOverlay,
+  setShowSearchOverlay,
   highlightedIndexDistance,
   setHighlightedIndexDistance
 }: {
-  showSearchOverlay: boolean;
-  onShowSearchOverlayChange: (showSearchOverlay?: boolean) => void;
   rawSearchQuery: string;
+  showSearchOverlay: boolean;
+  setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
   highlightedIndexDistance: number;
-  setHighlightedIndexDistance: (newHID: number) => void;
+  setHighlightedIndexDistance: Dispatch<SetStateAction<number>>;
 }) {
   const [formattedQuery, setFormattedQuery] = useState<string>('');
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
@@ -80,7 +80,7 @@ export default function SearchOverlay({
       }`}
       onClick={e => {
         if (!e.defaultPrevented) {
-          onShowSearchOverlayChange(false);
+          setShowSearchOverlay(false);
         }
       }}
     >

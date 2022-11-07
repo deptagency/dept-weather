@@ -1,7 +1,8 @@
-import { KeyboardEventHandler } from 'react';
+import { Dispatch, KeyboardEventHandler, SetStateAction, useState } from 'react';
 import { IME_UNSETTLED_KEY_CODE } from '../../constants';
 import homeStyles from '../../styles/Home.module.css';
 import styles from './Header.module.css';
+import SearchOverlay from './SearchOverlay/SearchOverlay';
 
 const DEPTLogo = () => (
   <svg
@@ -32,16 +33,18 @@ const ArrowIcon = ({ ariaLabel }: { ariaLabel?: string }) => (
 );
 
 export default function Header({
-  onShowSearchOverlayChange,
-  onSearchQueryChange,
-  onHighlightedIndexDistanceChange,
-  onEnterKeyDown
+  showSearchOverlay,
+  setShowSearchOverlay
 }: {
-  onShowSearchOverlayChange: (showSearchOverlay?: boolean) => void;
-  onSearchQueryChange: (query: string) => void;
-  onHighlightedIndexDistanceChange: (change: number) => void;
-  onEnterKeyDown: () => void;
+  showSearchOverlay: boolean;
+  setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
 }) {
+  const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
+  const [highlightedIndexDistance, setHighlightedIndexDistance] = useState<number>(0);
+
+  const onHighlightedIndexDistanceChange = (change: number) =>
+    setHighlightedIndexDistance(highlightedIndexDistance + change);
+
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = event => {
     // if (focusedTag !== -1 && ['ArrowLeft', 'ArrowRight'].indexOf(event.key) === -1) {
     //   setFocusedTag(-1);
@@ -105,7 +108,7 @@ export default function Header({
         //   handleFocusTag(event, 'next');
         //   break;
         case 'Enter':
-          onEnterKeyDown();
+          console.log('onEnterKeyDown!');
           break;
         // case 'Escape':
         //   if (popupOpen) {
@@ -138,43 +141,53 @@ export default function Header({
   };
 
   return (
-    <div
-      className={styles.header__container}
-      onClick={e => {
-        if (!e.defaultPrevented) {
-          onShowSearchOverlayChange(false);
-        }
-      }}
-    >
-      <header className={`${styles.header} ${homeStyles.container__content}`}>
-        <h1 className={styles.header__branding}>
-          <DEPTLogo></DEPTLogo>
-          <span className={`${styles.header__text} ${styles.header__branding__text}`}>Weather</span>
-        </h1>
-        <div className={styles.header__location}>
-          <input
-            className={`${styles.header__text} ${styles.header__location__input}`}
-            type="text"
-            onClick={e => e.preventDefault()}
-            onChange={e => onSearchQueryChange(e.target.value)}
-            onFocus={e => {
-              onShowSearchOverlayChange(true);
-              e.preventDefault();
-            }}
-            onKeyDown={handleKeyDown}
-          ></input>
-          {/*TODO - adjust padding so it's easier to click */}
-          {/*TODO - make this a tabable button */}
-          <div
-            onClick={e => {
-              onShowSearchOverlayChange();
-              e.preventDefault();
-            }}
-          >
-            <ArrowIcon></ArrowIcon>
+    <>
+      <div
+        className={styles.header__container}
+        onClick={e => {
+          if (!e.defaultPrevented) {
+            setShowSearchOverlay(false);
+          }
+        }}
+      >
+        <header className={`${styles.header} ${homeStyles.container__content}`}>
+          <h1 className={styles.header__branding}>
+            <DEPTLogo></DEPTLogo>
+            <span className={`${styles.header__text} ${styles.header__branding__text}`}>Weather</span>
+          </h1>
+          <div className={styles.header__location}>
+            <input
+              className={`${styles.header__text} ${styles.header__location__input}`}
+              type="text"
+              onClick={e => e.preventDefault()}
+              onChange={e => setRawSearchQuery(e.target.value)}
+              onFocus={e => {
+                setShowSearchOverlay(true);
+                e.preventDefault();
+              }}
+              onKeyDown={handleKeyDown}
+            ></input>
+            {/*TODO - adjust padding so it's easier to click */}
+            {/*TODO - make this a tabable button */}
+            <div
+              onClick={e => {
+                setShowSearchOverlay(!showSearchOverlay);
+                e.preventDefault();
+              }}
+            >
+              <ArrowIcon></ArrowIcon>
+            </div>
           </div>
-        </div>
-      </header>
-    </div>
+        </header>
+      </div>
+
+      <SearchOverlay
+        rawSearchQuery={rawSearchQuery}
+        showSearchOverlay={showSearchOverlay}
+        setShowSearchOverlay={setShowSearchOverlay}
+        highlightedIndexDistance={highlightedIndexDistance}
+        setHighlightedIndexDistance={setHighlightedIndexDistance}
+      ></SearchOverlay>
+    </>
   );
 }

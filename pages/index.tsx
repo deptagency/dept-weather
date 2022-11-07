@@ -60,11 +60,6 @@ export default function Home() {
   const { forecast, forecastIsLoading, forecastIsError } = useForecast();
 
   const [showSearchOverlay, setShowSearchOverlay] = useState<boolean>(false);
-  const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
-  const [highlightedIndexDistance, setHighlightedIndexDistance] = useState<number>(0);
-
-  const onShowSearchOverlayChange = (shouldShow?: boolean) => setShowSearchOverlay(shouldShow ?? !showSearchOverlay);
-
   useEffect(() => {
     const className = 'overflow-y-hidden';
     showSearchOverlay ? document.body.classList.add(className) : document.body.classList.remove(className);
@@ -80,24 +75,7 @@ export default function Home() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header
-        onShowSearchOverlayChange={onShowSearchOverlayChange}
-        onSearchQueryChange={(newQueryVal: string) => setRawSearchQuery(newQueryVal)}
-        onHighlightedIndexDistanceChange={(change: number) =>
-          setHighlightedIndexDistance(highlightedIndexDistance + change)
-        }
-        onEnterKeyDown={() => {
-          // TODO - handle this
-          console.log('enter pressed');
-        }}
-      ></Header>
-      <SearchOverlay
-        showSearchOverlay={showSearchOverlay}
-        onShowSearchOverlayChange={onShowSearchOverlayChange}
-        rawSearchQuery={rawSearchQuery}
-        highlightedIndexDistance={highlightedIndexDistance}
-        setHighlightedIndexDistance={setHighlightedIndexDistance}
-      ></SearchOverlay>
+      <Header showSearchOverlay={showSearchOverlay} setShowSearchOverlay={setShowSearchOverlay}></Header>
       <main className={styles.container__content}>
         {observations ? (
           !isError && observations.data ? (
