@@ -59,19 +59,19 @@ export default function Home() {
   const { observations, isLoading, isError } = useObservations();
   const { forecast, forecastIsLoading, forecastIsError } = useForecast();
 
-  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
+  const [showSearchOverlay, setShowSearchOverlay] = useState<boolean>(false);
   const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
+  const [highlightedIndexDistance, setHighlightedIndexDistance] = useState<number>(0);
 
-  const onInputFocusChange = (newIsFocusedVal: boolean) => setIsInputFocused(newIsFocusedVal);
-  const onSearchQueryChange = (newQueryVal: string) => setRawSearchQuery(newQueryVal);
+  const onShowSearchOverlayChange = (shouldShow?: boolean) => setShowSearchOverlay(shouldShow ?? !showSearchOverlay);
 
   useEffect(() => {
     const className = 'overflow-y-hidden';
-    isInputFocused ? document.body.classList.add(className) : document.body.classList.remove(className);
-  }, [isInputFocused]);
+    showSearchOverlay ? document.body.classList.add(className) : document.body.classList.remove(className);
+  }, [showSearchOverlay]);
 
   return (
-    <div className={`${styles.container} ${isInputFocused ? styles['container--overlay-visible'] : ''}`}>
+    <div className={`${styles.container} ${showSearchOverlay ? styles['container--overlay-visible'] : ''}`}>
       <Head>
         <title>DEPT® Weather</title>
         <meta
@@ -80,8 +80,24 @@ export default function Home() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header onInputFocusChange={onInputFocusChange} onSearchQueryChange={onSearchQueryChange}></Header>
-      <SearchOverlay isInputFocused={isInputFocused} rawSearchQuery={rawSearchQuery}></SearchOverlay>
+      <Header
+        onShowSearchOverlayChange={onShowSearchOverlayChange}
+        onSearchQueryChange={(newQueryVal: string) => setRawSearchQuery(newQueryVal)}
+        onHighlightedIndexDistanceChange={(change: number) =>
+          setHighlightedIndexDistance(highlightedIndexDistance + change)
+        }
+        onEnterKeyDown={() => {
+          // TODO - handle this
+          console.log('enter pressed');
+        }}
+      ></Header>
+      <SearchOverlay
+        showSearchOverlay={showSearchOverlay}
+        onShowSearchOverlayChange={onShowSearchOverlayChange}
+        rawSearchQuery={rawSearchQuery}
+        highlightedIndexDistance={highlightedIndexDistance}
+        setHighlightedIndexDistance={setHighlightedIndexDistance}
+      ></SearchOverlay>
       <main className={styles.container__content}>
         {observations ? (
           !isError && observations.data ? (

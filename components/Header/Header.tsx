@@ -1,3 +1,5 @@
+import { KeyboardEventHandler } from 'react';
+import { IME_UNSETTLED_KEY_CODE } from '../../constants';
 import homeStyles from '../../styles/Home.module.css';
 import styles from './Header.module.css';
 
@@ -30,14 +32,120 @@ const ArrowIcon = ({ ariaLabel }: { ariaLabel?: string }) => (
 );
 
 export default function Header({
-  onInputFocusChange,
-  onSearchQueryChange
+  onShowSearchOverlayChange,
+  onSearchQueryChange,
+  onHighlightedIndexDistanceChange,
+  onEnterKeyDown
 }: {
-  onInputFocusChange: (isFocused: boolean) => void;
+  onShowSearchOverlayChange: (showSearchOverlay?: boolean) => void;
   onSearchQueryChange: (query: string) => void;
+  onHighlightedIndexDistanceChange: (change: number) => void;
+  onEnterKeyDown: () => void;
 }) {
+  const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = event => {
+    // if (focusedTag !== -1 && ['ArrowLeft', 'ArrowRight'].indexOf(event.key) === -1) {
+    //   setFocusedTag(-1);
+    //   focusTag(-1);
+    // }
+
+    // Rougly based on material-ui implementation: https://github.com/mui/material-ui/blob/5b7b17c5f0761e71a971b8fb449a3ad27f55b933/packages/mui-base/src/AutocompleteUnstyled/useAutocomplete.js#L728
+    // Wait until Input Monitor Editor is settled.
+    if (event.code !== IME_UNSETTLED_KEY_CODE) {
+      switch (event.key) {
+        // case 'Home':
+        //   if (popupOpen && handleHomeEndKeys) {
+        //     // Prevent scroll of the page
+        //     event.preventDefault();
+        //     changeHighlightedIndex({ diff: 'start', direction: 'next', reason: 'keyboard', event });
+        //   }
+        //   break;
+        // case 'End':
+        //   if (popupOpen && handleHomeEndKeys) {
+        //     // Prevent scroll of the page
+        //     event.preventDefault();
+        //     changeHighlightedIndex({
+        //       diff: 'end',
+        //       direction: 'previous',
+        //       reason: 'keyboard',
+        //       event
+        //     });
+        //   }
+        //   break;
+        // case 'PageUp':
+        //   // Prevent scroll of the page
+        //   event.preventDefault();
+        //   changeHighlightedIndex({
+        //     diff: -pageSize,
+        //     direction: 'previous',
+        //     reason: 'keyboard',
+        //     event
+        //   });
+        //   handleOpen(event);
+        //   break;
+        // case 'PageDown':
+        //   // Prevent scroll of the page
+        //   event.preventDefault();
+        //   changeHighlightedIndex({ diff: pageSize, direction: 'next', reason: 'keyboard', event });
+        //   handleOpen(event);
+        //   break;
+        case 'ArrowDown':
+          // Prevent cursor move
+          event.preventDefault();
+          onHighlightedIndexDistanceChange(1);
+          break;
+        case 'ArrowUp':
+          // Prevent cursor move
+          event.preventDefault();
+          onHighlightedIndexDistanceChange(-1);
+          break;
+        // case 'ArrowLeft':
+        //   handleFocusTag(event, 'previous');
+        //   break;
+        // case 'ArrowRight':
+        //   handleFocusTag(event, 'next');
+        //   break;
+        case 'Enter':
+          onEnterKeyDown();
+          break;
+        // case 'Escape':
+        //   if (popupOpen) {
+        //     // Avoid Opera to exit fullscreen mode.
+        //     event.preventDefault();
+        //     // Avoid the Modal to handle the event.
+        //     event.stopPropagation();
+        //     handleClose(event, 'escape');
+        //   } else if (clearOnEscape && (inputValue !== '' || (multiple && value.length > 0))) {
+        //     // Avoid Opera to exit fullscreen mode.
+        //     event.preventDefault();
+        //     // Avoid the Modal to handle the event.
+        //     event.stopPropagation();
+        //     handleClear(event);
+        //   }
+        //   break;
+        // case 'Backspace':
+        //   if (multiple && !readOnly && inputValue === '' && value.length > 0) {
+        //     const index = focusedTag === -1 ? value.length - 1 : focusedTag;
+        //     const newValue = value.slice();
+        //     newValue.splice(index, 1);
+        //     handleValue(event, newValue, 'removeOption', {
+        //       option: value[index]
+        //     });
+        //   }
+        //   break;
+        default:
+      }
+    }
+  };
+
   return (
-    <div className={styles.header__container}>
+    <div
+      className={styles.header__container}
+      onClick={e => {
+        if (!e.defaultPrevented) {
+          onShowSearchOverlayChange(false);
+        }
+      }}
+    >
       <header className={`${styles.header} ${homeStyles.container__content}`}>
         <h1 className={styles.header__branding}>
           <DEPTLogo></DEPTLogo>
@@ -49,10 +157,22 @@ export default function Header({
             type="text"
             onClick={e => e.preventDefault()}
             onChange={e => onSearchQueryChange(e.target.value)}
-            onFocus={() => onInputFocusChange(true)}
-            onBlur={() => onInputFocusChange(false)}
+            onFocus={e => {
+              onShowSearchOverlayChange(true);
+              e.preventDefault();
+            }}
+            onKeyDown={handleKeyDown}
           ></input>
-          <ArrowIcon></ArrowIcon>
+          {/*TODO - adjust padding so it's easier to click */}
+          {/*TODO - make this a tabable button */}
+          <div
+            onClick={e => {
+              onShowSearchOverlayChange();
+              e.preventDefault();
+            }}
+          >
+            <ArrowIcon></ArrowIcon>
+          </div>
         </div>
       </header>
     </div>

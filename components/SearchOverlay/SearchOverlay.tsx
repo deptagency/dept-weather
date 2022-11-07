@@ -8,20 +8,36 @@ import styles from './SearchOverlay.module.css';
 import homeStyles from '../../styles/Home.module.css';
 
 export default function SearchOverlay({
-  isInputFocused,
-  rawSearchQuery
+  showSearchOverlay,
+  onShowSearchOverlayChange,
+  rawSearchQuery,
+  highlightedIndexDistance,
+  setHighlightedIndexDistance
 }: {
-  isInputFocused: boolean;
+  showSearchOverlay: boolean;
+  onShowSearchOverlayChange: (showSearchOverlay?: boolean) => void;
   rawSearchQuery: string;
+  highlightedIndexDistance: number;
+  setHighlightedIndexDistance: (newHID: number) => void;
 }) {
-  const [formattedQuery, setFormattedQuery] = useState('');
+  const [formattedQuery, setFormattedQuery] = useState<string>('');
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const [results, setResults] = useState<City[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const controllerRef = useRef<AbortController | undefined>();
 
   useEffect(() => {
     setFormattedQuery(QueryHelper.formatQuery(rawSearchQuery));
-  }, [rawSearchQuery]);
+  }, [rawSearchQuery, formattedQuery]);
+
+  useEffect(() => {
+    if (highlightedIndexDistance >= 0) {
+      setHighlightedIndex(highlightedIndexDistance % results.length);
+    } else {
+      const distanceFromEnd = (Math.abs(highlightedIndexDistance) - 1) % results.length;
+      setHighlightedIndex(results.length - 1 - distanceFromEnd);
+    }
+  }, [results, highlightedIndex, highlightedIndexDistance]);
 
   const debouncedSearchQuery: string = useDebounce<string>(formattedQuery, CITY_SEARCH_DEBOUNCE_MS);
 
@@ -40,6 +56,7 @@ export default function SearchOverlay({
         });
         const resJSON = await res.json();
         setResults(resJSON.data);
+        setHighlightedIndexDistance(0);
         setIsSearching(false);
       } catch (e) {
         if (e instanceof Error && e?.name !== 'AbortError') {
@@ -54,27 +71,31 @@ export default function SearchOverlay({
     } else {
       setResults([]);
     }
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, setHighlightedIndexDistance]);
 
   return (
     <div
       className={`${styles.search__overlay} ${
-        isInputFocused ? styles['search__overlay--visible'] : styles['search__overlay--hidden']
+        showSearchOverlay ? styles['search__overlay--visible'] : styles['search__overlay--hidden']
       }`}
+      onClick={e => {
+        if (!e.defaultPrevented) {
+          onShowSearchOverlayChange(false);
+        }
+      }}
     >
       <div className={`${styles.search__overlay__inner} ${homeStyles['container__content--no-padding']}`}>
         {results.map((result, idx) => (
-          // TODO - create css classes for the paragragh styles
-          <p
+          // TODO - potential improvement - allow pressing arrow up/down here after they've tabbed in
+          <button
             key={CoordinatesHelper.numArrToStr([result.latitude, result.longitude])}
-            style={{
-              textAlign: 'right',
-              fontSize: '1.5rem',
-              padding: '1rem 2.5rem 0rem',
-              margin: '0rem',
-              fontWeight: idx === 0 ? 700 : 300
-            }}
-          >{`${result.cityName}, ${result.stateCode}`}</p>
+            className={`${styles.search__overlay__result} ${
+              idx === highlightedIndex ? styles['search__overlay__result--highlighted'] : ''
+            }`}
+            onFocus={() => setHighlightedIndexDistance(idx)}
+            onMouseEnter={() => setHighlightedIndexDistance(idx)}
+            onClick={e => e.preventDefault()}
+          >{`${result.cityName}, ${result.stateCode}`}</button>
         ))}
       </div>
     </div>

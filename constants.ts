@@ -33,3 +33,5 @@ export const DEFAULT_UNITS: Record<UnitType, Unit> = {
 };
 
 export const API_ROUTE_PATH = '/api';
+
+export const IME_UNSETTLED_KEY_CODE = '229';
