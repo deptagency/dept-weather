@@ -17,7 +17,7 @@ export const CITY_SEARCH_FUSE_OPTIONS: Fuse.IFuseOptions<FullCity> = {
 };
 export const CITY_SEARCH_DEBOUNCE_MS = 250;
 export const CITY_SEARCH_INDEX_FILENAME = 'cities-index.json';
-export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top15000-query-cache.json';
+export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top20000-query-cache.json';
 
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
 export const NWS_UPLOAD_DELAY = 27 * 60; // 27 minutes
