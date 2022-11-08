@@ -59,13 +59,12 @@ export class EpaHelper {
   static mapHourlyToEpaHourlyForecast(cacheEntry: CacheEntry<UVHourlyForecast>): EpaHourlyForecast {
     const timeZone = SunriseSunsetHelper.getTimeZone(cacheEntry.key);
 
-    const hourlyForecast =
-      cacheEntry.item?.map(
-        (forecastItem: UVHourlyForecastItem): EpaHourlyForecastItem => ({
-          time: this.getParsedUnixTime(forecastItem, timeZone),
-          uvIndex: forecastItem.UV_VALUE
-        })
-      ) ?? [];
+    const hourlyForecast = (cacheEntry.item ?? []).map(
+      (forecastItem: UVHourlyForecastItem): EpaHourlyForecastItem => ({
+        time: this.getParsedUnixTime(forecastItem, timeZone),
+        uvIndex: forecastItem.UV_VALUE
+      })
+    );
 
     const hoursWithNonZeroUvIndex = hourlyForecast.filter(forecastItem => forecastItem.uvIndex);
     const readTime = (

@@ -20,6 +20,10 @@ export class NwsHelper {
   private static readonly BASE_URL = 'https://api.weather.gov/';
   private static readonly userAgent = process.env.USER_AGENT!;
 
+  private static async wait(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   private static async fetch(url: string, headers?: HeadersInit) {
     return fetch(url, { headers: { ...(headers ?? {}), 'User-Agent': this.userAgent } });
   }
@@ -88,12 +92,12 @@ export class NwsHelper {
       humidity: NumberHelper.roundNws(nwsCurrent.relativeHumidity),
       wind: {
         speed: NumberHelper.convertNws(nwsCurrent.windSpeed, UnitType.wind, reqQuery),
-        direction: nwsCurrent.windDirection.value,
+        direction: nwsCurrent.windDirection?.value,
         gustSpeed: NumberHelper.convertNws(nwsCurrent.windGust, UnitType.wind, reqQuery)
       },
       pressure: {
         atSeaLevel: NumberHelper.convert(
-          nwsCurrent.seaLevelPressure.value,
+          nwsCurrent.seaLevelPressure?.value,
           pressureUnitMapping,
           pressureUnitMapping.to === Unit.INCHES ? 2 : 1
         )
@@ -108,10 +112,47 @@ export class NwsHelper {
   }
 
   private static readonly forecast = new Cached<ForecastResponse, string>(
-    async (forecastUrl: string) =>
-      (
-        await this.fetch(forecastUrl, { 'Feature-Flags': 'forecast_temperature_qv,forecast_wind_speed_qv' })
-      ).json() as Promise<ForecastResponse>,
+    async (forecastUrl: string) => {
+      for (let attemptNum = 1; ; attemptNum++) {
+        let status: number | undefined;
+        let jsonResponse: any;
+        try {
+          const response = await this.fetch(forecastUrl, {
+            'Feature-Flags': 'forecast_temperature_qv,forecast_wind_speed_qv'
+          });
+          status = response.status;
+          jsonResponse = await response.json();
+          if (status === 200 && jsonResponse?.properties?.periods?.length) {
+            if (attemptNum > 1) {
+              console.log('[NwsHelper.forecast]', forecastUrl, `Attempt #${attemptNum} succeeded!'}`);
+            }
+            return jsonResponse as ForecastResponse;
+          }
+        } catch {}
+
+        let numSecondsToWait = Math.pow(2, attemptNum - 1);
+        let nextStepStr = `waiting ${numSecondsToWait}s`;
+        if (numSecondsToWait >= 64) {
+          nextStepStr = `treating response as null`;
+          numSecondsToWait = -1;
+        }
+
+        console.warn(
+          '[NwsHelper.forecast]',
+          forecastUrl,
+          `Attempt #${attemptNum} failed with code ${status}, ${nextStepStr}; ${
+            jsonResponse != null
+              ? `correlationId="${jsonResponse.correlationId}", detail="${jsonResponse.detail}"`
+              : 'response was nullish'
+          }`
+        );
+        if (numSecondsToWait < 0) {
+          break;
+        }
+        await this.wait(numSecondsToWait * 1_000);
+      }
+      return null as unknown as ForecastResponse;
+    },
     async (_: string, newItem: any) => {
       const lastReading = dayjs(newItem.properties.updateTime);
       const oneHourFromLastReading = lastReading.add(1, 'hour').unix();

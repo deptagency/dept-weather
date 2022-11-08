@@ -94,8 +94,8 @@ export class NumberHelper {
     roundN: number | undefined = 1
   ) {
     return this.convertNwsRawValueAndUnitCode(
-      quantitativeValue.value,
-      quantitativeValue.unitCode,
+      quantitativeValue?.value,
+      quantitativeValue?.unitCode,
       unitType,
       reqQuery,
       roundN
