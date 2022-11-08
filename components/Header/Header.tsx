@@ -174,6 +174,7 @@ export default function Header({
           <div className={styles.header__location}>
             <input
               className={`${styles.header__text} ${styles.header__location__input}`}
+              placeholder="City, State"
               aria-label={'Search City, State'}
               aria-expanded={showSearchOverlay}
               aria-controls="SearchResultsList"
