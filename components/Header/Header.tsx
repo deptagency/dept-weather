@@ -58,51 +58,10 @@ export default function Header({
   }, [results, highlightedIndex, highlightedIndexDistance]);
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = event => {
-    // if (focusedTag !== -1 && ['ArrowLeft', 'ArrowRight'].indexOf(event.key) === -1) {
-    //   setFocusedTag(-1);
-    //   focusTag(-1);
-    // }
-
-    // Rougly based on material-ui implementation: https://github.com/mui/material-ui/blob/5b7b17c5f0761e71a971b8fb449a3ad27f55b933/packages/mui-base/src/AutocompleteUnstyled/useAutocomplete.js#L728
+    // Roughly based on material-ui implementation: https://github.com/mui/material-ui/blob/5b7b17c5f0761e71a971b8fb449a3ad27f55b933/packages/mui-base/src/AutocompleteUnstyled/useAutocomplete.js#L728
     // Wait until Input Monitor Editor is settled.
     if (event.code !== IME_UNSETTLED_KEY_CODE) {
       switch (event.key) {
-        // case 'Home':
-        //   if (popupOpen && handleHomeEndKeys) {
-        //     // Prevent scroll of the page
-        //     event.preventDefault();
-        //     changeHighlightedIndex({ diff: 'start', direction: 'next', reason: 'keyboard', event });
-        //   }
-        //   break;
-        // case 'End':
-        //   if (popupOpen && handleHomeEndKeys) {
-        //     // Prevent scroll of the page
-        //     event.preventDefault();
-        //     changeHighlightedIndex({
-        //       diff: 'end',
-        //       direction: 'previous',
-        //       reason: 'keyboard',
-        //       event
-        //     });
-        //   }
-        //   break;
-        // case 'PageUp':
-        //   // Prevent scroll of the page
-        //   event.preventDefault();
-        //   changeHighlightedIndex({
-        //     diff: -pageSize,
-        //     direction: 'previous',
-        //     reason: 'keyboard',
-        //     event
-        //   });
-        //   handleOpen(event);
-        //   break;
-        // case 'PageDown':
-        //   // Prevent scroll of the page
-        //   event.preventDefault();
-        //   changeHighlightedIndex({ diff: pageSize, direction: 'next', reason: 'keyboard', event });
-        //   handleOpen(event);
-        //   break;
         case 'ArrowDown':
           // Prevent cursor move
           event.preventDefault();
@@ -113,12 +72,6 @@ export default function Header({
           event.preventDefault();
           onHighlightedIndexDistanceChange(-1);
           break;
-        // case 'ArrowLeft':
-        //   handleFocusTag(event, 'previous');
-        //   break;
-        // case 'ArrowRight':
-        //   handleFocusTag(event, 'next');
-        //   break;
         case 'Enter':
           if (results.length) {
             setSelectedCity(results[highlightedIndex]);
@@ -126,31 +79,14 @@ export default function Header({
           setShowSearchOverlay(false);
           inputRef?.current?.blur();
           break;
-        // case 'Escape':
-        //   if (popupOpen) {
-        //     // Avoid Opera to exit fullscreen mode.
-        //     event.preventDefault();
-        //     // Avoid the Modal to handle the event.
-        //     event.stopPropagation();
-        //     handleClose(event, 'escape');
-        //   } else if (clearOnEscape && (inputValue !== '' || (multiple && value.length > 0))) {
-        //     // Avoid Opera to exit fullscreen mode.
-        //     event.preventDefault();
-        //     // Avoid the Modal to handle the event.
-        //     event.stopPropagation();
-        //     handleClear(event);
-        //   }
-        //   break;
-        // case 'Backspace':
-        //   if (multiple && !readOnly && inputValue === '' && value.length > 0) {
-        //     const index = focusedTag === -1 ? value.length - 1 : focusedTag;
-        //     const newValue = value.slice();
-        //     newValue.splice(index, 1);
-        //     handleValue(event, newValue, 'removeOption', {
-        //       option: value[index]
-        //     });
-        //   }
-        //   break;
+        case 'Escape':
+          // Avoid Opera to exit fullscreen mode.
+          event.preventDefault();
+          // Avoid the Modal to handle the event.
+          event.stopPropagation();
+          setShowSearchOverlay(false);
+          inputRef?.current?.blur();
+          break;
         default:
       }
     }
