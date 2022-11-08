@@ -1,28 +1,58 @@
 import { MAX_COORDINATE_PRECISION } from '../constants';
+import { City } from '../models/cities';
 import { NumberHelper } from './number-helper';
 
 export class CoordinatesHelper {
-  static adjustPrecision(coordinatesStr: string): string {
-    return this.numArrToStr(
-      this.strToNumArr(coordinatesStr).map(
-        inputCoordinate => NumberHelper.round(inputCoordinate, MAX_COORDINATE_PRECISION)!
-      )
+  private static readonly LATITUDE_MIN = -90;
+  private static readonly LATITUDE_MAX = 90;
+  private static readonly LONGITUDE_MIN = -180;
+  private static readonly LONGITUDE_MAX = 180;
+
+  static adjustPrecision(coordinatesNumArr: number[]): number[] {
+    return coordinatesNumArr.map(coordinate => NumberHelper.round(coordinate, MAX_COORDINATE_PRECISION)!);
+  }
+  static areValid(coordinatesNumArr: number[]): boolean {
+    return (
+      coordinatesNumArr?.length === 2 &&
+      coordinatesNumArr[0] >= this.LATITUDE_MIN &&
+      coordinatesNumArr[0] <= this.LATITUDE_MAX &&
+      coordinatesNumArr[1] >= this.LONGITUDE_MIN &&
+      coordinatesNumArr[1] <= this.LONGITUDE_MAX
     );
   }
 
-  static strToArr(coordinatesStr: string): string[] {
+  /* From string */
+  static strToStrArr(coordinatesStr: string): string[] {
     return coordinatesStr.split(',');
   }
-
   static strToNumArr(coordinatesStr: string): number[] {
-    return this.strToArr(coordinatesStr).map(coordinate => Number(coordinate));
+    return this.strArrToNumArr(this.strToStrArr(coordinatesStr));
   }
 
-  static arrToStr(coordinatesArr: string[]): string {
-    return coordinatesArr.join(',');
+  /* From string array */
+  static strArrToStr(coordinatesStrArr: string[]): string {
+    return coordinatesStrArr.join(',');
+  }
+  static strArrToNumArr(coordinatesStrArr: string[]): number[] {
+    return coordinatesStrArr.map(coordinate => Number(coordinate));
   }
 
-  static numArrToStr(coordinatesArr: number[]): string {
-    return this.arrToStr(coordinatesArr.map(coordinate => String(coordinate)));
+  /* From number array */
+  static numArrToStr(coordinatesNumArr: number[]): string {
+    return this.strArrToStr(this.numArrToStrArr(coordinatesNumArr));
+  }
+  static numArrToStrArr(coordinatesNumArr: number[]): string[] {
+    return coordinatesNumArr.map(coordinate => String(coordinate));
+  }
+
+  /* From City */
+  static cityToStr(city: City): string {
+    return this.strArrToStr(this.cityToStrArr(city));
+  }
+  static cityToStrArr(city: City): string[] {
+    return this.numArrToStrArr(this.cityToNumArr(city));
+  }
+  static cityToNumArr(city: City): number[] {
+    return [city.latitude, city.longitude];
   }
 }

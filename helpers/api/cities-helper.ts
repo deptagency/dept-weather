@@ -2,15 +2,18 @@ import Fuse from 'fuse.js';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import {
+  API_COORDINATES_KEY,
+  API_GEONAMEID_KEY,
   CITY_SEARCH_FUSE_OPTIONS,
   CITY_SEARCH_INDEX_FILENAME,
   CITY_SEARCH_POPULATION_SORT_THRESHOLD,
   CITY_SEARCH_QUERY_CACHE_FILENAME,
-  CITY_SEARCH_RESULT_LIMIT
+  CITY_SEARCH_RESULT_LIMIT,
+  DEFAULT_CITY
 } from '../../constants';
 import { ReqQuery } from '../../models/api';
 import { CitiesQueryCache, City, FullCity, InputCity } from '../../models/cities';
-import { QueryHelper } from '../query-helper';
+import { CoordinatesHelper } from '../coordinates-helper';
 
 export class CitiesHelper {
   private static sortByPopulation(a: FullCity, b: FullCity) {
@@ -23,7 +26,8 @@ export class CitiesHelper {
       stateCode: fullCity.stateCode,
       latitude: fullCity.latitude,
       longitude: fullCity.longitude,
-      timeZone: fullCity.timeZone
+      timeZone: fullCity.timeZone,
+      geonameid: fullCity.geonameid
     };
   }
 
@@ -113,11 +117,10 @@ export class CitiesHelper {
     return topResults;
   }
 
-  static async searchFor(reqQuery: ReqQuery) {
-    const query = QueryHelper.formatQuery(typeof reqQuery.query === 'string' ? reqQuery.query : '');
+  static async searchFor(query: string) {
     console.time(query);
-    if (!query?.length) {
-      return this.usTopCitiesPromise;
+    if (!query.length) {
+      return (await this.usTopCitiesPromise).map(this.mapFullCityToCity);
     }
 
     let cities = await this.getFromCache(query);
@@ -130,5 +133,45 @@ export class CitiesHelper {
 
     console.timeEnd(query);
     return cities.map(this.mapFullCityToCity);
+  }
+
+  static async getByGeonameid(geonameid: number) {
+    const usCities = await this.usCitiesPromise;
+    const match = usCities.find(city => city.geonameid === geonameid);
+    return match;
+  }
+
+  static async parseReqCoordinates(reqQuery: ReqQuery) {
+    const warnings: string[] = [];
+
+    const getReturnValFor = (coordinatesNumArr: number[]) => ({
+      coordinatesStr: CoordinatesHelper.numArrToStr(CoordinatesHelper.adjustPrecision(coordinatesNumArr)),
+      warnings
+    });
+
+    // Use "coordinates" queryParam if provided
+    if (typeof reqQuery[API_COORDINATES_KEY] === 'string' && reqQuery[API_COORDINATES_KEY]?.length) {
+      const inputCoordinatesNumArr = CoordinatesHelper.strToNumArr(reqQuery[API_COORDINATES_KEY]);
+      if (CoordinatesHelper.areValid(inputCoordinatesNumArr)) {
+        return getReturnValFor(inputCoordinatesNumArr);
+      }
+      warnings.push(`The received '${API_COORDINATES_KEY}' query param value was invalid`);
+    }
+
+    // Use "geonameid" queryParam if provided
+    if (typeof reqQuery[API_GEONAMEID_KEY] === 'string' && reqQuery[API_GEONAMEID_KEY]?.length) {
+      const geonameid = Number(reqQuery[API_GEONAMEID_KEY]);
+      if (Number.isInteger(geonameid) && geonameid >= 0) {
+        const matchingCity = await CitiesHelper.getByGeonameid(geonameid);
+        if (matchingCity != null) {
+          return getReturnValFor(CoordinatesHelper.cityToNumArr(matchingCity));
+        }
+      }
+      warnings.push(`The received '${API_GEONAMEID_KEY}' query param value was invalid`);
+    }
+
+    // Use DEFAULT_CITY coordinates
+    warnings.push(`Data is for the default city of '${DEFAULT_CITY.cityName}, ${DEFAULT_CITY.stateCode}'`);
+    return getReturnValFor(CoordinatesHelper.cityToNumArr(DEFAULT_CITY));
   }
 }

@@ -1,9 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { AQ_COORDINATES_STR } from '../../constants';
-import { CoordinatesHelper } from '../../helpers';
 import {
   AirNowHelper,
   CacheEntry,
+  CitiesHelper,
   EpaHelper,
   NwsHelper,
   SunriseSunsetHelper,
@@ -14,7 +13,7 @@ import { APIRoute, BaseObservations, getPath, Observations, Response } from '../
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const coordinatesStr = CoordinatesHelper.adjustPrecision(AQ_COORDINATES_STR);
+    const { coordinatesStr, warnings } = await CitiesHelper.parseReqCoordinates(req.query);
     const promises: Array<Promise<CacheEntry<any>>> = [
       NwsHelper.getCurrent(coordinatesStr),
       AirNowHelper.getCurrent(coordinatesStr),
@@ -44,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const response: Response<Observations> = {
       data,
-      warnings: [],
+      warnings,
       errors: [],
       validUntil,
       latestReadTime

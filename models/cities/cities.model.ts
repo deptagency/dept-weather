@@ -13,6 +13,7 @@ export interface FullCity {
 
 export interface InputCity extends Omit<FullCity, 'cityAndStateCode'> {}
 
-export interface City extends Pick<FullCity, 'cityName' | 'stateCode' | 'latitude' | 'longitude' | 'timeZone'> {}
+export interface City
+  extends Pick<FullCity, 'cityName' | 'stateCode' | 'latitude' | 'longitude' | 'timeZone' | 'geonameid'> {}
 
 export type CitiesQueryCache = Record<string, number[]>;

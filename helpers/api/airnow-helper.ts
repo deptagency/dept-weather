@@ -18,7 +18,7 @@ export class AirNowHelper {
   private static readonly userAgent = process.env.USER_AGENT!;
 
   private static getRequestUrlFor(coordinatesStr: string) {
-    const coordinatesArr = CoordinatesHelper.strToArr(coordinatesStr);
+    const coordinatesArr = CoordinatesHelper.strToNumArr(coordinatesStr);
     return `https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${coordinatesArr[0]}&longitude=${coordinatesArr[1]}&distance=100&API_KEY=${this.apiKey}`;
   }
 

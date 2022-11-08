@@ -1,13 +1,15 @@
 import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CITY_SEARCH_RESULTS_MAX_AGE } from '../../constants';
+import { QueryHelper } from '../../helpers';
 import { CitiesHelper } from '../../helpers/api';
 import { APIRoute, getPath, Response } from '../../models/api';
 import { City } from '../../models/cities';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const results = await CitiesHelper.searchFor(req.query);
+    const query = QueryHelper.formatQuery(typeof req.query.query === 'string' ? req.query.query : '');
+    const results = await CitiesHelper.searchFor(query);
 
     const response: Response<City[]> = {
       data: results,

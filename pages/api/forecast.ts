@@ -1,13 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { AQ_COORDINATES_STR } from '../../constants';
-import { CoordinatesHelper } from '../../helpers';
-import { NwsHelper } from '../../helpers/api';
+import { CitiesHelper, NwsHelper } from '../../helpers/api';
 import { DataSource } from '../../models';
 import { APIRoute, Forecast, getPath, Response } from '../../models/api';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const coordinatesStr = CoordinatesHelper.adjustPrecision(AQ_COORDINATES_STR);
+    const { coordinatesStr, warnings } = await CitiesHelper.parseReqCoordinates(req.query);
     const forecast = await NwsHelper.getForecast(coordinatesStr);
 
     const data: Forecast = {
@@ -16,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const response: Response<Forecast> = {
       data,
-      warnings: [],
+      warnings,
       errors: [],
       validUntil: forecast.validUntil,
       latestReadTime: data.nws!.readTime
