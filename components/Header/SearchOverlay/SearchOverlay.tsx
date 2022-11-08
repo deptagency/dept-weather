@@ -80,22 +80,26 @@ export default function SearchOverlay({
       }}
     >
       <div className={`${styles.search__overlay__inner} ${homeStyles['container__content--no-padding']}`}>
-        {results.map((result, idx) => (
-          // TODO - potential improvement - allow pressing arrow up/down here after they've tabbed in
-          <button
-            key={CoordinatesHelper.cityToStr(result)}
-            className={`${styles.search__overlay__result} ${
-              idx === highlightedIndex ? styles['search__overlay__result--highlighted'] : ''
-            }`}
-            onFocus={() => setHighlightedIndexDistance(idx)}
-            onMouseEnter={() => setHighlightedIndexDistance(idx)}
-            onClick={e => {
-              e.preventDefault();
-              setSelectedCity(results[highlightedIndex]);
-              setShowSearchOverlay(false);
-            }}
-          >{`${result.cityName}, ${result.stateCode}`}</button>
-        ))}
+        <ul id="SearchResultsList" className={styles['search__overlay__results-list']} role="listbox">
+          {results.map((result, idx) => (
+            <li
+              id={`SearchResult${idx}`}
+              key={CoordinatesHelper.cityToStr(result)}
+              className={`${styles.search__overlay__result} ${
+                idx === highlightedIndex ? styles['search__overlay__result--highlighted'] : ''
+              }`}
+              role="option"
+              aria-selected={idx === highlightedIndex}
+              onFocus={() => setHighlightedIndexDistance(idx)}
+              onMouseEnter={() => setHighlightedIndexDistance(idx)}
+              onClick={e => {
+                e.preventDefault();
+                setSelectedCity(results[highlightedIndex]);
+                setShowSearchOverlay(false);
+              }}
+            >{`${result.cityName}, ${result.stateCode}`}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );

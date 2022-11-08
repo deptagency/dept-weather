@@ -175,6 +175,13 @@ export default function Header({
             <input
               className={`${styles.header__text} ${styles.header__location__input}`}
               aria-label={'Search City, State'}
+              aria-expanded={showSearchOverlay}
+              aria-controls="SearchResultsList"
+              aria-autocomplete="list"
+              aria-haspopup="listbox"
+              aria-activedescendant={results.length ? `SearchResult${highlightedIndex}` : undefined}
+              role="combobox"
+              autoComplete="off"
               type="text"
               ref={inputRef}
               onClick={e => e.preventDefault()}
@@ -195,7 +202,9 @@ export default function Header({
               className={`${styles.header__location__arrow} ${
                 showSearchOverlay ? styles['header__location__arrow--expanded'] : ''
               }`}
-              aria-label={showSearchOverlay ? 'Collapse location search panel' : 'Expand location search panel'}
+              aria-label={'Location search panel'}
+              aria-expanded={showSearchOverlay}
+              // aria-controls="SearchResultsList"
               onClick={e => {
                 e.preventDefault();
                 showSearchOverlay ? setShowSearchOverlay(false) : inputRef?.current?.focus();
