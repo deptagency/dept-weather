@@ -1,5 +1,6 @@
-import { Dispatch, KeyboardEventHandler, SetStateAction, useState } from 'react';
+import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, useState } from 'react';
 import { IME_UNSETTLED_KEY_CODE } from '../../constants';
+import { City } from '../../models/cities';
 import homeStyles from '../../styles/Home.module.css';
 import styles from './Header.module.css';
 import SearchOverlay from './SearchOverlay/SearchOverlay';
@@ -20,30 +21,41 @@ const DEPTLogo = () => (
   </svg>
 );
 
-const ArrowIcon = ({ ariaLabel }: { ariaLabel?: string }) => (
-  <svg
-    aria-label={ariaLabel}
-    className={styles.header__location__arrow}
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+const ArrowIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 18.999C11.6 18.999 11.224 18.843 10.941 18.561L0.22 7.841C0.078 7.699 0 7.511 0 7.31C0 7.11 0.078 6.921 0.22 6.78C0.362 6.638 0.55 6.56 0.75 6.56C0.95 6.56 1.139 6.638 1.28 6.78L12 17.499L22.72 6.78C22.862 6.638 23.05 6.56 23.25 6.56C23.45 6.56 23.639 6.638 23.78 6.78C23.922 6.922 24 7.11 24 7.31C24 7.51 23.922 7.699 23.78 7.84L13.06 18.56C12.778 18.843 12.401 18.999 12 18.999Z" />
   </svg>
 );
 
 export default function Header({
   showSearchOverlay,
-  setShowSearchOverlay
+  setShowSearchOverlay,
+  selectedCity,
+  setSelectedCity
 }: {
   showSearchOverlay: boolean;
   setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
+  selectedCity: City;
+  setSelectedCity: Dispatch<SetStateAction<City>>;
 }) {
   const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const [highlightedIndexDistance, setHighlightedIndexDistance] = useState<number>(0);
+  const [results, setResults] = useState<City[]>([]);
+
+  const inputRef = createRef<HTMLInputElement>();
 
   const onHighlightedIndexDistanceChange = (change: number) =>
     setHighlightedIndexDistance(highlightedIndexDistance + change);
+
+  useEffect(() => {
+    if (highlightedIndexDistance >= 0) {
+      setHighlightedIndex(highlightedIndexDistance % results.length);
+    } else {
+      const distanceFromEnd = (Math.abs(highlightedIndexDistance) - 1) % results.length;
+      setHighlightedIndex(results.length - 1 - distanceFromEnd);
+    }
+  }, [results, highlightedIndex, highlightedIndexDistance]);
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = event => {
     // if (focusedTag !== -1 && ['ArrowLeft', 'ArrowRight'].indexOf(event.key) === -1) {
@@ -108,7 +120,11 @@ export default function Header({
         //   handleFocusTag(event, 'next');
         //   break;
         case 'Enter':
-          console.log('onEnterKeyDown!');
+          if (results.length) {
+            setSelectedCity(results[highlightedIndex]);
+          }
+          setShowSearchOverlay(false);
+          inputRef?.current?.blur();
           break;
         // case 'Escape':
         //   if (popupOpen) {
@@ -158,25 +174,35 @@ export default function Header({
           <div className={styles.header__location}>
             <input
               className={`${styles.header__text} ${styles.header__location__input}`}
+              aria-label={'Search City, State'}
               type="text"
+              ref={inputRef}
               onClick={e => e.preventDefault()}
               onChange={e => setRawSearchQuery(e.target.value)}
               onFocus={e => {
-                setShowSearchOverlay(true);
                 e.preventDefault();
+                if (!showSearchOverlay) {
+                  setRawSearchQuery('');
+                  setResults([]);
+                  setHighlightedIndexDistance(0);
+                  setShowSearchOverlay(true);
+                }
               }}
               onKeyDown={handleKeyDown}
+              value={showSearchOverlay ? rawSearchQuery : `${selectedCity.cityName}, ${selectedCity.stateCode}`}
             ></input>
-            {/*TODO - adjust padding so it's easier to click */}
-            {/*TODO - make this a tabable button */}
-            <div
+            <button
+              className={`${styles.header__location__arrow} ${
+                showSearchOverlay ? styles['header__location__arrow--expanded'] : ''
+              }`}
+              aria-label={showSearchOverlay ? 'Collapse location search panel' : 'Expand location search panel'}
               onClick={e => {
-                setShowSearchOverlay(!showSearchOverlay);
                 e.preventDefault();
+                showSearchOverlay ? setShowSearchOverlay(false) : inputRef?.current?.focus();
               }}
             >
               <ArrowIcon></ArrowIcon>
-            </div>
+            </button>
           </div>
         </header>
       </div>
@@ -185,8 +211,11 @@ export default function Header({
         rawSearchQuery={rawSearchQuery}
         showSearchOverlay={showSearchOverlay}
         setShowSearchOverlay={setShowSearchOverlay}
-        highlightedIndexDistance={highlightedIndexDistance}
+        results={results}
+        setResults={setResults}
         setHighlightedIndexDistance={setHighlightedIndexDistance}
+        highlightedIndex={highlightedIndex}
+        setSelectedCity={setSelectedCity}
       ></SearchOverlay>
     </>
   );

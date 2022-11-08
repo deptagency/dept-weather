@@ -71,8 +71,7 @@ const ForecastCards = ({
 };
 
 export default function Home() {
-  // TODO - useState() here and pass to Header component
-  const selectedCity = DEFAULT_CITY;
+  const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY);
   const { observations, isLoading, isError } = useObservations(selectedCity);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(selectedCity);
 
@@ -92,7 +91,12 @@ export default function Home() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header showSearchOverlay={showSearchOverlay} setShowSearchOverlay={setShowSearchOverlay}></Header>
+      <Header
+        showSearchOverlay={showSearchOverlay}
+        setShowSearchOverlay={setShowSearchOverlay}
+        selectedCity={selectedCity}
+        setSelectedCity={setSelectedCity}
+      ></Header>
       <main className={styles.container__content}>
         {observations ? (
           !isError && observations.data ? (

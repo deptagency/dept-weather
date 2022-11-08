@@ -11,33 +11,28 @@ export default function SearchOverlay({
   rawSearchQuery,
   showSearchOverlay,
   setShowSearchOverlay,
-  highlightedIndexDistance,
-  setHighlightedIndexDistance
+  results,
+  setResults,
+  setHighlightedIndexDistance,
+  highlightedIndex,
+  setSelectedCity
 }: {
   rawSearchQuery: string;
   showSearchOverlay: boolean;
   setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
-  highlightedIndexDistance: number;
+  results: City[];
+  setResults: Dispatch<SetStateAction<City[]>>;
   setHighlightedIndexDistance: Dispatch<SetStateAction<number>>;
+  highlightedIndex: number;
+  setSelectedCity: Dispatch<SetStateAction<City>>;
 }) {
   const [formattedQuery, setFormattedQuery] = useState<string>('');
-  const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
-  const [results, setResults] = useState<City[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const controllerRef = useRef<AbortController | undefined>();
 
   useEffect(() => {
     setFormattedQuery(QueryHelper.formatQuery(rawSearchQuery));
   }, [rawSearchQuery, formattedQuery]);
-
-  useEffect(() => {
-    if (highlightedIndexDistance >= 0) {
-      setHighlightedIndex(highlightedIndexDistance % results.length);
-    } else {
-      const distanceFromEnd = (Math.abs(highlightedIndexDistance) - 1) % results.length;
-      setHighlightedIndex(results.length - 1 - distanceFromEnd);
-    }
-  }, [results, highlightedIndex, highlightedIndexDistance]);
 
   const debouncedSearchQuery: string = useDebounce<string>(formattedQuery, CITY_SEARCH_DEBOUNCE_MS);
 
@@ -71,7 +66,7 @@ export default function SearchOverlay({
     } else {
       setResults([]);
     }
-  }, [debouncedSearchQuery, setHighlightedIndexDistance]);
+  }, [debouncedSearchQuery, setResults, setHighlightedIndexDistance]);
 
   return (
     <div
@@ -88,13 +83,17 @@ export default function SearchOverlay({
         {results.map((result, idx) => (
           // TODO - potential improvement - allow pressing arrow up/down here after they've tabbed in
           <button
-            key={CoordinatesHelper.numArrToStr([result.latitude, result.longitude])}
+            key={CoordinatesHelper.cityToStr(result)}
             className={`${styles.search__overlay__result} ${
               idx === highlightedIndex ? styles['search__overlay__result--highlighted'] : ''
             }`}
             onFocus={() => setHighlightedIndexDistance(idx)}
             onMouseEnter={() => setHighlightedIndexDistance(idx)}
-            onClick={e => e.preventDefault()}
+            onClick={e => {
+              e.preventDefault();
+              setSelectedCity(results[highlightedIndex]);
+              setShowSearchOverlay(false);
+            }}
           >{`${result.cityName}, ${result.stateCode}`}</button>
         ))}
       </div>
