@@ -52,7 +52,7 @@ export class CoordinatesHelper {
   static cityToStrArr(city: City): string[] {
     return this.numArrToStrArr(this.cityToNumArr(city));
   }
-  static cityToNumArr(city: City): number[] {
+  static cityToNumArr(city: Pick<City, 'latitude' | 'longitude'>): number[] {
     return [city.latitude, city.longitude];
   }
 }

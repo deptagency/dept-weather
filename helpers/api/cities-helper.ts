@@ -20,14 +20,14 @@ export class CitiesHelper {
     return b.population - a.population;
   }
 
-  private static mapFullCityToCity(fullCity: FullCity): City {
+  private static mapToCity(extendedCity: City): City {
     return {
-      cityName: fullCity.cityName,
-      stateCode: fullCity.stateCode,
-      latitude: fullCity.latitude,
-      longitude: fullCity.longitude,
-      timeZone: fullCity.timeZone,
-      geonameid: fullCity.geonameid
+      cityName: extendedCity.cityName,
+      stateCode: extendedCity.stateCode,
+      latitude: extendedCity.latitude,
+      longitude: extendedCity.longitude,
+      timeZone: extendedCity.timeZone,
+      geonameid: extendedCity.geonameid
     };
   }
 
@@ -124,7 +124,7 @@ export class CitiesHelper {
   static async searchFor(query: string) {
     console.time(query);
     if (!query.length) {
-      return (await this.usTopCitiesPromise).map(this.mapFullCityToCity);
+      return (await this.usTopCitiesPromise).map(this.mapToCity);
     }
 
     let cities = await this.getFromCache(query);
@@ -136,16 +136,27 @@ export class CitiesHelper {
     }
 
     console.timeEnd(query);
-    return cities.map(this.mapFullCityToCity);
+    return cities.map(this.mapToCity);
   }
 
-  static async getByGeonameid(geonameid: number) {
-    const usCitiesById = await this.usCitiesByIdPromise;
-    return usCitiesById[String(geonameid)];
+  static async getByGeonameid(geonameidStr: string) {
+    const geonameid = Number(geonameidStr);
+    if (Number.isInteger(geonameid) && geonameid >= 0) {
+      const usCitiesById = await this.usCitiesByIdPromise;
+      const match = usCitiesById[String(geonameid)];
+      if (match != null) {
+        return this.mapToCity({
+          ...match,
+          geonameid: geonameid
+        });
+      }
+    }
   }
 
   static async parseReqCoordinates(reqQuery: ReqQuery) {
     const warnings: string[] = [];
+    const coordinatesStr = reqQuery[API_COORDINATES_KEY];
+    const geonameidStr = reqQuery[API_GEONAMEID_KEY];
 
     const getReturnValFor = (coordinatesNumArr: number[]) => ({
       coordinatesStr: CoordinatesHelper.numArrToStr(CoordinatesHelper.adjustPrecision(coordinatesNumArr)),
@@ -153,28 +164,30 @@ export class CitiesHelper {
     });
 
     // Use "coordinates" queryParam if provided
-    if (typeof reqQuery[API_COORDINATES_KEY] === 'string' && reqQuery[API_COORDINATES_KEY]?.length) {
-      const inputCoordinatesNumArr = CoordinatesHelper.strToNumArr(reqQuery[API_COORDINATES_KEY]);
+    if (typeof coordinatesStr === 'string' && coordinatesStr.length) {
+      const inputCoordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
       if (CoordinatesHelper.areValid(inputCoordinatesNumArr)) {
+        if (geonameidStr != null) {
+          warnings.push(`'${API_GEONAMEID_KEY}' was ignored since '${API_COORDINATES_KEY}' takes precedence`);
+        }
         return getReturnValFor(inputCoordinatesNumArr);
       }
-      warnings.push(`The received '${API_COORDINATES_KEY}' query param value was invalid`);
+      warnings.push(`'${API_COORDINATES_KEY}' was invalid`);
     }
 
-    // Use "geonameid" queryParam if provided
-    if (typeof reqQuery[API_GEONAMEID_KEY] === 'string' && reqQuery[API_GEONAMEID_KEY]?.length) {
-      const geonameid = Number(reqQuery[API_GEONAMEID_KEY]);
-      if (Number.isInteger(geonameid) && geonameid >= 0) {
-        const matchingCity = await CitiesHelper.getByGeonameid(geonameid);
-        if (matchingCity != null) {
-          return getReturnValFor(CoordinatesHelper.cityToNumArr(matchingCity));
-        }
+    // Use "id" queryParam if provided
+    if (typeof geonameidStr === 'string' && geonameidStr.length) {
+      const matchingCity = await CitiesHelper.getByGeonameid(geonameidStr);
+      if (matchingCity != null) {
+        return getReturnValFor(CoordinatesHelper.cityToNumArr(matchingCity));
       }
-      warnings.push(`The received '${API_GEONAMEID_KEY}' query param value was invalid`);
+      warnings.push(`'${API_GEONAMEID_KEY}' was invalid`);
     }
 
     // Use DEFAULT_CITY coordinates
-    warnings.push(`Data is for the default city of '${DEFAULT_CITY.cityName}, ${DEFAULT_CITY.stateCode}'`);
+    warnings.push(
+      `Data is for the default city of '${DEFAULT_CITY.cityName}, ${DEFAULT_CITY.stateCode}' since neither '${API_COORDINATES_KEY}' nor '${API_GEONAMEID_KEY}' were valid`
+    );
     return getReturnValFor(CoordinatesHelper.cityToNumArr(DEFAULT_CITY));
   }
 }

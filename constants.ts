@@ -43,7 +43,8 @@ export const DEFAULT_UNITS: Record<UnitType, Unit> = {
 };
 
 export const API_ROUTE_PATH = '/api';
+export const API_SEARCH_QUERY_KEY = 'query';
 export const API_COORDINATES_KEY = 'coordinates';
-export const API_GEONAMEID_KEY = 'geonameid';
+export const API_GEONAMEID_KEY = 'id';
 
 export const IME_UNSETTLED_KEY_CODE = '229';
