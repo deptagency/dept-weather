@@ -12,7 +12,7 @@ import {
   DEFAULT_CITY
 } from '../../constants';
 import { ReqQuery } from '../../models/api';
-import { CitiesQueryCache, City, FullCity, InputCity } from '../../models/cities';
+import { CitiesById, CitiesQueryCache, City, FullCity, InputCity } from '../../models/cities';
 import { CoordinatesHelper } from '../coordinates-helper';
 
 export class CitiesHelper {
@@ -49,6 +49,10 @@ export class CitiesHelper {
   private static usTopCitiesPromise: Promise<FullCity[]> = (async () => {
     const usCities = await this.usCitiesPromise;
     return [...usCities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+  })();
+  private static usCitiesByIdPromise: Promise<CitiesById> = (async () => {
+    const citiesById = (await this.getFile('cities-by-id.json')) as CitiesById;
+    return citiesById;
   })();
   private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {
     return this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME);
@@ -136,9 +140,8 @@ export class CitiesHelper {
   }
 
   static async getByGeonameid(geonameid: number) {
-    const usCities = await this.usCitiesPromise;
-    const match = usCities.find(city => city.geonameid === geonameid);
-    return match;
+    const usCitiesById = await this.usCitiesByIdPromise;
+    return usCitiesById[String(geonameid)];
   }
 
   static async parseReqCoordinates(reqQuery: ReqQuery) {
