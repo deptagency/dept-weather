@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { CITY_SEARCH_DEBOUNCE_MS } from '../../../constants';
+import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS } from '../../../constants';
 import { CoordinatesHelper, QueryHelper } from '../../../helpers';
 import { useDebounce } from '../../../hooks';
 import { APIRoute, getPath } from '../../../models/api';
@@ -24,7 +24,7 @@ export default function SearchOverlay({
   setResults: Dispatch<SetStateAction<City[]>>;
   setHighlightedIndexDistance: Dispatch<SetStateAction<number>>;
   highlightedIndex: number;
-  setSelectedCity: Dispatch<SetStateAction<City>>;
+  setSelectedCity: Dispatch<SetStateAction<City | undefined>>;
 }) {
   const [formattedQuery, setFormattedQuery] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -46,7 +46,7 @@ export default function SearchOverlay({
 
       try {
         setIsSearching(true);
-        const res = await fetch(`${getPath(APIRoute.CITY_SEARCH)}?query=${formattedQuery}`, {
+        const res = await fetch(getPath(APIRoute.CITY_SEARCH, { [API_SEARCH_QUERY_KEY]: formattedQuery }), {
           signal: controllerRef.current?.signal
         });
         const resJSON = await res.json();

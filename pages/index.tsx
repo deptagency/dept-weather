@@ -1,26 +1,35 @@
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import { NextRouter, useRouter } from 'next/router';
+import { useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
 import { Footer, ForecastCard, Header, ObservationsCard } from '../components';
-import { API_COORDINATES_KEY, DEFAULT_CITY } from '../constants';
-import { CoordinatesHelper } from '../helpers';
-import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response } from '../models/api';
+import { API_GEONAMEID_KEY, DEFAULT_CITY } from '../constants';
+import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response, QueryParams } from '../models/api';
 import { City } from '../models/cities';
 import styles from '../styles/Home.module.css';
 
-const fetcher = (key: string) => fetch(key).then(res => res.json());
+const getGeonameidFromUrl = (router: NextRouter) => {
+  let geonameidStr = router.query[API_GEONAMEID_KEY];
+  if (typeof geonameidStr === 'string' && geonameidStr.length) {
+    const geonameid = Number(geonameidStr);
+    if (Number.isInteger(geonameid) && geonameid >= 0) {
+      return geonameid;
+    }
+  }
+  return undefined;
+};
 
-const getQueryParamsForCity = (city: City) => ({
-  [API_COORDINATES_KEY]: CoordinatesHelper.numArrToStr(
-    CoordinatesHelper.adjustPrecision(CoordinatesHelper.cityToNumArr(city))
-  )
+const getQueryParamsForGeonameid = (geonameid: number): QueryParams => ({
+  [API_GEONAMEID_KEY]: geonameid
 });
 
+const fetcher = (key: string) => fetch(key).then(res => res.json());
+
 const useObservations = (
-  city: City
+  queryParams: QueryParams
 ): { observations?: Response<Observations>; isLoading: boolean; isError: boolean } => {
   const { data, error } = useSWR<Response<Observations>>(
-    getPath(APIRoute.CURRENT, getQueryParamsForCity(city)),
+    queryParams != null ? getPath(APIRoute.CURRENT, queryParams) : null,
     fetcher
   );
 
@@ -32,9 +41,12 @@ const useObservations = (
 };
 
 const useForecast = (
-  city: City
+  queryParams: QueryParams
 ): { forecast?: Response<Forecast>; forecastIsLoading: boolean; forecastIsError: boolean } => {
-  const { data, error } = useSWR<Response<Forecast>>(getPath(APIRoute.FORECAST, getQueryParamsForCity(city)), fetcher);
+  const { data, error } = useSWR<Response<Forecast>>(
+    queryParams != null ? getPath(APIRoute.FORECAST, queryParams) : null,
+    fetcher
+  );
 
   return {
     forecast: data,
@@ -71,9 +83,63 @@ const ForecastCards = ({
 };
 
 export default function Home() {
-  const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY);
-  const { observations, isLoading, isError } = useObservations(selectedCity);
-  const { forecast, forecastIsLoading, forecastIsError } = useForecast(selectedCity);
+  const router = useRouter();
+  const geonameid = getGeonameidFromUrl(router);
+  const [selectedCity, setSelectedCity] = useState<City | undefined>(undefined);
+  const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
+  const controllerRef = useRef<AbortController | undefined>();
+
+  useEffect(() => {
+    if (geonameid != null) {
+      setQueryParams(getQueryParamsForGeonameid(geonameid));
+    } else if (selectedCity != null) {
+      setQueryParams(getQueryParamsForGeonameid(selectedCity.geonameid));
+    }
+  }, [geonameid, selectedCity]);
+
+  useEffect(() => {
+    const searchAndSetSelectedCity = async (searchQueryParams: QueryParams) => {
+      if (controllerRef.current) {
+        controllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      controllerRef.current = controller;
+
+      try {
+        const res = await fetch(getPath(APIRoute.CITY_SEARCH, searchQueryParams), {
+          signal: controllerRef.current?.signal
+        });
+        const resJSON = await res.json();
+        if (resJSON.data?.length) {
+          setSelectedCity(resJSON.data[0]);
+        } else {
+          throw new Error('API did not return a result');
+        }
+      } catch (e) {
+        if (e instanceof Error && e?.name !== 'AbortError') {
+          setSelectedCity(DEFAULT_CITY);
+        }
+      }
+    };
+
+    if (geonameid != null) {
+      if (selectedCity == null) {
+        searchAndSetSelectedCity(getQueryParamsForGeonameid(geonameid));
+      }
+    } else if (router.isReady) {
+      setSelectedCity(DEFAULT_CITY);
+    }
+  }, [geonameid, selectedCity, router.isReady]);
+
+  useEffect(() => {
+    if (selectedCity != null && geonameid !== selectedCity.geonameid) {
+      const href = `/?${API_GEONAMEID_KEY}=${selectedCity.geonameid}`;
+      router.push(href, href, { shallow: true });
+    }
+  }, [geonameid, selectedCity, router]);
+
+  const { observations, isLoading, isError } = useObservations(queryParams);
+  const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
 
   const [showSearchOverlay, setShowSearchOverlay] = useState<boolean>(false);
   useEffect(() => {

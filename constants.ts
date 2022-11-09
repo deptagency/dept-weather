@@ -11,7 +11,7 @@ const BOSTON_CITY: City = {
   latitude: 42.35843,
   longitude: -71.05977,
   timeZone: 'America/New_York',
-  geonameid: 4928934
+  geonameid: 4930956
 };
 export const DEFAULT_CITY = BOSTON_CITY;
 

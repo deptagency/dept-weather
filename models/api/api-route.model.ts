@@ -7,7 +7,9 @@ export enum APIRoute {
   HEALTH = 'health'
 }
 
-export const getPath = (route: APIRoute, queryParams?: Record<string, string>) => {
+export type QueryParams = Record<string, string | number> | undefined;
+
+export const getPath = (route: APIRoute, queryParams?: QueryParams) => {
   let path = `${API_ROUTE_PATH}/${route}`;
   if (queryParams != null && Object.keys(queryParams).length > 0) {
     const formattedQueryParams = Object.keys(queryParams).map(key => `${key}=${queryParams[key]}`);

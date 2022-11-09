@@ -35,8 +35,8 @@ export default function Header({
 }: {
   showSearchOverlay: boolean;
   setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
-  selectedCity: City;
-  setSelectedCity: Dispatch<SetStateAction<City>>;
+  selectedCity: City | undefined;
+  setSelectedCity: Dispatch<SetStateAction<City | undefined>>;
 }) {
   const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
@@ -110,7 +110,7 @@ export default function Header({
           <div className={styles.header__location}>
             <input
               className={`${styles.header__text} ${styles.header__location__input}`}
-              placeholder="City, State"
+              placeholder={selectedCity != null ? 'City, State' : ''}
               aria-label={'Search City, State'}
               aria-expanded={showSearchOverlay}
               aria-controls="SearchResultsList"
@@ -133,7 +133,13 @@ export default function Header({
                 }
               }}
               onKeyDown={handleKeyDown}
-              value={showSearchOverlay ? rawSearchQuery : `${selectedCity.cityName}, ${selectedCity.stateCode}`}
+              value={
+                showSearchOverlay
+                  ? rawSearchQuery
+                  : selectedCity != null
+                  ? `${selectedCity.cityName}, ${selectedCity.stateCode}`
+                  : ''
+              }
             ></input>
             <button
               className={`${styles.header__location__arrow} ${
@@ -141,7 +147,7 @@ export default function Header({
               }`}
               aria-label={'Location search panel'}
               aria-expanded={showSearchOverlay}
-              // aria-controls="SearchResultsList"
+              aria-controls="SearchResultsList"
               onClick={e => {
                 e.preventDefault();
                 showSearchOverlay ? setShowSearchOverlay(false) : inputRef?.current?.focus();
