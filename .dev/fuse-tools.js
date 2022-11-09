@@ -1,10 +1,21 @@
-// Script to create index and/or generate query cache (uncomment/comment in run() function at end of file)
-//  Required: ./data/cities.json file(s)
-//  Run "node .dev/fuse-tools.js" in the terminal
+// Script to create index and/or generate caches (queryCache, cityAndStateCodeCache, and cache)
+//  Inputs:
+//    - generateIndex():  "cities.json" file
+//    - generateCaches(): "cities.json" and "cities-index.json" files
+//  Outputs:
+//    - generateIndex():  "cities-index.json" file
+//    - generateCaches(): "cities-topN-query-cache.json", "cities-topN-cityAndStateCode-cache.json", and "cities-topN-cache.json" files;
+//                          for each N in QUERY_CACHE_LEVELS
+//  How to use:
+//    1. Uncomment/comment desired functionality in run() function at end of file
+//    2. Run "node .dev/fuse-tools.js" in the terminal from the root project directory
+
 import { readFile, writeFile } from 'fs/promises';
 import Fuse from 'fuse.js';
 
-const QUERY_CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000, 12_500, 15_000, 17_500, 20_000, 22_500, 25_000];
+const QUERY_CACHE_LEVELS = [
+  50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000, 12_500, 15_000, 17_500, 20_000, 22_500, 25_000
+];
 
 const RESULT_LIMIT = 5;
 const POPULATION_SORT_THRESHOLD = 10e-4;
@@ -191,6 +202,7 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
 };
 
 const run = async () => {
+  // Use for generating a brand new index & cache
   // await generateIndex();
   // await generateCaches();
 
