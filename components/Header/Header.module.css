@@ -43,7 +43,6 @@
 
 .header__location {
   display: flex;
-  align-items: baseline;
   flex-grow: 1;
   max-width: 37.5rem;
 
@@ -54,7 +53,7 @@
 }
 
 .header__location__arrow {
-  padding: 1rem 0rem 1rem 0.75rem;
+  padding: 1.25rem 0rem 1.25rem 0.75rem;
 }
 
 .header__location__arrow svg {

@@ -191,7 +191,7 @@ export default function Home() {
 
   const [showSearchOverlay, setShowSearchOverlay] = useState<boolean>(false);
   useEffect(() => {
-    const className = 'overflow-y-hidden';
+    const className = 'body--disable-scroll';
     showSearchOverlay ? document.body.classList.add(className) : document.body.classList.remove(className);
   }, [showSearchOverlay]);
 

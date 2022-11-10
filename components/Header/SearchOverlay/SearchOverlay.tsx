@@ -110,6 +110,7 @@ export default function SearchOverlay({
               role="option"
               aria-selected={idx === highlightedIndex}
               onFocus={() => setHighlightedIndexDistance(idx)}
+              onTouchStart={() => setHighlightedIndexDistance(idx)}
               onMouseEnter={() => setHighlightedIndexDistance(idx)}
               onClick={e => {
                 e.preventDefault();
