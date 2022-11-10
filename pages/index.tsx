@@ -3,7 +3,7 @@ import { NextRouter, useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
 import { Footer, ForecastCard, Header, ObservationsCard } from '../components';
-import { API_GEONAMEID_KEY, DEFAULT_CITY } from '../constants';
+import { API_GEONAMEID_KEY, APP_TITLE, DEFAULT_CITY } from '../constants';
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response, QueryParams } from '../models/api';
 import { City } from '../models/cities';
 import styles from '../styles/Home.module.css';
@@ -150,10 +150,12 @@ export default function Home() {
   return (
     <div className={`${styles.container} ${showSearchOverlay ? styles['container--overlay-visible'] : ''}`}>
       <Head>
-        <title>DEPT® Weather</title>
+        <title>
+          {selectedCity != null ? `${selectedCity.cityName}, ${selectedCity.stateCode} | ${APP_TITLE}` : APP_TITLE}
+        </title>
         <meta
           name="description"
-          content="The DEPT® Weather app provides up-to-date weather information and forecasts for locations across the U.S."
+          content={`The ${APP_TITLE} app provides up-to-date weather information and forecasts for locations across the U.S.`}
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>

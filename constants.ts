@@ -2,6 +2,8 @@ import Fuse from 'fuse.js';
 import { Unit, UnitType } from './models';
 import { City, FullCity } from './models/cities';
 
+export const APP_TITLE = 'DEPT® Weather';
+
 export const MAX_COORDINATE_PRECISION = 2;
 export const AQ_COORDINATES_STR = '42.35826159869919,-71.05360507074275';
 

@@ -37,6 +37,9 @@
 }
 
 .measurement__description__label {
-  margin: 0rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
   font-weight: 700;
+  margin: 0rem;
 }
