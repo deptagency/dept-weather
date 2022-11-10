@@ -49,4 +49,6 @@ export const API_SEARCH_QUERY_KEY = 'query';
 export const API_COORDINATES_KEY = 'coordinates';
 export const API_GEONAMEID_KEY = 'id';
 
+export const LOCAL_STORAGE_RECENT_CITIES_KEY = 'recentCities';
+
 export const IME_UNSETTLED_KEY_CODE = '229';

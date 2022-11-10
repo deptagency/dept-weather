@@ -41,6 +41,7 @@
 
 .search__overlay__results-list {
   list-style-type: none;
+  text-align: right;
   margin: 0rem;
   padding: 0rem;
 }
@@ -51,8 +52,26 @@
   font-weight: 300;
 
   width: fit-content;
-  padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+  padding: 0.5rem 1rem;
   margin: 0rem 0rem 0rem auto;
+}
+
+.search__overlay__result span {
+  padding-right: 0.75rem;
+}
+
+.search__overlay__result__recent-icon {
+  display: inline;
+  height: 1rem;
+  width: 1rem;
+}
+
+.search__overlay__result__recent-icon--hidden {
+  visibility: hidden;
+}
+
+.search__overlay__result__recent-icon path {
+  fill: var(--black);
 }
 
 .search__overlay__result--highlighted {
@@ -65,7 +84,7 @@
 
 @media screen and (max-width: 576px) {
   .search__overlay__result {
-    padding-right: 2rem;
+    padding-right: 0.5rem;
   }
 }
 

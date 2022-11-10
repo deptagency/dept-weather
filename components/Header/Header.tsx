@@ -31,12 +31,14 @@ export default function Header({
   showSearchOverlay,
   setShowSearchOverlay,
   selectedCity,
-  setSelectedCity
+  setSelectedCity,
+  recentCities
 }: {
   showSearchOverlay: boolean;
   setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
   selectedCity: City | undefined;
   setSelectedCity: Dispatch<SetStateAction<City | undefined>>;
+  recentCities: City[];
 }) {
   const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
@@ -127,7 +129,7 @@ export default function Header({
                 e.preventDefault();
                 if (!showSearchOverlay) {
                   setRawSearchQuery('');
-                  setResults([]);
+                  setResults(recentCities);
                   setHighlightedIndexDistance(0);
                   setShowSearchOverlay(true);
                 }
@@ -168,6 +170,7 @@ export default function Header({
         setHighlightedIndexDistance={setHighlightedIndexDistance}
         highlightedIndex={highlightedIndex}
         setSelectedCity={setSelectedCity}
+        recentCities={recentCities}
       ></SearchOverlay>
     </>
   );

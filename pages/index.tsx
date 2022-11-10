@@ -3,7 +3,13 @@ import { NextRouter, useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
 import { Footer, ForecastCard, Header, ObservationsCard } from '../components';
-import { API_GEONAMEID_KEY, APP_TITLE, DEFAULT_CITY } from '../constants';
+import {
+  API_GEONAMEID_KEY,
+  APP_TITLE,
+  CITY_SEARCH_RESULT_LIMIT,
+  DEFAULT_CITY,
+  LOCAL_STORAGE_RECENT_CITIES_KEY
+} from '../constants';
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response, QueryParams } from '../models/api';
 import { City } from '../models/cities';
 import styles from '../styles/Home.module.css';
@@ -152,6 +158,34 @@ export default function Home() {
     }
   }, [geonameid, selectedCity, router, isPopState]);
 
+  const [recentCities, setRecentCities] = useState<City[]>((): City[] => {
+    // Only run on client-side (i.e., when window object is available)
+    if (typeof window !== 'undefined') {
+      const recentCitiesStr = localStorage.getItem(LOCAL_STORAGE_RECENT_CITIES_KEY);
+      return recentCitiesStr ? JSON.parse(recentCitiesStr) : [];
+    }
+    return [];
+  });
+  useEffect(() => {
+    if (recentCities != null && selectedCity != null) {
+      const idxOfSelectedInRecents = recentCities.findIndex(city => city.geonameid === selectedCity.geonameid);
+      if (idxOfSelectedInRecents === -1 || idxOfSelectedInRecents > 0) {
+        let newRecentCities = [...recentCities];
+
+        if (idxOfSelectedInRecents >= 0) {
+          newRecentCities.splice(idxOfSelectedInRecents, 1);
+        }
+        newRecentCities.unshift(selectedCity);
+        newRecentCities = newRecentCities.slice(0, CITY_SEARCH_RESULT_LIMIT);
+
+        const newRecentCitiesStr = JSON.stringify(newRecentCities);
+        localStorage.setItem(LOCAL_STORAGE_RECENT_CITIES_KEY, newRecentCitiesStr);
+        // Wait for search panel close animation before adding to recents list to avoid showing recent icon before loading city
+        setTimeout(() => setRecentCities(newRecentCities), 300);
+      }
+    }
+  }, [recentCities, selectedCity]);
+
   const { observations, isLoading, isError } = useObservations(queryParams);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
 
@@ -178,6 +212,7 @@ export default function Home() {
         setShowSearchOverlay={setShowSearchOverlay}
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
+        recentCities={recentCities}
       ></Header>
       <main className={styles.container__content}>
         {observations ? (
