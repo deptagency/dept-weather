@@ -131,12 +131,26 @@ export default function Home() {
     }
   }, [geonameid, selectedCity, router.isReady]);
 
+  const [isPopState, setIsPopState] = useState<boolean>(false);
+  useEffect(() => {
+    router.beforePopState(_ => {
+      setIsPopState(true);
+      return true;
+    });
+  }, [router]);
   useEffect(() => {
     if (selectedCity != null && geonameid !== selectedCity.geonameid) {
-      const href = `/?${API_GEONAMEID_KEY}=${selectedCity.geonameid}`;
-      router.push(href, href, { shallow: true });
+      if (isPopState) {
+        setSelectedCity(undefined);
+        setIsPopState(false);
+      } else {
+        const href = `/?${API_GEONAMEID_KEY}=${selectedCity.geonameid}`;
+        selectedCity === DEFAULT_CITY
+          ? router.replace(href, href, { shallow: true })
+          : router.push(href, href, { shallow: true });
+      }
     }
-  }, [geonameid, selectedCity, router]);
+  }, [geonameid, selectedCity, router, isPopState]);
 
   const { observations, isLoading, isError } = useObservations(queryParams);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
