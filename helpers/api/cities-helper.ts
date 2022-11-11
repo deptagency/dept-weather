@@ -155,38 +155,38 @@ export class CitiesHelper {
 
   static async parseReqCoordinates(reqQuery: ReqQuery) {
     const warnings: string[] = [];
-    const coordinatesStr = reqQuery[API_COORDINATES_KEY];
     const geonameidStr = reqQuery[API_GEONAMEID_KEY];
+    const coordinatesStr = reqQuery[API_COORDINATES_KEY];
 
     const getReturnValFor = (coordinatesNumArr: number[]) => ({
       coordinatesStr: CoordinatesHelper.numArrToStr(CoordinatesHelper.adjustPrecision(coordinatesNumArr)),
       warnings
     });
 
-    // Use "coordinates" queryParam if provided
-    if (typeof coordinatesStr === 'string' && coordinatesStr.length) {
-      const inputCoordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
-      if (CoordinatesHelper.areValid(inputCoordinatesNumArr)) {
-        if (geonameidStr != null) {
-          warnings.push(`'${API_GEONAMEID_KEY}' was ignored since '${API_COORDINATES_KEY}' takes precedence`);
-        }
-        return getReturnValFor(inputCoordinatesNumArr);
-      }
-      warnings.push(`'${API_COORDINATES_KEY}' was invalid`);
-    }
-
     // Use "id" queryParam if provided
     if (typeof geonameidStr === 'string' && geonameidStr.length) {
       const matchingCity = await CitiesHelper.getByGeonameid(geonameidStr);
       if (matchingCity != null) {
+        if (coordinatesStr != null) {
+          warnings.push(`'${API_COORDINATES_KEY}' was ignored since '${API_GEONAMEID_KEY}' takes precedence`);
+        }
         return getReturnValFor(CoordinatesHelper.cityToNumArr(matchingCity));
       }
       warnings.push(`'${API_GEONAMEID_KEY}' was invalid`);
     }
 
+    // Use "coordinates" queryParam if provided
+    if (typeof coordinatesStr === 'string' && coordinatesStr.length) {
+      const inputCoordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
+      if (CoordinatesHelper.areValid(inputCoordinatesNumArr)) {
+        return getReturnValFor(inputCoordinatesNumArr);
+      }
+      warnings.push(`'${API_COORDINATES_KEY}' was invalid`);
+    }
+
     // Use DEFAULT_CITY coordinates
     warnings.push(
-      `Data is for the default city of '${DEFAULT_CITY.cityName}, ${DEFAULT_CITY.stateCode}' since neither '${API_COORDINATES_KEY}' nor '${API_GEONAMEID_KEY}' were valid`
+      `Data is for the default city of '${DEFAULT_CITY.cityName}, ${DEFAULT_CITY.stateCode}' since neither '${API_GEONAMEID_KEY}' nor '${API_COORDINATES_KEY}' were valid`
     );
     return getReturnValFor(CoordinatesHelper.cityToNumArr(DEFAULT_CITY));
   }
