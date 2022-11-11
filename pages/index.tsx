@@ -92,9 +92,36 @@ export default function Home() {
   const router = useRouter();
   const geonameid = getGeonameidFromUrl(router);
   const [selectedCity, setSelectedCity] = useState<City | undefined>(undefined);
-  const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
-  const controllerRef = useRef<AbortController | undefined>();
 
+  const [recentCities, setRecentCities] = useState<City[]>((): City[] => {
+    // Only run on client-side (i.e., when window object is available)
+    if (typeof window !== 'undefined') {
+      const recentCitiesStr = localStorage.getItem(LOCAL_STORAGE_RECENT_CITIES_KEY);
+      return recentCitiesStr ? JSON.parse(recentCitiesStr) : [];
+    }
+    return [];
+  });
+  useEffect(() => {
+    if (recentCities != null && selectedCity != null) {
+      const idxOfSelectedInRecents = recentCities.findIndex(city => city.geonameid === selectedCity.geonameid);
+      if (idxOfSelectedInRecents === -1 || idxOfSelectedInRecents > 0) {
+        let newRecentCities = [...recentCities];
+
+        if (idxOfSelectedInRecents >= 0) {
+          newRecentCities.splice(idxOfSelectedInRecents, 1);
+        }
+        newRecentCities.unshift(selectedCity);
+        newRecentCities = newRecentCities.slice(0, CITY_SEARCH_RESULT_LIMIT);
+
+        const newRecentCitiesStr = JSON.stringify(newRecentCities);
+        localStorage.setItem(LOCAL_STORAGE_RECENT_CITIES_KEY, newRecentCitiesStr);
+        // Wait for search panel close animation before adding to recents list to avoid showing recent icon before loading city
+        setTimeout(() => setRecentCities(newRecentCities), 300);
+      }
+    }
+  }, [recentCities, selectedCity]);
+
+  const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
   useEffect(() => {
     if (geonameid != null) {
       setQueryParams(getQueryParamsForGeonameid(geonameid));
@@ -103,6 +130,7 @@ export default function Home() {
     }
   }, [geonameid, selectedCity]);
 
+  const controllerRef = useRef<AbortController | undefined>();
   useEffect(() => {
     const searchAndSetSelectedCity = async (searchQueryParams: QueryParams) => {
       if (controllerRef.current) {
@@ -133,9 +161,9 @@ export default function Home() {
         searchAndSetSelectedCity(getQueryParamsForGeonameid(geonameid));
       }
     } else if (router.isReady) {
-      setSelectedCity(DEFAULT_CITY);
+      setSelectedCity(recentCities?.length ? recentCities[0] : DEFAULT_CITY);
     }
-  }, [geonameid, selectedCity, router.isReady]);
+  }, [geonameid, recentCities, selectedCity, router.isReady]);
 
   const [isPopState, setIsPopState] = useState<boolean>(false);
   useEffect(() => {
@@ -157,34 +185,6 @@ export default function Home() {
       }
     }
   }, [geonameid, selectedCity, router, isPopState]);
-
-  const [recentCities, setRecentCities] = useState<City[]>((): City[] => {
-    // Only run on client-side (i.e., when window object is available)
-    if (typeof window !== 'undefined') {
-      const recentCitiesStr = localStorage.getItem(LOCAL_STORAGE_RECENT_CITIES_KEY);
-      return recentCitiesStr ? JSON.parse(recentCitiesStr) : [];
-    }
-    return [];
-  });
-  useEffect(() => {
-    if (recentCities != null && selectedCity != null) {
-      const idxOfSelectedInRecents = recentCities.findIndex(city => city.geonameid === selectedCity.geonameid);
-      if (idxOfSelectedInRecents === -1 || idxOfSelectedInRecents > 0) {
-        let newRecentCities = [...recentCities];
-
-        if (idxOfSelectedInRecents >= 0) {
-          newRecentCities.splice(idxOfSelectedInRecents, 1);
-        }
-        newRecentCities.unshift(selectedCity);
-        newRecentCities = newRecentCities.slice(0, CITY_SEARCH_RESULT_LIMIT);
-
-        const newRecentCitiesStr = JSON.stringify(newRecentCities);
-        localStorage.setItem(LOCAL_STORAGE_RECENT_CITIES_KEY, newRecentCitiesStr);
-        // Wait for search panel close animation before adding to recents list to avoid showing recent icon before loading city
-        setTimeout(() => setRecentCities(newRecentCities), 300);
-      }
-    }
-  }, [recentCities, selectedCity]);
 
   const { observations, isLoading, isError } = useObservations(queryParams);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
