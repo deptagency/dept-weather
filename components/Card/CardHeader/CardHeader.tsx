@@ -12,6 +12,18 @@ const timeAgoFormatter = ((
     return <>just now</>;
   } else if ((unit === 'second' && value >= 30) || (unit === 'minute' && value < 2)) {
     return <>a moment {suffix}</>;
+  } else if (unit === 'minute') {
+    return (
+      <>
+        {value}m {suffix}
+      </>
+    );
+  } else if (unit === 'hour') {
+    return (
+      <>
+        {value}hr {suffix}
+      </>
+    );
   }
   return nextFormatter(value, unit, suffix, epochMiliseconds);
 }) as Formatter;

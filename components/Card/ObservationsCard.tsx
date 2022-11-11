@@ -3,7 +3,7 @@ import CardHeader from './CardHeader/CardHeader';
 import Condition from './Condition/Condition';
 import CurrentTemp from './CurrentTemp/CurrentTemp';
 import { AirQuality, Humidity, Precipitation, Pressure, UVIndex, Wind } from './Measurement';
-import styles from './ObservationsCard.module.css';
+import styles from './Card.module.css';
 
 const getIsNight = (sunData?: SunriseSunsetObservations) => {
   let isNight = false;

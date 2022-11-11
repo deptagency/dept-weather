@@ -1,8 +1,8 @@
-import { NwsForecastPeriod } from '../../../models/api';
-import CardHeader from '../CardHeader/CardHeader';
-import ForecastPeriod from '../ForecastPeriod/ForecastPeriod';
-import ForecastTemps from '../ForecastTemps/ForecastTemps';
-import styles from './ForecastCard.module.css';
+import { NwsForecastPeriod } from '../../models/api';
+import CardHeader from './CardHeader/CardHeader';
+import ForecastPeriod from './ForecastPeriod/ForecastPeriod';
+import ForecastTemps from './ForecastTemps/ForecastTemps';
+import styles from './Card.module.css';
 
 export default function ForecastCard({
   dayForecast,
@@ -22,7 +22,7 @@ export default function ForecastCard({
         useIndigo={false}
       ></CardHeader>
       <div className={styles['card-contents']}>
-        <div className={styles['card-contents__overview']}>
+        <div className={`${styles['card-contents__overview']} ${styles['card-contents__overview--forecast']}`}>
           <ForecastTemps
             highTemperature={dayForecast?.temperature}
             lowTemperature={nightForecast?.temperature}

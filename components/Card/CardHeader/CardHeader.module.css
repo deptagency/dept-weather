@@ -4,6 +4,9 @@
   align-items: center;
   flex-wrap: wrap;
 
+  gap: 0.5rem;
+  padding: 1rem;
+
   min-height: 3.5rem;
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
@@ -20,11 +23,7 @@
 }
 
 .card-header > * {
-  margin: 1rem;
-}
-
-.card-header__title {
-  margin-bottom: 0.75rem;
+  margin: 0rem;
 }
 
 .card-header__title span {
