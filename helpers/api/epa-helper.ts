@@ -5,14 +5,16 @@ import utc from 'dayjs/plugin/utc';
 import geo2zip from 'geo2zip';
 import fetch from 'node-fetch';
 import { EpaHourlyForecast, EpaHourlyForecastItem } from '../../models/api';
+import { QueriedLocation } from '../../models/cities';
 import { UVHourlyForecast, UVHourlyForecastItem } from '../../models/epa';
 import { Cached, CacheEntry } from './cached';
 import { CoordinatesHelper } from '../';
-import { SunriseSunsetHelper } from './sunrise-sunset-helper';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
 dayjs.extend(utc);
+
+type UVHourlyForecastWithTz = { uvHourlyForecast: UVHourlyForecast } & Pick<QueriedLocation, 'timeZone'>;
 
 export class EpaHelper {
   private static readonly userAgent = process.env.USER_AGENT!;
@@ -34,34 +36,37 @@ export class EpaHelper {
     return 0;
   }
 
-  private static readonly hourly = new Cached<UVHourlyForecast, string>(
-    async (coordinatesStr: string) => {
-      const coordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
+  private static readonly hourly = new Cached<UVHourlyForecastWithTz, QueriedLocation>(
+    async (queriedLocation: QueriedLocation) => {
+      const coordinatesNumArr = CoordinatesHelper.cityToNumArr(queriedLocation);
       const closestZipArr = await geo2zip(coordinatesNumArr);
       const closestZip = closestZipArr?.length > 0 ? closestZipArr[0] : '';
 
-      return (
+      const uvHourlyForecast = (await (
         await fetch(this.getRequestUrlFor(closestZip), { headers: { 'User-Agent': this.userAgent } })
-      ).json() as Promise<UVHourlyForecast>;
+      ).json()) as UVHourlyForecast;
+      return {
+        uvHourlyForecast,
+        timeZone: queriedLocation.timeZone
+      };
     },
-    async (key: string, newItem: UVHourlyForecast) => {
-      return newItem?.length > 0
-        ? this.getParsedUnixTime(newItem[newItem.length - 1], SunriseSunsetHelper.getTimeZone(key))
+    async (_: string, newItem: UVHourlyForecastWithTz) => {
+      return newItem.uvHourlyForecast?.length > 0
+        ? this.getParsedUnixTime(newItem.uvHourlyForecast[newItem.uvHourlyForecast.length - 1], newItem.timeZone)
         : 0;
     },
     true,
     '[EpaHelper.hourly]'
   );
-  static async getHourly(coordinatesStr: string) {
-    return this.hourly.get(coordinatesStr, coordinatesStr);
+  static async getHourly(queriedLocation: QueriedLocation) {
+    return this.hourly.get(CoordinatesHelper.cityToStr(queriedLocation), queriedLocation);
   }
 
-  static mapHourlyToEpaHourlyForecast(cacheEntry: CacheEntry<UVHourlyForecast>): EpaHourlyForecast {
-    const timeZone = SunriseSunsetHelper.getTimeZone(cacheEntry.key);
-
-    const hourlyForecast = (cacheEntry.item ?? []).map(
+  static mapHourlyToEpaHourlyForecast(cacheEntry: CacheEntry<UVHourlyForecastWithTz>): EpaHourlyForecast {
+    const hourlyForecastIn = cacheEntry.item.uvHourlyForecast ?? [];
+    const hourlyForecast = (hourlyForecastIn instanceof Array ? hourlyForecastIn : []).map(
       (forecastItem: UVHourlyForecastItem): EpaHourlyForecastItem => ({
-        time: this.getParsedUnixTime(forecastItem, timeZone),
+        time: this.getParsedUnixTime(forecastItem, cacheEntry.item.timeZone),
         uvIndex: forecastItem.UV_VALUE
       })
     );
@@ -73,7 +78,7 @@ export class EpaHelper {
             .unix(hoursWithNonZeroUvIndex[hoursWithNonZeroUvIndex.length - 1].time)
             .subtract(1, 'day')
             .add(1, 'hour')
-        : dayjs().startOf('day')
+        : dayjs().tz(cacheEntry.item.timeZone).startOf('day')
     ).unix();
 
     return {

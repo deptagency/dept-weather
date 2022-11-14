@@ -13,15 +13,15 @@ import { APIRoute, BaseObservations, getPath, Observations, Response } from '../
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { coordinatesStr, warnings } = await CitiesHelper.parseReqCoordinates(req.query);
+    const { queriedLocation, warnings } = await CitiesHelper.parseQueriedLocation(req.query);
     const promises: Array<Promise<CacheEntry<any>>> = [
-      NwsHelper.getCurrent(coordinatesStr),
-      AirNowHelper.getCurrent(coordinatesStr),
-      EpaHelper.getHourly(coordinatesStr),
-      SunriseSunsetHelper.getSunriseSunset(coordinatesStr)
+      NwsHelper.getCurrent(queriedLocation),
+      AirNowHelper.getCurrent(queriedLocation),
+      EpaHelper.getHourly(queriedLocation),
+      SunriseSunsetHelper.getSunriseSunset(queriedLocation)
     ];
-    if (WeatherlinkHelper.shouldUse(coordinatesStr)) {
-      promises.push(WeatherlinkHelper.getCurrent(coordinatesStr));
+    if (WeatherlinkHelper.shouldUse(queriedLocation)) {
+      promises.push(WeatherlinkHelper.getCurrent());
     }
 
     const results = await Promise.all(promises);
@@ -32,13 +32,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapCurrentToNwsObservations(results[0], req.query),
       [DataSource.AIRNOW]: AirNowHelper.mapCurrentToAirNowObservations(results[1]),
       [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]: EpaHelper.mapHourlyToEpaHourlyForecast(results[2]),
-      [DataSource.SUNRISE_SUNSET]: SunriseSunsetHelper.mapSunriseSunsetToSunriseSunsetObservations(results[3])
+      [DataSource.SUNRISE_SUNSET]: SunriseSunsetHelper.mapSunriseSunsetToSunriseSunsetObservations(results[3]),
+      [DataSource.QUERIED_LOCATION]: queriedLocation
     };
     if (results.length > 4) {
       data[DataSource.WEATHERLINK] = WeatherlinkHelper.mapCurrentToWlObservations(results[4], req.query);
     }
     const latestReadTime = Math.max(
-      ...Object.values(data).map((observation: BaseObservations) => observation.readTime)
+      ...Object.values(data)
+        .map((observation: BaseObservations) => observation.readTime)
+        .filter(readTime => Number.isInteger(readTime))
     );
 
     const response: Response<Observations> = {

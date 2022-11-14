@@ -5,11 +5,12 @@ import { APIRoute, Forecast, getPath, Response } from '../../models/api';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { coordinatesStr, warnings } = await CitiesHelper.parseReqCoordinates(req.query);
-    const forecast = await NwsHelper.getForecast(coordinatesStr);
+    const { queriedLocation, warnings } = await CitiesHelper.parseQueriedLocation(req.query);
+    const forecast = await NwsHelper.getForecast(queriedLocation);
 
     const data: Forecast = {
-      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapForecastToNwsForecast(forecast, req.query)
+      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapForecastToNwsForecast(forecast, req.query),
+      [DataSource.QUERIED_LOCATION]: queriedLocation
     };
 
     const response: Response<Forecast> = {

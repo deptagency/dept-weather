@@ -12,8 +12,17 @@ import {
   DEFAULT_CITY
 } from '../../constants';
 import { ReqQuery } from '../../models/api';
-import { CitiesById, CitiesQueryCache, City, FullCity, InputCity } from '../../models/cities';
+import {
+  CitiesById,
+  CitiesQueryCache,
+  City,
+  FullCity,
+  InputCity,
+  QueriedCoordinates,
+  QueriedLocation
+} from '../../models/cities';
 import { CoordinatesHelper } from '../coordinates-helper';
+import { NwsHelper } from './nws-helper';
 
 export class CitiesHelper {
   private static sortByPopulation(a: FullCity, b: FullCity) {
@@ -153,15 +162,27 @@ export class CitiesHelper {
     }
   }
 
-  static async parseReqCoordinates(reqQuery: ReqQuery) {
+  static async parseQueriedLocation(reqQuery: ReqQuery) {
     const warnings: string[] = [];
     const geonameidStr = reqQuery[API_GEONAMEID_KEY];
     const coordinatesStr = reqQuery[API_COORDINATES_KEY];
 
-    const getReturnValFor = (coordinatesNumArr: number[]) => ({
-      coordinatesStr: CoordinatesHelper.numArrToStr(CoordinatesHelper.adjustPrecision(coordinatesNumArr)),
-      warnings
-    });
+    const getReturnValFor = async (partialQueriedLocation: Partial<QueriedLocation> & QueriedCoordinates) => {
+      const coordinatesNumArr = CoordinatesHelper.adjustPrecision(
+        CoordinatesHelper.cityToNumArr(partialQueriedLocation)
+      );
+      const queriedLocation: QueriedLocation = {
+        latitude: coordinatesNumArr[0],
+        longitude: coordinatesNumArr[1],
+        timeZone: partialQueriedLocation.timeZone
+          ? partialQueriedLocation.timeZone
+          : (await NwsHelper.getPoints(CoordinatesHelper.numArrToStr(coordinatesNumArr))).item.properties.timeZone
+      };
+      return {
+        queriedLocation,
+        warnings
+      };
+    };
 
     // Use "id" queryParam if provided
     if (typeof geonameidStr === 'string' && geonameidStr.length) {
@@ -170,7 +191,7 @@ export class CitiesHelper {
         if (coordinatesStr != null) {
           warnings.push(`'${API_COORDINATES_KEY}' was ignored since '${API_GEONAMEID_KEY}' takes precedence`);
         }
-        return getReturnValFor(CoordinatesHelper.cityToNumArr(matchingCity));
+        return getReturnValFor(matchingCity);
       }
       warnings.push(`'${API_GEONAMEID_KEY}' was invalid`);
     }
@@ -179,7 +200,7 @@ export class CitiesHelper {
     if (typeof coordinatesStr === 'string' && coordinatesStr.length) {
       const inputCoordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
       if (CoordinatesHelper.areValid(inputCoordinatesNumArr)) {
-        return getReturnValFor(inputCoordinatesNumArr);
+        return getReturnValFor({ latitude: inputCoordinatesNumArr[0], longitude: inputCoordinatesNumArr[1] });
       }
       warnings.push(`'${API_COORDINATES_KEY}' was invalid`);
     }
@@ -188,6 +209,6 @@ export class CitiesHelper {
     warnings.push(
       `Data is for the default city of '${DEFAULT_CITY.cityName}, ${DEFAULT_CITY.stateCode}' since neither '${API_GEONAMEID_KEY}' nor '${API_COORDINATES_KEY}' were valid`
     );
-    return getReturnValFor(CoordinatesHelper.cityToNumArr(DEFAULT_CITY));
+    return getReturnValFor(DEFAULT_CITY);
   }
 }

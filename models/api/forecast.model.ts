@@ -2,8 +2,9 @@ import { DataSource } from '../data-source.enum';
 import { DetailedWindDirection } from '../detailed-wind-direction.enum';
 import { WindDirection } from '../wind-direction.enum';
 import { Wind } from './observations.model';
+import { QueriedLocationInfo } from './queried-location-info.model';
 
-export interface Forecast {
+export interface Forecast extends QueriedLocationInfo {
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsForecast;
 }
 

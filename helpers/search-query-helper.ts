@@ -1,4 +1,4 @@
-export class QueryHelper {
+export class SearchQueryHelper {
   private static readonly US_STATE_CODES: Record<string, string> = {
     ALASKA: 'AK',
     ALABAMA: 'AL',

@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import localeData from 'dayjs/plugin/localeData';
 import fetch, { HeadersInit } from 'node-fetch';
 import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '../../constants';
 import { Unit, UnitMapping, UnitType } from '../../models';
@@ -14,7 +15,10 @@ import {
   StationsResponse
 } from '../../models/nws';
 import { Cached, CacheEntry } from './cached';
-import { NumberHelper } from '../';
+import { CoordinatesHelper, NumberHelper } from '../';
+import { QueriedLocation } from '../../models/cities';
+
+dayjs.extend(localeData);
 
 export class NwsHelper {
   private static readonly BASE_URL = 'https://api.weather.gov/';
@@ -35,7 +39,7 @@ export class NwsHelper {
     true,
     '[NwsHelper.points]'
   );
-  private static async getPoints(coordinatesStr: string) {
+  static async getPoints(coordinatesStr: string) {
     return this.points.get(coordinatesStr, coordinatesStr);
   }
 
@@ -70,8 +74,9 @@ export class NwsHelper {
     true,
     '[NwsHelper.current]'
   );
-  static async getCurrent(coordinatesStr: string) {
-    const stationId = (await this.getNearestStation(coordinatesStr))?.properties?.stationIdentifier ?? '';
+  static async getCurrent(queriedLocation: QueriedLocation) {
+    const stationId =
+      (await this.getNearestStation(CoordinatesHelper.cityToStr(queriedLocation)))?.properties?.stationIdentifier ?? '';
     return this.current.get(stationId, stationId);
   }
 
@@ -162,8 +167,8 @@ export class NwsHelper {
     true,
     '[NwsHelper.forecast]'
   );
-  static async getForecast(coordinatesStr: string) {
-    const points = await this.getPoints(coordinatesStr);
+  static async getForecast(queriedLocation: QueriedLocation) {
+    const points = await this.getPoints(CoordinatesHelper.cityToStr(queriedLocation));
     const forecastUrl = points.item.properties.forecast;
     return this.forecast.get(forecastUrl, forecastUrl);
   }
@@ -229,7 +234,7 @@ export class NwsHelper {
         ? period.isDaytime
           ? 'Today'
           : 'Tonight'
-        : period.name?.split(' ')[0];
+        : dayjs.weekdays()[start.day()];
       return {
         dayName,
         shortDateName: start.format('MMM D'),

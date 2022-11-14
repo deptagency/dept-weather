@@ -46,10 +46,10 @@ export class CoordinatesHelper {
   }
 
   /* From City */
-  static cityToStr(city: City): string {
+  static cityToStr(city: Pick<City, 'latitude' | 'longitude'>): string {
     return this.strArrToStr(this.cityToStrArr(city));
   }
-  static cityToStrArr(city: City): string[] {
+  static cityToStrArr(city: Pick<City, 'latitude' | 'longitude'>): string[] {
     return this.numArrToStrArr(this.cityToNumArr(city));
   }
   static cityToNumArr(city: Pick<City, 'latitude' | 'longitude'>): number[] {

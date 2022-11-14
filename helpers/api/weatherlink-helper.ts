@@ -2,6 +2,7 @@ import turf from '@turf/distance';
 import { default as WeatherLink } from 'weatherlink';
 import { AQ_COORDINATES_STR, DEFAULT_UNITS } from '../../constants';
 import { Unit, UnitType } from '../../models';
+import { QueriedLocation } from '../../models/cities';
 import { ReqQuery, WlObservations } from '../../models/api';
 import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../../models/weatherlink';
 import { Cached, CacheEntry } from './cached';
@@ -17,10 +18,10 @@ export class WeatherlinkHelper {
     return (await this.getAllStationsPromise).stations[0];
   }
 
-  static shouldUse(coordinatesStr: string) {
+  static shouldUse(queriedLocation: QueriedLocation) {
     const distanceToAQ = turf(
       CoordinatesHelper.strToNumArr(AQ_COORDINATES_STR),
-      CoordinatesHelper.strToNumArr(coordinatesStr),
+      CoordinatesHelper.cityToNumArr(queriedLocation),
       {
         units: Unit.MILES
       }
@@ -38,8 +39,8 @@ export class WeatherlinkHelper {
     true,
     '[WeatherlinkHelper.current]'
   );
-  static async getCurrent(coordinatesStr: string) {
-    return this.current.get(coordinatesStr, undefined);
+  static async getCurrent() {
+    return this.current.get(AQ_COORDINATES_STR, undefined);
   }
 
   static mapCurrentToWlObservations(cacheEntry: CacheEntry<CurrentConditions>, reqQuery: ReqQuery): WlObservations {

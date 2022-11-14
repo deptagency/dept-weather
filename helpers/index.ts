@@ -3,4 +3,4 @@
 
 export * from './coordinates-helper';
 export * from './number-helper';
-export * from './query-helper';
+export * from './search-query-helper';

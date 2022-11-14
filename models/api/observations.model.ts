@@ -1,8 +1,9 @@
 import { AQILevelName } from '../airnow';
 import { DataSource } from '../data-source.enum';
 import { SunriseSunset } from '../sunrise-sunset/sunrise-sunset';
+import { QueriedLocationInfo } from './queried-location-info.model';
 
-export interface Observations {
+export interface Observations extends QueriedLocationInfo {
   [DataSource.WEATHERLINK]?: WlObservations;
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsObservations;
   [DataSource.AIRNOW]?: AirNowObservations;

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULTS_MAX_AGE } from '../../constants';
-import { QueryHelper } from '../../helpers';
+import { SearchQueryHelper } from '../../helpers';
 import { CitiesHelper } from '../../helpers/api';
 import { APIRoute, getPath, Response } from '../../models/api';
 import { City } from '../../models/cities';
@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Use "query" queryParam if provided; search using search query
     if (typeof query === 'string') {
-      const formattedQuery = QueryHelper.formatQuery(query);
+      const formattedQuery = SearchQueryHelper.formatQuery(query);
       const results = await CitiesHelper.searchFor(formattedQuery);
       return { data: results, warnings, errors };
     }

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS } from '../../../constants';
-import { CoordinatesHelper, QueryHelper } from '../../../helpers';
+import { CoordinatesHelper, SearchQueryHelper } from '../../../helpers';
 import { useDebounce } from '../../../hooks';
 import { APIRoute, getPath } from '../../../models/api';
 import { City } from '../../../models/cities';
@@ -48,7 +48,7 @@ export default function SearchOverlay({
   const controllerRef = useRef<AbortController | undefined>();
 
   useEffect(() => {
-    setFormattedQuery(QueryHelper.formatQuery(rawSearchQuery));
+    setFormattedQuery(SearchQueryHelper.formatQuery(rawSearchQuery));
   }, [rawSearchQuery, formattedQuery]);
 
   const debouncedSearchQuery: string = useDebounce<string>(formattedQuery, CITY_SEARCH_DEBOUNCE_MS);

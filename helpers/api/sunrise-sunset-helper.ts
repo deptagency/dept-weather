@@ -1,72 +1,79 @@
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import { find } from 'geo-tz';
 import { getSunrise, getSunset } from 'sunrise-sunset-js';
 import { SunriseSunsetObservations } from '../../models/api';
+import { QueriedLocation } from '../../models/cities';
 import { SunriseSunset } from '../../models/sunrise-sunset';
+import { CoordinatesHelper } from '../';
 import { Cached, CacheEntry } from './cached';
-import { CoordinatesHelper, NumberHelper } from '../';
 
+dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
+type SunriseSunsetWithTz = { sunriseSunset: SunriseSunset } & Pick<QueriedLocation, 'timeZone'>;
+
 export class SunriseSunsetHelper {
-  static getSunrise(coordinatesStr: string) {
+  static getSun(riseOrSet: 'rise' | 'set', queriedLocation: QueriedLocation, day: Dayjs) {
     try {
-      const coordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
-      return NumberHelper.round(getSunrise(coordinatesNumArr[0], coordinatesNumArr[1]).getTime() / 1_000, 0);
+      const coordinatesNumArr = CoordinatesHelper.cityToNumArr(queriedLocation);
+      const sunFn = riseOrSet === 'rise' ? getSunrise : getSunset;
+      return dayjs(sunFn(coordinatesNumArr[0], coordinatesNumArr[1], day.toDate()));
     } catch (err) {
-      console.log(`[SunriseSunsetHelper.getSunrise()]`, `Couldn't get sunrise for "${coordinatesStr}"`, err);
+      console.log(
+        `[SunriseSunsetHelper.getSun()]`,
+        `Couldn't get sun${riseOrSet} for "${CoordinatesHelper.cityToStr(queriedLocation)}"`,
+        err
+      );
     }
   }
 
-  static getSunset(coordinatesStr: string) {
-    try {
-      const coordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
-      return NumberHelper.round(getSunset(coordinatesNumArr[0], coordinatesNumArr[1]).getTime() / 1_000, 0);
-    } catch (err) {
-      console.log(`[SunriseSunsetHelper.getSunset()]`, `Couldn't get sunset for "${coordinatesStr}"`, err);
-    }
-  }
+  private static readonly sunrisesunset = new Cached<SunriseSunsetWithTz, QueriedLocation>(
+    async (queriedLocation: QueriedLocation) => {
+      const currentLocalTime = dayjs().tz(queriedLocation.timeZone);
 
-  static getTimeZone(coordinatesStr: string) {
-    try {
-      const coordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
-      const timeZones = find(coordinatesNumArr[0], coordinatesNumArr[1]);
-      return timeZones?.length > 0 ? timeZones[0] : undefined;
-    } catch (err) {
-      console.log(`[SunriseSunsetHelper.getTimeZone()]`, `Couldn't find timezone for "${coordinatesStr}"`, err);
-    }
-  }
+      let sunrise = this.getSun('rise', queriedLocation, currentLocalTime);
+      if (sunrise != null) {
+        if (sunrise.isBefore(currentLocalTime.startOf('day'))) {
+          sunrise = this.getSun('rise', queriedLocation, currentLocalTime.add(1, 'day'));
+        } else if (sunrise.isAfter(currentLocalTime.endOf('day'))) {
+          sunrise = this.getSun('rise', queriedLocation, currentLocalTime.subtract(1, 'day'));
+        }
+      }
 
-  private static getNow(timeZone: string | null) {
-    try {
-      return timeZone ? dayjs().tz(timeZone) : dayjs();
-    } catch (err) {
-      console.log(`[SunriseSunsetHelper.getNow()]`, `Couldn't interpret timezone "${timeZone}"`, err);
-    }
-    return dayjs();
-  }
+      let sunset = this.getSun('set', queriedLocation, currentLocalTime);
+      if (sunrise != null && sunset != null) {
+        if (sunset.isBefore(sunrise)) {
+          sunset = this.getSun('set', queriedLocation, currentLocalTime.add(1, 'day'));
+        } else if (sunset.isAfter(currentLocalTime.endOf('day'))) {
+          sunset = this.getSun('rise', queriedLocation, currentLocalTime.subtract(1, 'day'));
+        }
+      }
 
-  private static readonly sunrisesunset = new Cached<SunriseSunset, string>(
-    async (coordinatesStr: string) => ({
-      timezone: this.getTimeZone(coordinatesStr) ?? null,
-      sunrise: this.getSunrise(coordinatesStr) ?? null,
-      sunset: this.getSunset(coordinatesStr) ?? null
-    }),
-    async (_: string, newItem: SunriseSunset) => this.getNow(newItem.timezone).endOf('day').unix(),
+      return {
+        timeZone: queriedLocation.timeZone,
+        sunriseSunset: {
+          sunrise: sunrise?.unix() ?? null,
+          sunset: sunset?.unix() ?? null
+        }
+      };
+    },
+    async (_: string, newItem: SunriseSunsetWithTz) => dayjs().tz(newItem.timeZone).endOf('day').unix(),
     true,
     '[SunriseSunsetHelper.sunrisesunset]'
   );
-  static async getSunriseSunset(coordinatesStr: string) {
-    return this.sunrisesunset.get(coordinatesStr, coordinatesStr);
+  static async getSunriseSunset(queriedLocation: QueriedLocation) {
+    return this.sunrisesunset.get(CoordinatesHelper.cityToStr(queriedLocation), queriedLocation);
   }
 
-  static mapSunriseSunsetToSunriseSunsetObservations(cacheEntry: CacheEntry<SunriseSunset>): SunriseSunsetObservations {
+  static mapSunriseSunsetToSunriseSunsetObservations(
+    cacheEntry: CacheEntry<SunriseSunsetWithTz>
+  ): SunriseSunsetObservations {
     return {
-      ...cacheEntry.item,
-      readTime: this.getNow(cacheEntry.item.timezone).startOf('day').unix(),
+      ...cacheEntry.item.sunriseSunset,
+      readTime: dayjs().tz(cacheEntry.item.timeZone).startOf('day').unix(),
       validUntil: cacheEntry.validUntil
     };
   }
