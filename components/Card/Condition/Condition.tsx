@@ -7,12 +7,18 @@ type ConditionSize = 'small' | 'large';
 const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
   const conditionUpped = condition.toUpperCase();
   let match: DefaultIconMapping = DefaultIcons[conditionUpped as IconCondition] ?? undefined;
-  if (match == undefined) {
-    const subConditions = conditionUpped.split(new RegExp(` *and *`, 'i'));
-    for (const subCon of subConditions) {
-      match = DefaultIcons[subCon.trim() as IconCondition] ?? undefined;
-      if (match != null) {
-        break;
+  if (match == null) {
+    const baseCondition = conditionUpped
+      .replaceAll(new RegExp(' *isolated *', 'ig'), '')
+      .replaceAll(new RegExp(' *scattered *', 'ig'), '');
+    match = DefaultIcons[baseCondition.trim() as IconCondition] ?? undefined;
+    if (match == null) {
+      const subConditions = conditionUpped.split(new RegExp(' *and *', 'i'));
+      for (const subCon of subConditions) {
+        match = DefaultIcons[subCon.trim() as IconCondition] ?? undefined;
+        if (match != null) {
+          break;
+        }
       }
     }
   }
