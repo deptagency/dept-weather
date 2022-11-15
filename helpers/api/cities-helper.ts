@@ -22,6 +22,7 @@ import {
   QueriedLocation
 } from '../../models/cities';
 import { CoordinatesHelper } from '../coordinates-helper';
+import { SearchQueryHelper } from '../search-query-helper';
 import { NwsHelper } from './nws-helper';
 
 export class CitiesHelper {
@@ -51,7 +52,7 @@ export class CitiesHelper {
     return inputCities.map(
       (inputCity: InputCity): FullCity => ({
         ...inputCity,
-        cityAndStateCode: `${inputCity.cityName}, ${inputCity.stateCode}`
+        cityAndStateCode: SearchQueryHelper.getCityAndStateCode(inputCity)
       })
     );
   })();
@@ -207,7 +208,9 @@ export class CitiesHelper {
 
     // Use DEFAULT_CITY coordinates
     warnings.push(
-      `Data is for the default city of '${DEFAULT_CITY.cityName}, ${DEFAULT_CITY.stateCode}' since neither '${API_GEONAMEID_KEY}' nor '${API_COORDINATES_KEY}' were valid`
+      `Data is for the default city of '${SearchQueryHelper.getCityAndStateCode(
+        DEFAULT_CITY
+      )}' since neither '${API_GEONAMEID_KEY}' nor '${API_COORDINATES_KEY}' were valid`
     );
     return getReturnValFor(DEFAULT_CITY);
   }

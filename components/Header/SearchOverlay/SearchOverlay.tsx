@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS } from '../../../constants';
-import { CoordinatesHelper, SearchQueryHelper } from '../../../helpers';
+import { SearchQueryHelper } from '../../../helpers';
 import { useDebounce } from '../../../hooks';
 import { APIRoute, getPath } from '../../../models/api';
-import { City } from '../../../models/cities';
+import { CitiesGIDCache, SearchResultCity } from '../../../models/cities';
 import styles from './SearchOverlay.module.css';
 import homeStyles from '../../../styles/Home.module.css';
 
@@ -31,30 +31,59 @@ export default function SearchOverlay({
   setHighlightedIndexDistance,
   highlightedIndex,
   setSelectedCity,
-  recentCities
+  recentCities,
+  citiesGIDCache
 }: {
   rawSearchQuery: string;
   showSearchOverlay: boolean;
   setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
-  results: City[];
-  setResults: Dispatch<SetStateAction<City[]>>;
+  results: SearchResultCity[];
+  setResults: Dispatch<SetStateAction<SearchResultCity[]>>;
   setHighlightedIndexDistance: Dispatch<SetStateAction<number>>;
   highlightedIndex: number;
-  setSelectedCity: Dispatch<SetStateAction<City | undefined>>;
-  recentCities: City[];
+  setSelectedCity: Dispatch<SetStateAction<SearchResultCity | undefined>>;
+  recentCities: SearchResultCity[];
+  citiesGIDCache: CitiesGIDCache | undefined;
 }) {
-  const [formattedQuery, setFormattedQuery] = useState<string>('');
-  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const debouncedSearchQuery: string = useDebounce<string>(searchQuery, CITY_SEARCH_DEBOUNCE_MS);
   const controllerRef = useRef<AbortController | undefined>();
 
   useEffect(() => {
-    setFormattedQuery(SearchQueryHelper.formatQuery(rawSearchQuery));
-  }, [rawSearchQuery, formattedQuery]);
+    const abortSearchCallAndUse = (newResults: SearchResultCity[]) => {
+      if (controllerRef.current) {
+        controllerRef.current.abort();
+      }
+      setResults(newResults);
+      setHighlightedIndexDistance(0);
+    };
 
-  const debouncedSearchQuery: string = useDebounce<string>(formattedQuery, CITY_SEARCH_DEBOUNCE_MS);
+    const formattedQuery = SearchQueryHelper.formatQuery(rawSearchQuery);
+    // If query is non-empty string & cache is defined...
+    if (formattedQuery && citiesGIDCache != null) {
+      const cachedQuery = citiesGIDCache.gidQueryCache[formattedQuery.toLowerCase()];
+      // If query is in gidQueryCache...
+      if (cachedQuery?.length) {
+        // Map array of geonameids to array of objects, which also include the cityAndStateCode found in the gidCityAndStateCodeCache
+        const cachedResults = cachedQuery.map(geonameid => ({
+          cityAndStateCode: citiesGIDCache.gidCityAndStateCodeCache[String(geonameid)],
+          geonameid
+        }));
+        abortSearchCallAndUse(cachedResults);
+        return;
+      }
+      // Else if query is empty string, use recentCities
+    } else if (formattedQuery === '') {
+      abortSearchCallAndUse(recentCities);
+      return;
+    }
+
+    // Set searchQuery so a /city-search API call can be debounced
+    setSearchQuery(formattedQuery);
+  }, [rawSearchQuery, recentCities, citiesGIDCache, setResults, setHighlightedIndexDistance]);
 
   useEffect(() => {
-    const search = async (formattedQuery: string) => {
+    const search = async (searchQuery: string) => {
       if (controllerRef.current) {
         controllerRef.current.abort();
       }
@@ -62,30 +91,23 @@ export default function SearchOverlay({
       controllerRef.current = controller;
 
       try {
-        setIsSearching(true);
-        const res = await fetch(getPath(APIRoute.CITY_SEARCH, { [API_SEARCH_QUERY_KEY]: formattedQuery }), {
+        const res = await fetch(getPath(APIRoute.CITY_SEARCH, { [API_SEARCH_QUERY_KEY]: searchQuery }), {
           signal: controllerRef.current?.signal
         });
         const resJSON = await res.json();
         setResults(resJSON.data);
         setHighlightedIndexDistance(0);
-        setIsSearching(false);
       } catch (e) {
         if (e instanceof Error && e?.name !== 'AbortError') {
           setResults([]);
-          setIsSearching(false);
         }
       }
     };
 
     if (debouncedSearchQuery) {
       search(debouncedSearchQuery);
-    } else if (debouncedSearchQuery != null) {
-      setResults(recentCities);
-    } else {
-      setResults([]);
     }
-  }, [debouncedSearchQuery, recentCities, setResults, setHighlightedIndexDistance]);
+  }, [debouncedSearchQuery, setResults, setHighlightedIndexDistance]);
 
   return (
     <div
@@ -100,30 +122,33 @@ export default function SearchOverlay({
     >
       <div className={`${styles.search__overlay__inner} ${homeStyles['container__content--no-padding']}`}>
         <ul id="SearchResultsList" className={styles['search__overlay__results-list']} role="listbox">
-          {results.map((result, idx) => (
-            <li
-              id={`SearchResult${idx}`}
-              key={CoordinatesHelper.cityToStr(result)}
-              className={`${styles.search__overlay__result} ${
-                idx === highlightedIndex ? styles['search__overlay__result--highlighted'] : ''
-              }`}
-              role="option"
-              aria-selected={idx === highlightedIndex}
-              onFocus={() => setHighlightedIndexDistance(idx)}
-              onTouchStart={() => setHighlightedIndexDistance(idx)}
-              onMouseEnter={() => setHighlightedIndexDistance(idx)}
-              onClick={e => {
-                e.preventDefault();
-                setSelectedCity(results[highlightedIndex]);
-                setShowSearchOverlay(false);
-              }}
-            >
-              <span>{`${result.cityName}, ${result.stateCode}`}</span>
-              <RecentIcon
-                isHidden={!recentCities.find(recentCity => recentCity.geonameid === result.geonameid)}
-              ></RecentIcon>
-            </li>
-          ))}
+          {results.map((result, idx) => {
+            const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(result);
+            return (
+              <li
+                id={`SearchResult${idx}`}
+                key={cityAndStateCode}
+                className={`${styles.search__overlay__result} ${
+                  idx === highlightedIndex ? styles['search__overlay__result--highlighted'] : ''
+                }`}
+                role="option"
+                aria-selected={idx === highlightedIndex}
+                onFocus={() => setHighlightedIndexDistance(idx)}
+                onTouchStart={() => setHighlightedIndexDistance(idx)}
+                onMouseEnter={() => setHighlightedIndexDistance(idx)}
+                onClick={e => {
+                  e.preventDefault();
+                  setSelectedCity(results[highlightedIndex]);
+                  setShowSearchOverlay(false);
+                }}
+              >
+                <span>{cityAndStateCode}</span>
+                <RecentIcon
+                  isHidden={!recentCities.find(recentCity => recentCity.geonameid === result.geonameid)}
+                ></RecentIcon>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>

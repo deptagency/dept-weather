@@ -1,6 +1,7 @@
 import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, useState } from 'react';
 import { IME_UNSETTLED_KEY_CODE } from '../../constants';
-import { City } from '../../models/cities';
+import { SearchQueryHelper } from '../../helpers';
+import { CitiesGIDCache, SearchResultCity } from '../../models/cities';
 import homeStyles from '../../styles/Home.module.css';
 import styles from './Header.module.css';
 import SearchOverlay from './SearchOverlay/SearchOverlay';
@@ -32,18 +33,20 @@ export default function Header({
   setShowSearchOverlay,
   selectedCity,
   setSelectedCity,
-  recentCities
+  recentCities,
+  citiesGIDCache
 }: {
   showSearchOverlay: boolean;
   setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
-  selectedCity: City | undefined;
-  setSelectedCity: Dispatch<SetStateAction<City | undefined>>;
-  recentCities: City[];
+  selectedCity: SearchResultCity | undefined;
+  setSelectedCity: Dispatch<SetStateAction<SearchResultCity | undefined>>;
+  recentCities: SearchResultCity[];
+  citiesGIDCache: CitiesGIDCache | undefined;
 }) {
   const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const [highlightedIndexDistance, setHighlightedIndexDistance] = useState<number>(0);
-  const [results, setResults] = useState<City[]>([]);
+  const [results, setResults] = useState<SearchResultCity[]>([]);
 
   const inputRef = createRef<HTMLInputElement>();
 
@@ -139,7 +142,7 @@ export default function Header({
                 showSearchOverlay
                   ? rawSearchQuery
                   : selectedCity != null
-                  ? `${selectedCity.cityName}, ${selectedCity.stateCode}`
+                  ? SearchQueryHelper.getCityAndStateCode(selectedCity)
                   : ''
               }
             ></input>
@@ -171,6 +174,7 @@ export default function Header({
         highlightedIndex={highlightedIndex}
         setSelectedCity={setSelectedCity}
         recentCities={recentCities}
+        citiesGIDCache={citiesGIDCache}
       ></SearchOverlay>
     </>
   );

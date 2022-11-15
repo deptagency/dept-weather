@@ -16,6 +16,11 @@ export interface InputCity extends Omit<FullCity, 'cityAndStateCode'> {}
 export interface City
   extends Pick<FullCity, 'cityName' | 'stateCode' | 'latitude' | 'longitude' | 'timeZone' | 'geonameid'> {}
 
+export interface SearchResultCity
+  extends Pick<FullCity, 'geonameid'>,
+    Partial<Pick<FullCity, 'cityName' | 'stateCode'>>,
+    Partial<Pick<FullCity, 'cityAndStateCode'>> {}
+
 export interface InputCityById extends Omit<City, 'geonameid' | 'cityAndStateCode'> {}
 
 export interface QueriedLocation extends QueriedCoordinates, Pick<FullCity, 'timeZone'> {}
@@ -25,3 +30,9 @@ export interface QueriedCoordinates extends Pick<FullCity, 'latitude' | 'longitu
 export type CitiesById = Record<string, InputCityById>;
 
 export type CitiesQueryCache = Record<string, number[]>;
+export type CitiesCityAndStateCodeCache = Record<string, string>;
+
+export interface CitiesGIDCache {
+  gidQueryCache: CitiesQueryCache;
+  gidCityAndStateCodeCache: CitiesCityAndStateCodeCache;
+}

@@ -8,10 +8,12 @@ import {
   APP_TITLE,
   CITY_SEARCH_RESULT_LIMIT,
   DEFAULT_CITY,
+  FRONTEND_CACHE_FILENAME,
   LOCAL_STORAGE_RECENT_CITIES_KEY
 } from '../constants';
+import { SearchQueryHelper } from '../helpers';
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response, QueryParams } from '../models/api';
-import { City } from '../models/cities';
+import { CitiesGIDCache, SearchResultCity } from '../models/cities';
 import styles from '../styles/Home.module.css';
 
 const getGeonameidFromUrl = (router: NextRouter) => {
@@ -91,9 +93,20 @@ const ForecastCards = ({
 export default function Home() {
   const router = useRouter();
   const geonameid = getGeonameidFromUrl(router);
-  const [selectedCity, setSelectedCity] = useState<City | undefined>(undefined);
+  const [selectedCity, setSelectedCity] = useState<SearchResultCity | undefined>(undefined);
 
-  const [recentCities, setRecentCities] = useState<City[]>((): City[] => {
+  const [citiesGIDCache, setCitiesGIDCache] = useState<CitiesGIDCache | undefined>(undefined);
+  useEffect(() => {
+    fetch(FRONTEND_CACHE_FILENAME)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.gidQueryCache != null && data.gidCityAndStateCodeCache != null) {
+          setCitiesGIDCache(data);
+        }
+      });
+  }, []);
+
+  const [recentCities, setRecentCities] = useState<SearchResultCity[]>((): SearchResultCity[] => {
     // Only run on client-side (i.e., when window object is available)
     if (typeof window !== 'undefined') {
       const recentCitiesStr = localStorage.getItem(LOCAL_STORAGE_RECENT_CITIES_KEY);
@@ -110,7 +123,10 @@ export default function Home() {
         if (idxOfSelectedInRecents >= 0) {
           newRecentCities.splice(idxOfSelectedInRecents, 1);
         }
-        newRecentCities.unshift(selectedCity);
+        newRecentCities.unshift({
+          cityAndStateCode: SearchQueryHelper.getCityAndStateCode(selectedCity),
+          geonameid: selectedCity.geonameid
+        });
         newRecentCities = newRecentCities.slice(0, CITY_SEARCH_RESULT_LIMIT);
 
         const newRecentCitiesStr = JSON.stringify(newRecentCities);
@@ -199,7 +215,7 @@ export default function Home() {
     <div className={`${styles.container} ${showSearchOverlay ? styles['container--overlay-visible'] : ''}`}>
       <Head>
         <title>
-          {selectedCity != null ? `${selectedCity.cityName}, ${selectedCity.stateCode} | ${APP_TITLE}` : APP_TITLE}
+          {selectedCity != null ? `${SearchQueryHelper.getCityAndStateCode(selectedCity)} | ${APP_TITLE}` : APP_TITLE}
         </title>
         <meta
           name="description"
@@ -213,6 +229,7 @@ export default function Home() {
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         recentCities={recentCities}
+        citiesGIDCache={citiesGIDCache}
       ></Header>
       <main className={styles.container__content}>
         {observations ? (

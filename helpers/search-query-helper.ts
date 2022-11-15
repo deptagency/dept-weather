@@ -1,3 +1,5 @@
+import { SearchResultCity } from '../models/cities';
+
 export class SearchQueryHelper {
   private static readonly US_STATE_CODES: Record<string, string> = {
     ALASKA: 'AK',
@@ -81,5 +83,9 @@ export class SearchQueryHelper {
     return (
       this.replaceLastSeparated(formattedQuery, ',') ?? this.replaceLastSeparated(formattedQuery, ' ') ?? formattedQuery
     );
+  }
+
+  static getCityAndStateCode(city: SearchResultCity) {
+    return city.cityAndStateCode ? city.cityAndStateCode : `${city.cityName}, ${city.stateCode}`;
   }
 }
