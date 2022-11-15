@@ -4,8 +4,10 @@
 //    - generateCaches(): "cities.json" and "cities-index.json" files
 //  Outputs:
 //    - generateIndex():  "cities-index.json" file
-//    - generateCaches(): "cities-topN-query-cache.json", "cities-topN-cityAndStateCode-cache.json", and "cities-topN-cache.json" files;
-//                          for each N in QUERY_CACHE_LEVELS
+//    - generateCaches(): these files for each N in CACHE_LEVELS:
+//                          - "cities-topN-query-cache.json":             Object where key is query and value is array of refIndexes of cities.json array
+//                          - "cities-topN-cityAndStateCode-cache.json":  Object where key is refIndex and value is a string formatted as "City, State"
+//                          - "cities-topN-gid-cache.json":               Object with gidQueryCache & gidCityAndStateCode keys; values are caches with geonameid values instead of refIndex values
 //  How to use:
 //    1. Uncomment/comment desired functionality in run() function at end of file
 //    2. Run "node .dev/fuse-tools.js" in the terminal from the root project directory
@@ -13,9 +15,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import Fuse from 'fuse.js';
 
-const QUERY_CACHE_LEVELS = [
-  50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000, 12_500, 15_000, 17_500, 20_000, 22_500, 25_000
-];
+const CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000, 12_500, 15_000, 17_500, 20_000, 22_500, 25_000];
 
 const RESULT_LIMIT = 5;
 const POPULATION_SORT_THRESHOLD = 10e-4;
@@ -33,7 +33,8 @@ const readCities = async () => {
   return inputCities.map(inputCity => ({
     cityAndStateCode: `${inputCity.cityName}, ${inputCity.stateCode}`,
     alternateCityNames: inputCity.alternateCityNames,
-    population: inputCity.population
+    population: inputCity.population,
+    geonameid: inputCity.geonameid
   }));
 };
 
@@ -122,7 +123,7 @@ const buildQueryCache = async (fuse, cities, startIdx, queryCache) => {
   }
 };
 
-const getOrderedQueryCache = async queryCache => {
+const getOrderedQueryCache = queryCache => {
   return Object.keys(queryCache)
     .sort()
     .reduce((obj, key) => {
@@ -131,7 +132,15 @@ const getOrderedQueryCache = async queryCache => {
     }, {});
 };
 
-const buildCityAndStateCodeCache = async (cityAndStateCodeCache, allCities, queryCache) => {
+const getGidQueryCache = (queryCache, allCities) => {
+  const gidQueryCache = {};
+  for (const [query, refIdxs] of Object.entries(queryCache)) {
+    gidQueryCache[query] = refIdxs.map(refIdx => allCities[refIdx].geonameid);
+  }
+  return gidQueryCache;
+};
+
+const buildCityAndStateCodeCache = (cityAndStateCodeCache, allCities, queryCache) => {
   const queryCacheArrs = Object.values(queryCache);
   for (const queryCacheArr of queryCacheArrs) {
     for (const idx of queryCacheArr) {
@@ -141,6 +150,17 @@ const buildCityAndStateCodeCache = async (cityAndStateCodeCache, allCities, quer
       }
     }
   }
+};
+
+const getGidCityAndStateCodeCache = (cityAndStateCodeCache, allCities) => {
+  const gidCityAndStateCodeCache = {};
+  for (const [refIdx, cityAndStateCode] of Object.entries(cityAndStateCodeCache)) {
+    const geonameidStr = String(allCities[refIdx].geonameid);
+    if (gidCityAndStateCodeCache[geonameidStr] == null) {
+      gidCityAndStateCodeCache[geonameidStr] = cityAndStateCode;
+    }
+  }
+  return gidCityAndStateCodeCache;
 };
 
 const write = async (object, fName) => {
@@ -165,7 +185,7 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
   const fuse = getFuse(usAllCities, index);
   console.timeEnd('setup');
 
-  const levels = QUERY_CACHE_LEVELS.sort((a, b) => a - b).filter(level => level > startIdx);
+  const levels = CACHE_LEVELS.sort((a, b) => a - b).filter(level => level > startIdx);
   const usTopCities = usSortedCities.slice(0, levels[levels.length - 1]);
   console.log('generating query cache & cityAndStateCode cache for levels:', levels.join(', '));
   console.log();
@@ -179,23 +199,26 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
 
     const qcLabel = `L${level} - order & write query cache`;
     console.time(qcLabel);
-    const orderedQueryCache = await getOrderedQueryCache(queryCache);
+    const orderedQueryCache = getOrderedQueryCache(queryCache);
     await write(orderedQueryCache, `./data/cities-top${level}-query-cache.json`);
     console.timeEnd(qcLabel);
 
     const cascLabel = `L${level} - build & write cityAndStateCode cache`;
     console.time(cascLabel);
-    await buildCityAndStateCodeCache(cityAndStateCodeCache, usAllCities, queryCache);
+    buildCityAndStateCodeCache(cityAndStateCodeCache, usAllCities, queryCache);
     await write(cityAndStateCodeCache, `./data/cities-top${level}-cityAndStateCode-cache.json`);
     console.timeEnd(cascLabel);
 
-    const combinedLabel = `L${level} - build & write combined cache`;
-    console.time(combinedLabel);
+    const gidLabel = `L${level} - build & write gid cache`;
+    console.time(gidLabel);
     await write(
-      { queryCache: orderedQueryCache, cityAndStateCodeCache: cityAndStateCodeCache },
-      `./data/cities-top${level}-cache.json`
+      {
+        gidQueryCache: getGidQueryCache(orderedQueryCache, usAllCities),
+        gidCityAndStateCodeCache: getGidCityAndStateCodeCache(cityAndStateCodeCache, usAllCities)
+      },
+      `./data/cities-top${level}-gid-cache.json`
     );
-    console.timeEnd(combinedLabel);
+    console.timeEnd(gidLabel);
 
     console.log();
   }
