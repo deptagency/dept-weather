@@ -2,14 +2,16 @@ import Head from 'next/head';
 import { NextRouter, useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
+import useSWRImmutable from 'swr/immutable';
 import { Footer, ForecastCard, Header, ObservationsCard } from '../components';
 import {
   API_GEONAMEID_KEY,
   APP_TITLE,
   CITY_SEARCH_RESULT_LIMIT,
   DEFAULT_CITY,
-  FRONTEND_CACHE_FILENAME,
-  LOCAL_STORAGE_RECENT_CITIES_KEY
+  GID_CACHE_FILENAME,
+  LOCAL_STORAGE_RECENT_CITIES_KEY,
+  SEARCH_PANEL_ANIMATION_DURATION
 } from '../constants';
 import { SearchQueryHelper } from '../helpers';
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response, QueryParams } from '../models/api';
@@ -32,6 +34,11 @@ const getQueryParamsForGeonameid = (geonameid: number): QueryParams => ({
 });
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
+
+const useCitiesGIDCache = (): CitiesGIDCache | undefined => {
+  const { data } = useSWRImmutable<CitiesGIDCache | undefined>(GID_CACHE_FILENAME, fetcher);
+  return data?.gidQueryCache != null && data.gidCityAndStateCodeCache != null ? data : undefined;
+};
 
 const useObservations = (
   queryParams: QueryParams
@@ -95,16 +102,7 @@ export default function Home() {
   const geonameid = getGeonameidFromUrl(router);
   const [selectedCity, setSelectedCity] = useState<SearchResultCity | undefined>(undefined);
 
-  const [citiesGIDCache, setCitiesGIDCache] = useState<CitiesGIDCache | undefined>(undefined);
-  useEffect(() => {
-    fetch(FRONTEND_CACHE_FILENAME)
-      .then(res => res.json())
-      .then(data => {
-        if (data?.gidQueryCache != null && data.gidCityAndStateCodeCache != null) {
-          setCitiesGIDCache(data);
-        }
-      });
-  }, []);
+  const citiesGIDCache = useCitiesGIDCache();
 
   const [recentCities, setRecentCities] = useState<SearchResultCity[]>((): SearchResultCity[] => {
     // Only run on client-side (i.e., when window object is available)
@@ -132,7 +130,7 @@ export default function Home() {
         const newRecentCitiesStr = JSON.stringify(newRecentCities);
         localStorage.setItem(LOCAL_STORAGE_RECENT_CITIES_KEY, newRecentCitiesStr);
         // Wait for search panel close animation before adding to recents list to avoid showing recent icon before loading city
-        setTimeout(() => setRecentCities(newRecentCities), 300);
+        setTimeout(() => setRecentCities(newRecentCities), SEARCH_PANEL_ANIMATION_DURATION);
       }
     }
   }, [recentCities, selectedCity]);

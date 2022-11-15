@@ -3,7 +3,8 @@ import { Unit, UnitType } from './models';
 import { City, FullCity } from './models/cities';
 
 export const APP_TITLE = 'DEPT® Weather';
-export const FRONTEND_CACHE_FILENAME = 'cities-top10000-gid-cache.json';
+export const GID_CACHE_FILENAME = 'cities-top10000-gid-cache.json';
+export const SEARCH_PANEL_ANIMATION_DURATION = 300;
 
 export const MAX_COORDINATE_PRECISION = 2;
 export const AQ_COORDINATES_STR = '42.35826159869919,-71.05360507074275';
