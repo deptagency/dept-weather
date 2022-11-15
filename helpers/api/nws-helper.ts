@@ -137,7 +137,7 @@ export class NwsHelper {
 
         let numSecondsToWait = Math.pow(2, attemptNum - 1);
         let nextStepStr = `waiting ${numSecondsToWait}s`;
-        if (numSecondsToWait >= 64) {
+        if (attemptNum === 5) {
           nextStepStr = `treating response as null`;
           numSecondsToWait = -1;
         }

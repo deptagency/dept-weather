@@ -29,12 +29,14 @@ const timeAgoFormatter = ((
 }) as Formatter;
 
 export default function CardHeader({
+  isLoading,
   lastUpdatedTime,
   label,
   secondaryLabel,
   useIndigo
 }: {
-  lastUpdatedTime: number;
+  isLoading?: boolean;
+  lastUpdatedTime?: number;
   label: string;
   secondaryLabel?: string;
   useIndigo?: boolean;
@@ -55,7 +57,13 @@ export default function CardHeader({
         )}
       </h2>
       <p className={styles['card-header__last-updated']}>
-        Updated {<TimeAgo date={lastUpdatedTime * 1_000} formatter={timeAgoFormatter} />}
+        {isLoading ? (
+          <>Updating...</>
+        ) : lastUpdatedTime ? (
+          <>Updated {<TimeAgo date={lastUpdatedTime * 1_000} formatter={timeAgoFormatter} />}</>
+        ) : (
+          <>Update failed</>
+        )}
       </p>
     </header>
   );

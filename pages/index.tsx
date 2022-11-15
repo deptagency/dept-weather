@@ -1,9 +1,8 @@
 import Head from 'next/head';
 import { NextRouter, useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import useSWR from 'swr';
 import useSWRImmutable from 'swr/immutable';
-import { Footer, ForecastCard, Header, ObservationsCard } from '../components';
+import { Footer, Header, Main } from '../components';
 import {
   API_GEONAMEID_KEY,
   APP_TITLE,
@@ -14,7 +13,7 @@ import {
   SEARCH_PANEL_ANIMATION_DURATION
 } from '../constants';
 import { SearchQueryHelper } from '../helpers';
-import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, Response, QueryParams } from '../models/api';
+import { APIRoute, getPath, QueryParams } from '../models/api';
 import { CitiesGIDCache, SearchResultCity } from '../models/cities';
 import styles from '../styles/Home.module.css';
 
@@ -38,63 +37,6 @@ const fetcher = (key: string) => fetch(key).then(res => res.json());
 const useCitiesGIDCache = (): CitiesGIDCache | undefined => {
   const { data } = useSWRImmutable<CitiesGIDCache | undefined>(GID_CACHE_FILENAME, fetcher);
   return data?.gidQueryCache != null && data.gidCityAndStateCodeCache != null ? data : undefined;
-};
-
-const useObservations = (
-  queryParams: QueryParams
-): { observations?: Response<Observations>; isLoading: boolean; isError: boolean } => {
-  const { data, error } = useSWR<Response<Observations>>(
-    queryParams != null ? getPath(APIRoute.CURRENT, queryParams) : null,
-    fetcher
-  );
-
-  return {
-    observations: data,
-    isLoading: !error && !data,
-    isError: error
-  };
-};
-
-const useForecast = (
-  queryParams: QueryParams
-): { forecast?: Response<Forecast>; forecastIsLoading: boolean; forecastIsError: boolean } => {
-  const { data, error } = useSWR<Response<Forecast>>(
-    queryParams != null ? getPath(APIRoute.FORECAST, queryParams) : null,
-    fetcher
-  );
-
-  return {
-    forecast: data,
-    forecastIsLoading: !error && !data,
-    forecastIsError: error
-  };
-};
-
-const ForecastCards = ({
-  latestReadTime,
-  forecasts
-}: {
-  latestReadTime: number;
-  forecasts: Array<NwsForecastPeriod>;
-}) => {
-  const cards = [];
-
-  let i = 0;
-  if (!forecasts[0].isDaytime) {
-    cards.push(<ForecastCard nightForecast={forecasts[0]} latestReadTime={latestReadTime} key={i++} />);
-  }
-
-  for (; i < forecasts.length; i += 2) {
-    cards.push(
-      <ForecastCard
-        dayForecast={forecasts[i]}
-        nightForecast={i + 1 < forecasts.length ? forecasts[i + 1] : undefined}
-        latestReadTime={latestReadTime}
-        key={i}
-      />
-    );
-  }
-  return cards;
 };
 
 export default function Home() {
@@ -200,9 +142,6 @@ export default function Home() {
     }
   }, [geonameid, selectedCity, router, isPopState]);
 
-  const { observations, isLoading, isError } = useObservations(queryParams);
-  const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
-
   const [showSearchOverlay, setShowSearchOverlay] = useState<boolean>(false);
   useEffect(() => {
     const className = 'body--disable-scroll';
@@ -229,29 +168,7 @@ export default function Home() {
         recentCities={recentCities}
         citiesGIDCache={citiesGIDCache}
       ></Header>
-      <main className={styles.container__content}>
-        {observations ? (
-          !isError && observations.data ? (
-            <ObservationsCard observations={observations}></ObservationsCard>
-          ) : (
-            <h2>Couldn’t fetch current conditions</h2>
-          )
-        ) : (
-          <h2>Loading observations...</h2>
-        )}
-        {forecast ? (
-          !forecastIsError && forecast.data?.nws?.forecasts?.length ? (
-            ForecastCards({
-              latestReadTime: forecast.latestReadTime,
-              forecasts: forecast.data.nws.forecasts
-            })
-          ) : (
-            <h2>Couldn’t fetch forecast</h2>
-          )
-        ) : (
-          <h2>Loading forecast...</h2>
-        )}
-      </main>
+      <Main queryParams={queryParams}></Main>
       <Footer></Footer>
     </div>
   );

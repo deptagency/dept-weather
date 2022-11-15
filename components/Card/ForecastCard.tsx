@@ -5,17 +5,20 @@ import ForecastTemps from './ForecastTemps/ForecastTemps';
 import styles from './Card.module.css';
 
 export default function ForecastCard({
+  isLoading,
+  latestReadTime,
   dayForecast,
-  nightForecast,
-  latestReadTime
+  nightForecast
 }: {
+  isLoading?: boolean;
+  latestReadTime?: number;
   dayForecast?: NwsForecastPeriod;
   nightForecast?: NwsForecastPeriod;
-  latestReadTime: number;
 }) {
   return (
     <article className={styles.card}>
       <CardHeader
+        isLoading={isLoading}
         lastUpdatedTime={latestReadTime}
         label={(dayForecast?.dayName ?? nightForecast?.dayName ?? '').toUpperCase()}
         secondaryLabel={(dayForecast?.shortDateName ?? nightForecast?.shortDateName ?? '').toUpperCase()}
