@@ -51,7 +51,7 @@ export default function UVIndex({ epaData }: { epaData?: EpaHourlyForecast }) {
   const uvIndex = (epaData?.hourlyForecast ?? []).reduce(
     (prev: EpaHourlyForecastItem, current: EpaHourlyForecastItem) =>
       current.time <= new Date().getTime() / 1_000 ? current : prev,
-    { uvIndex: null, time: 0 }
+    { uvIndex: 0, time: 0 }
   )?.uvIndex;
 
   return (
