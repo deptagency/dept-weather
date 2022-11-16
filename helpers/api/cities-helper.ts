@@ -46,8 +46,8 @@ export class CitiesHelper {
   }
 
   private static async getFile(fName: string) {
-    const jsonDirectory = path.join(process.cwd(), 'public');
-    const fileContents = await readFile(`${jsonDirectory}/${fName}`, 'utf8');
+    const publicDirectory = path.join(process.cwd(), process.env.NODE_ENV !== 'production' ? 'public' : '');
+    const fileContents = await readFile(`${publicDirectory}/${fName}`, 'utf8');
     return JSON.parse(fileContents);
   }
 
