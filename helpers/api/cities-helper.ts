@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js';
-import { readFile } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import path from 'path';
 import {
   API_COORDINATES_KEY,
@@ -46,7 +46,10 @@ export class CitiesHelper {
   }
 
   private static async getFile(fName: string) {
-    const directory = path.join(process.cwd(), process.env.NODE_ENV !== 'production' ? 'public' : 'files');
+    const directory = path.join(process.cwd(), process.env.NODE_ENV !== 'production' ? 'public' : '');
+    // DEBUG ONLY
+    const filesInDir = await readdir(directory);
+    LoggerHelper.getLogger(this.CLASS_NAME).error(`filesInDir: ${filesInDir.join(' ')}`);
     const fileContents = await readFile(`${directory}/${fName}`, 'utf8');
     return JSON.parse(fileContents);
   }
