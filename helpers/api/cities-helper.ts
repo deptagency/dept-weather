@@ -46,7 +46,7 @@ export class CitiesHelper {
   }
 
   private static async getFile(fName: string) {
-    const directory = path.join(process.cwd(), process.env.NODE_ENV !== 'production' ? 'public' : '');
+    const directory = path.join(process.cwd());
     // DEBUG ONLY
     const filesInDir = await readdir(directory);
     LoggerHelper.getLogger(this.CLASS_NAME).error(`filesInDir: ${filesInDir.join(' ')}`);
