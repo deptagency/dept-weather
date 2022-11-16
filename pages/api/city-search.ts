@@ -2,9 +2,11 @@ import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULTS_MAX_AGE } from '../../constants';
 import { SearchQueryHelper } from '../../helpers';
-import { CitiesHelper } from '../../helpers/api';
+import { CitiesHelper, LoggerHelper } from '../../helpers/api';
 import { APIRoute, getPath, Response } from '../../models/api';
 import { City } from '../../models/cities';
+
+const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const getPartialResponse = async (): Promise<Pick<Response<City[]>, 'data' | 'warnings' | 'errors'>> => {
@@ -52,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     res.status(200).json(response);
   } catch (err) {
-    console.log(`[${getPath(APIRoute.CITY_SEARCH)}]`, err);
+    LoggerHelper.getLogger(LOGGER_LABEL).error(err);
     const errorResponse: Response<null> = {
       data: null,
       warnings: [],

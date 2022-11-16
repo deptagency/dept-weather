@@ -1,7 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CitiesHelper, NwsHelper } from '../../helpers/api';
+import { CitiesHelper, LoggerHelper, NwsHelper } from '../../helpers/api';
 import { DataSource } from '../../models';
 import { APIRoute, Forecast, getPath, Response } from '../../models/api';
+
+const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -26,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     res.status(200).json(response);
   } catch (err) {
-    console.log(`[${getPath(APIRoute.FORECAST)}]`, err);
+    LoggerHelper.getLogger(LOGGER_LABEL).error(err);
     const errorResponse: Response<null> = {
       data: null,
       warnings: [],
