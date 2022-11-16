@@ -77,14 +77,6 @@ export class NumberHelper {
     return this.round(convertedValue, roundN);
   }
 
-  /*
-[/api/current] TypeError: Cannot read properties of undefined (reading 'in')
-    at Function.convert (/var/task/.next/server/chunks/167.js:1177:115)
-    at Function.convertNwsRawValueAndUnitCode (/var/task/.next/server/chunks/167.js:1181:21)
-    at Function.convertNws (/var/task/.next/server/chunks/167.js:1184:21)
-    at Function.mapCurrentToNwsObservations (/var/task/.next/server/chunks/167.js:752:92)
-  */
-
   static convertNwsRawValueAndUnitCode(
     value: number | null,
     unitCode: string,
@@ -92,12 +84,7 @@ export class NumberHelper {
     reqQuery: ReqQuery,
     roundN: number | undefined = 1
   ) {
-    try {
-      return this.convert(value, this.getUnitMapping(unitType, NwsUnits[unitCode], reqQuery), roundN);
-    } catch (err) {
-      console.error(`Could not convert value=${value} with unitCode=${unitCode}`, err);
-    }
-    return 0;
+    return this.convert(value, this.getUnitMapping(unitType, NwsUnits[unitCode], reqQuery), roundN);
   }
 
   static convertNws(
