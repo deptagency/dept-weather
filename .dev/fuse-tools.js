@@ -28,7 +28,7 @@ const FUSE_OPTIONS = {
 };
 
 const readCities = async () => {
-  const inputCitiesFile = await readFile('./data/cities.json', 'utf-8');
+  const inputCitiesFile = await readFile('./.data/cities.json', 'utf-8');
   const inputCities = JSON.parse(inputCitiesFile);
   return inputCities.map(inputCity => ({
     cityAndStateCode: `${inputCity.cityName}, ${inputCity.stateCode}`,
@@ -41,17 +41,17 @@ const readCities = async () => {
 const createIndex = cities => Fuse.createIndex(FUSE_OPTIONS.keys, cities);
 
 const readIndex = async () => {
-  const indexFile = await readFile('./data/cities-index.json', 'utf-8');
+  const indexFile = await readFile('./.data/cities-index.json', 'utf-8');
   return Fuse.parseIndex(JSON.parse(indexFile));
 };
 
 const readQueryCache = async n => {
-  const queryCacheStr = await readFile(`./data/cities-top${n}-query-cache.json`, 'utf-8');
+  const queryCacheStr = await readFile(`./.data/cities-top${n}-query-cache.json`, 'utf-8');
   return JSON.parse(queryCacheStr);
 };
 
 const readCityAndStateCodeCache = async n => {
-  const cityAndStateCodeCacheStr = await readFile(`./data/cities-top${n}-cityAndStateCode-cache.json`, 'utf-8');
+  const cityAndStateCodeCacheStr = await readFile(`./.data/cities-top${n}-cityAndStateCode-cache.json`, 'utf-8');
   return JSON.parse(cityAndStateCodeCacheStr);
 };
 
@@ -172,7 +172,7 @@ const generateIndex = async () => {
   console.time('generate index');
   const usAllCities = await readCities();
   const index = createIndex(usAllCities);
-  await writeFile('./data/cities-index.json', JSON.stringify(index));
+  await writeFile('./.data/cities-index.json', JSON.stringify(index));
   console.timeEnd('generate index');
 };
 
@@ -200,13 +200,13 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
     const qcLabel = `L${level} - order & write query cache`;
     console.time(qcLabel);
     const orderedQueryCache = getOrderedQueryCache(queryCache);
-    await write(orderedQueryCache, `./data/cities-top${level}-query-cache.json`);
+    await write(orderedQueryCache, `./.data/cities-top${level}-query-cache.json`);
     console.timeEnd(qcLabel);
 
     const cascLabel = `L${level} - build & write cityAndStateCode cache`;
     console.time(cascLabel);
     buildCityAndStateCodeCache(cityAndStateCodeCache, usAllCities, queryCache);
-    await write(cityAndStateCodeCache, `./data/cities-top${level}-cityAndStateCode-cache.json`);
+    await write(cityAndStateCodeCache, `./.data/cities-top${level}-cityAndStateCode-cache.json`);
     console.timeEnd(cascLabel);
 
     const gidLabel = `L${level} - build & write gid cache`;
@@ -216,7 +216,7 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
         gidQueryCache: getGidQueryCache(orderedQueryCache, usAllCities),
         gidCityAndStateCodeCache: getGidCityAndStateCodeCache(cityAndStateCodeCache, usAllCities)
       },
-      `./data/cities-top${level}-gid-cache.json`
+      `./.data/cities-top${level}-gid-cache.json`
     );
     console.timeEnd(gidLabel);
 

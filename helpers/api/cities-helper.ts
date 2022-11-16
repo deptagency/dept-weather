@@ -4,6 +4,8 @@ import path from 'path';
 import {
   API_COORDINATES_KEY,
   API_GEONAMEID_KEY,
+  CITY_SEARCH_CITIES_BY_ID_FILENAME,
+  CITY_SEARCH_CITIES_FILENAME,
   CITY_SEARCH_DATA_FOLDER,
   CITY_SEARCH_FUSE_OPTIONS,
   CITY_SEARCH_INDEX_FILENAME,
@@ -28,10 +30,6 @@ import { NwsHelper } from './nws-helper';
 import { LoggerHelper } from './logger-helper';
 import { NumberHelper } from '../number-helper';
 
-// Instruct Vercel to includes these files
-path.resolve(CITY_SEARCH_DATA_FOLDER, CITY_SEARCH_INDEX_FILENAME);
-path.resolve(CITY_SEARCH_DATA_FOLDER, CITY_SEARCH_QUERY_CACHE_FILENAME);
-
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';
 
@@ -51,15 +49,13 @@ export class CitiesHelper {
   }
 
   private static async getFile(fName: string) {
-    // DEBUG ONLY
-    const filesInDir = await readdir(process.cwd());
-    LoggerHelper.getLogger(this.CLASS_NAME).error(`files in cwd: ${filesInDir.join(' ')}`);
-    const fileContents = await readFile(path.join(process.cwd(), CITY_SEARCH_DATA_FOLDER, fName), 'utf8');
+    const dataDirectory = path.join(process.cwd(), CITY_SEARCH_DATA_FOLDER);
+    const fileContents = await readFile(path.join(dataDirectory, fName), 'utf8');
     return JSON.parse(fileContents);
   }
 
   private static usCitiesPromise: Promise<FullCity[]> = (async () => {
-    const inputCities = (await this.getFile('cities.json')) as InputCity[];
+    const inputCities = (await this.getFile(CITY_SEARCH_CITIES_FILENAME)) as InputCity[];
     return inputCities.map(
       (inputCity: InputCity): FullCity => ({
         ...inputCity,
@@ -72,7 +68,7 @@ export class CitiesHelper {
     return [...usCities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
   })();
   private static usCitiesByIdPromise: Promise<CitiesById> = (async () => {
-    const citiesById = (await this.getFile('cities-by-id.json')) as CitiesById;
+    const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as CitiesById;
     return citiesById;
   })();
   private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {

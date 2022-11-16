@@ -16,7 +16,7 @@ const write = async (object, fName) => {
 };
 
 const readCities = async () => {
-  const inputCitiesFile = await readFile('./data/cities.json', 'utf-8');
+  const inputCitiesFile = await readFile('./.data/cities.json', 'utf-8');
   const inputCities = JSON.parse(inputCitiesFile);
   return inputCities;
 };
@@ -45,8 +45,8 @@ const run = async () => {
   const citiesById = transformCities(cities);
   const orderedCitiesById = getOrderedCitiesById(citiesById);
 
-  await write(orderedCitiesById, `./data/cities-by-id.json`);
-  await write(orderedCitiesById, `./data/cities-by-id-formatted.json`);
+  await write(orderedCitiesById, `./.data/cities-by-id.json`);
+  await write(orderedCitiesById, `./.data/cities-by-id-formatted.json`);
 };
 
 run();

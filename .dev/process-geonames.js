@@ -57,7 +57,7 @@ const run = async () => {
   }
 
   const stringified = JSON.stringify(cities);
-  await writeFile('./data/cities.json', stringified);
+  await writeFile('./.data/cities.json', stringified);
   await writeFile('./cities-formatted.json', stringified);
 };
 
