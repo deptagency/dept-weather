@@ -141,7 +141,7 @@ export class NwsHelper {
           }`
         );
         let numSecondsToWait = Math.pow(2, attemptNum - 1);
-        if (numSecondsToWait < 0 || attemptNum === 5) {
+        if (numSecondsToWait < 0 || attemptNum === 3) {
           break;
         }
         await this.wait(numSecondsToWait * 1_000);
