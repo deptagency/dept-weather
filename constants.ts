@@ -30,6 +30,7 @@ export const CITY_SEARCH_FUSE_OPTIONS: Fuse.IFuseOptions<FullCity> = {
   ]
 };
 export const CITY_SEARCH_DEBOUNCE_MS = 250;
+export const CITY_SEARCH_DATA_FOLDER = './data';
 export const CITY_SEARCH_INDEX_FILENAME = 'cities-index.json';
 export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top25000-query-cache.json';
 

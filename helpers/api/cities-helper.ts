@@ -4,6 +4,7 @@ import path from 'path';
 import {
   API_COORDINATES_KEY,
   API_GEONAMEID_KEY,
+  CITY_SEARCH_DATA_FOLDER,
   CITY_SEARCH_FUSE_OPTIONS,
   CITY_SEARCH_INDEX_FILENAME,
   CITY_SEARCH_POPULATION_SORT_THRESHOLD,
@@ -27,6 +28,10 @@ import { NwsHelper } from './nws-helper';
 import { LoggerHelper } from './logger-helper';
 import { NumberHelper } from '../number-helper';
 
+// Instruct Vercel to includes these files
+path.resolve(CITY_SEARCH_DATA_FOLDER, CITY_SEARCH_INDEX_FILENAME);
+path.resolve(CITY_SEARCH_DATA_FOLDER, CITY_SEARCH_QUERY_CACHE_FILENAME);
+
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';
 
@@ -46,7 +51,7 @@ export class CitiesHelper {
   }
 
   private static async getFile(fName: string) {
-    const directory = path.join(process.cwd());
+    const directory = path.join(process.cwd(), CITY_SEARCH_DATA_FOLDER);
     // DEBUG ONLY
     const filesInDir = await readdir(directory);
     LoggerHelper.getLogger(this.CLASS_NAME).error(`filesInDir: ${filesInDir.join(' ')}`);
