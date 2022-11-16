@@ -101,13 +101,13 @@ export default function Main({ queryParams }: { queryParams: QueryParams }) {
     <main className={homeStyles.container__content}>
       <ObservationsCard
         isLoading={observationsIsLoading}
-        latestReadTime={observations?.latestReadTime ?? -1}
+        latestReadTime={observations?.latestReadTime ? observations.latestReadTime : undefined}
         observations={observations?.data}
       ></ObservationsCard>
       <ForecastCards
         isLoading={forecastIsLoading}
-        latestReadTime={forecast?.latestReadTime ?? -1}
-        forecasts={forecast?.data?.nws?.forecasts ?? placeholderForecasts}
+        latestReadTime={forecast?.latestReadTime ? forecast.latestReadTime : undefined}
+        forecasts={forecast?.data?.nws?.forecasts?.length ? forecast.data.nws.forecasts : placeholderForecasts}
       ></ForecastCards>
     </main>
   );
