@@ -66,7 +66,7 @@ export class NwsHelper {
         await this.fetch(`${this.BASE_URL}stations/${stationId}/observations/latest`)
       ).json() as Promise<ObservationResponse>,
     async (_: string, newItem: ObservationResponse) => {
-      const lastReadingTimestamp = newItem.properties?.timestamp;
+      const lastReadingTimestamp = newItem?.properties?.timestamp;
       return lastReadingTimestamp != null
         ? dayjs(lastReadingTimestamp).unix() + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY
         : 0;
@@ -80,38 +80,36 @@ export class NwsHelper {
   }
 
   static mapCurrentToNwsObservations(cacheEntry: CacheEntry<ObservationResponse>, reqQuery: ReqQuery): NwsObservations {
-    const nwsCurrent = cacheEntry.item.properties;
-    const pressureUnitMapping: UnitMapping = NumberHelper.getUnitMapping(
-      UnitType.pressure,
-      NwsUnits[nwsCurrent.seaLevelPressure.unitCode],
-      reqQuery
-    );
+    const nwsCurrent = cacheEntry.item?.properties;
+    const pressureUnitMapping = nwsCurrent?.seaLevelPressure?.unitCode
+      ? NumberHelper.getUnitMapping(UnitType.pressure, NwsUnits[nwsCurrent.seaLevelPressure.unitCode], reqQuery)
+      : null;
 
     return {
-      readTime: dayjs(nwsCurrent.timestamp).unix(),
+      readTime: nwsCurrent?.timestamp ? dayjs(nwsCurrent.timestamp).unix() : 0,
       validUntil: cacheEntry.validUntil,
-      temperature: NumberHelper.convertNws(nwsCurrent.temperature, UnitType.temp, reqQuery),
-      heatIndex: NumberHelper.convertNws(nwsCurrent.heatIndex, UnitType.temp, reqQuery),
-      dewPoint: NumberHelper.convertNws(nwsCurrent.dewpoint, UnitType.temp, reqQuery),
-      humidity: NumberHelper.roundNws(nwsCurrent.relativeHumidity),
+      temperature: NumberHelper.convertNws(nwsCurrent?.temperature, UnitType.temp, reqQuery),
+      heatIndex: NumberHelper.convertNws(nwsCurrent?.heatIndex, UnitType.temp, reqQuery),
+      dewPoint: NumberHelper.convertNws(nwsCurrent?.dewpoint, UnitType.temp, reqQuery),
+      humidity: NumberHelper.roundNws(nwsCurrent?.relativeHumidity),
       wind: {
-        speed: NumberHelper.convertNws(nwsCurrent.windSpeed, UnitType.wind, reqQuery),
-        direction: nwsCurrent.windDirection?.value,
-        gustSpeed: NumberHelper.convertNws(nwsCurrent.windGust, UnitType.wind, reqQuery)
+        speed: NumberHelper.convertNws(nwsCurrent?.windSpeed, UnitType.wind, reqQuery),
+        direction: nwsCurrent?.windDirection?.value,
+        gustSpeed: NumberHelper.convertNws(nwsCurrent?.windGust, UnitType.wind, reqQuery)
       },
       pressure: {
         atSeaLevel: NumberHelper.convert(
-          nwsCurrent.seaLevelPressure?.value,
+          nwsCurrent?.seaLevelPressure?.value,
           pressureUnitMapping,
-          pressureUnitMapping.to === Unit.INCHES ? 2 : 1
+          pressureUnitMapping?.to === Unit.INCHES ? 2 : 1
         )
       },
       precipitation: {
-        last1Hrs: NumberHelper.convertNws(nwsCurrent.precipitationLastHour, UnitType.precipitation, reqQuery, 2),
-        last3Hrs: NumberHelper.convertNws(nwsCurrent.precipitationLast3Hours, UnitType.precipitation, reqQuery, 2),
-        last6Hrs: NumberHelper.convertNws(nwsCurrent.precipitationLast6Hours, UnitType.precipitation, reqQuery, 2)
+        last1Hrs: NumberHelper.convertNws(nwsCurrent?.precipitationLastHour, UnitType.precipitation, reqQuery, 2),
+        last3Hrs: NumberHelper.convertNws(nwsCurrent?.precipitationLast3Hours, UnitType.precipitation, reqQuery, 2),
+        last6Hrs: NumberHelper.convertNws(nwsCurrent?.precipitationLast6Hours, UnitType.precipitation, reqQuery, 2)
       },
-      textDescription: nwsCurrent.textDescription
+      textDescription: nwsCurrent?.textDescription ?? null
     };
   }
 

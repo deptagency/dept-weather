@@ -63,12 +63,12 @@ export class NumberHelper {
     return roundedX / multiple;
   }
 
-  static roundNws(quantitativeValue: QuantitativeValue, n: number | undefined = 1) {
-    return this.round(quantitativeValue.value, n);
+  static roundNws(quantitativeValue: QuantitativeValue | undefined, n: number | undefined = 1) {
+    return this.round(quantitativeValue?.value ?? null, n);
   }
 
-  static convert(value: number | null, unitMapping: UnitMapping, roundN: number | undefined = 1) {
-    if (value == null) {
+  static convert(value: number | null, unitMapping: UnitMapping | null, roundN: number | undefined = 1) {
+    if (value == null || unitMapping == null) {
       return null;
     }
 
@@ -88,18 +88,20 @@ export class NumberHelper {
   }
 
   static convertNws(
-    quantitativeValue: QuantitativeValue,
+    quantitativeValue: QuantitativeValue | undefined,
     unitType: UnitType,
     reqQuery: ReqQuery,
     roundN: number | undefined = 1
   ) {
-    return this.convertNwsRawValueAndUnitCode(
-      quantitativeValue?.value,
-      quantitativeValue?.unitCode,
-      unitType,
-      reqQuery,
-      roundN
-    );
+    return quantitativeValue?.value != null && quantitativeValue?.unitCode
+      ? this.convertNwsRawValueAndUnitCode(
+          quantitativeValue.value,
+          quantitativeValue.unitCode,
+          unitType,
+          reqQuery,
+          roundN
+        )
+      : null;
   }
 
   static getUnitMapping(unitType: UnitType, from: Unit, reqQuery: ReqQuery): UnitMapping {
