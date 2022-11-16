@@ -51,11 +51,10 @@ export class CitiesHelper {
   }
 
   private static async getFile(fName: string) {
-    const directory = path.join(process.cwd(), CITY_SEARCH_DATA_FOLDER);
     // DEBUG ONLY
-    const filesInDir = await readdir(directory);
-    LoggerHelper.getLogger(this.CLASS_NAME).error(`filesInDir: ${filesInDir.join(' ')}`);
-    const fileContents = await readFile(`${directory}/${fName}`, 'utf8');
+    const filesInDir = await readdir(process.cwd());
+    LoggerHelper.getLogger(this.CLASS_NAME).error(`files in cwd: ${filesInDir.join(' ')}`);
+    const fileContents = await readFile(path.join(process.cwd(), CITY_SEARCH_DATA_FOLDER, fName), 'utf8');
     return JSON.parse(fileContents);
   }
 
