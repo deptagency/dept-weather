@@ -7,8 +7,10 @@ import { ReqQuery, WlObservations } from '../../models/api';
 import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from '../../models/weatherlink';
 import { Cached, CacheEntry } from './cached';
 import { CoordinatesHelper, NumberHelper } from '../';
+import { LoggerHelper } from './logger-helper';
 
 export class WeatherlinkHelper {
+  private static readonly CLASS_NAME = 'WeatherlinkHelper';
   private static readonly apiKey = process.env.WEATHERLINK_API_KEY!;
   private static readonly apiSecret = process.env.WEATHERLINK_API_SECRET!;
   private static readonly wl = WeatherLink({ apiKey: this.apiKey, apiSecret: this.apiSecret });
@@ -36,8 +38,7 @@ export class WeatherlinkHelper {
       const recordingInterval = (await this.getMainStation()).recording_interval * 60;
       return lastReading ? lastReading + recordingInterval + 10 : 0;
     },
-    true,
-    '[WeatherlinkHelper.current]'
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
   );
   static async getCurrent() {
     return this.current.get(AQ_COORDINATES_STR, undefined);

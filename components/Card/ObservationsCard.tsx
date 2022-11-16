@@ -1,11 +1,11 @@
-import { Observations, SunriseSunsetObservations } from '../../models/api';
+import { Observations, SunTimesObservations } from '../../models/api';
 import CardHeader from './CardHeader/CardHeader';
 import Condition from './Condition/Condition';
 import CurrentTemp from './CurrentTemp/CurrentTemp';
 import { AirQuality, Humidity, Precipitation, Pressure, UVIndex, Wind } from './Measurement';
 import styles from './Card.module.css';
 
-const getIsNight = (sunData?: SunriseSunsetObservations) => {
+const getIsNight = (sunData?: SunTimesObservations) => {
   let isNight = false;
   if (sunData?.sunrise != null && sunData?.sunset != null) {
     const now = new Date();

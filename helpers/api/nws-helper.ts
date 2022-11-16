@@ -17,10 +17,12 @@ import {
 import { Cached, CacheEntry } from './cached';
 import { CoordinatesHelper, NumberHelper } from '../';
 import { QueriedLocation } from '../../models/cities';
+import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(localeData);
 
 export class NwsHelper {
+  private static readonly CLASS_NAME = 'NwsHelper';
   private static readonly BASE_URL = 'https://api.weather.gov/';
   private static readonly userAgent = process.env.USER_AGENT!;
 
@@ -36,8 +38,7 @@ export class NwsHelper {
     async (coordinatesStr: string) =>
       (await this.fetch(`${this.BASE_URL}points/${coordinatesStr}`)).json() as Promise<PointsResponse>,
     async (_: string, __: PointsResponse) => dayjs().add(1, 'week').unix(),
-    true,
-    '[NwsHelper.points]'
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.points`)
   );
   static async getPoints(coordinatesStr: string) {
     return this.points.get(coordinatesStr, coordinatesStr);
@@ -46,8 +47,7 @@ export class NwsHelper {
   private static readonly stations = new Cached<StationsResponse, string>(
     async (stationsUrl: string) => (await this.fetch(stationsUrl)).json() as Promise<StationsResponse>,
     async (_: string, __: StationsResponse) => dayjs().add(1, 'week').unix(),
-    true,
-    '[NwsHelper.stations]'
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.stations`)
   );
   private static async getStations(coordinatesStr: string) {
     const points = await this.getPoints(coordinatesStr);
@@ -71,8 +71,7 @@ export class NwsHelper {
         ? dayjs(lastReadingTimestamp).unix() + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY
         : 0;
     },
-    true,
-    '[NwsHelper.current]'
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
   );
   static async getCurrent(queriedLocation: QueriedLocation) {
     const stationId =
@@ -118,6 +117,7 @@ export class NwsHelper {
 
   private static readonly forecast = new Cached<ForecastResponse, string>(
     async (forecastUrl: string) => {
+      const forecastLogger = LoggerHelper.getLogger(`${this.CLASS_NAME}.forecast`);
       for (let attemptNum = 1; ; attemptNum++) {
         let status: number | undefined;
         let jsonResponse: any;
@@ -129,33 +129,26 @@ export class NwsHelper {
           jsonResponse = await response.json();
           if (status === 200 && jsonResponse?.properties?.periods?.length) {
             if (attemptNum > 1) {
-              console.log('[NwsHelper.forecast]', forecastUrl, `Attempt #${attemptNum} succeeded!'}`);
+              forecastLogger.info(`Attempt #${attemptNum} for ${forecastUrl} SUCCEEDED`);
             }
             return jsonResponse as ForecastResponse;
           }
         } catch {}
 
-        let numSecondsToWait = Math.pow(2, attemptNum - 1);
-        let nextStepStr = `waiting ${numSecondsToWait}s`;
-        if (attemptNum === 5) {
-          nextStepStr = `treating response as null`;
-          numSecondsToWait = -1;
-        }
-
-        console.warn(
-          '[NwsHelper.forecast]',
-          forecastUrl,
-          `Attempt #${attemptNum} failed with code ${status}, ${nextStepStr}; ${
+        forecastLogger.warn(
+          `Attempt #${attemptNum} for ${forecastUrl} FAILED with code ${status} - ${
             jsonResponse != null
               ? `correlationId="${jsonResponse.correlationId}", detail="${jsonResponse.detail}"`
               : 'response was nullish'
           }`
         );
-        if (numSecondsToWait < 0) {
+        let numSecondsToWait = Math.pow(2, attemptNum - 1);
+        if (numSecondsToWait < 0 || attemptNum === 5) {
           break;
         }
         await this.wait(numSecondsToWait * 1_000);
       }
+      forecastLogger.error(`All attempts for ${forecastUrl} FAILED; returning null`);
       return null as unknown as ForecastResponse;
     },
     async (_: string, newItem: any) => {
@@ -164,8 +157,7 @@ export class NwsHelper {
       const fifteenMinsFromNow = dayjs().add(15, 'minutes').unix();
       return Math.max(oneHourFromLastReading, fifteenMinsFromNow);
     },
-    true,
-    '[NwsHelper.forecast]'
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.forecast`)
   );
   static async getForecast(queriedLocation: QueriedLocation) {
     const points = await this.getPoints(CoordinatesHelper.cityToStr(queriedLocation));
@@ -174,7 +166,7 @@ export class NwsHelper {
   }
 
   static mapForecastToNwsForecast(cacheEntry: CacheEntry<ForecastResponse>, reqQuery: ReqQuery): NwsForecast {
-    const forecast = cacheEntry.item.properties;
+    const forecast = cacheEntry.item?.properties;
 
     const getWind = (period: ForecastPeriod): WindForecast => {
       let wind: WindForecast = {
@@ -228,28 +220,29 @@ export class NwsHelper {
       return wind;
     };
 
-    const forecasts = forecast.periods.map((period): NwsForecastPeriod => {
-      const start = dayjs(period.startTime);
-      const dayName = start.isBefore(dayjs().endOf('day'))
-        ? period.isDaytime
-          ? 'Today'
-          : 'Tonight'
-        : dayjs.weekdays()[start.day()];
-      return {
-        dayName,
-        shortDateName: start.format('MMM D'),
-        periodStart: start.unix(),
-        periodEnd: dayjs(period.endTime).unix(),
-        isDaytime: period.isDaytime,
-        temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
-        wind: getWind(period),
-        shortForecast: period.shortForecast,
-        detailedForecast: period.detailedForecast
-      };
-    });
+    const forecasts =
+      forecast?.periods?.map((period): NwsForecastPeriod => {
+        const start = dayjs(period.startTime);
+        const dayName = start.isBefore(dayjs().endOf('day'))
+          ? period.isDaytime
+            ? 'Today'
+            : 'Tonight'
+          : dayjs.weekdays()[start.day()];
+        return {
+          dayName,
+          shortDateName: start.format('MMM D'),
+          periodStart: start.unix(),
+          periodEnd: dayjs(period.endTime).unix(),
+          isDaytime: period.isDaytime,
+          temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
+          wind: getWind(period),
+          shortForecast: period.shortForecast,
+          detailedForecast: period.detailedForecast
+        };
+      }) ?? [];
 
     return {
-      readTime: dayjs(forecast.updateTime).unix(),
+      readTime: forecast?.updateTime ? dayjs(forecast.updateTime).unix() : 0,
       validUntil: cacheEntry.validUntil,
       forecasts
     };

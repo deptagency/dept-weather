@@ -9,6 +9,7 @@ import { QueriedLocation } from '../../models/cities';
 import { UVHourlyForecast, UVHourlyForecastItem } from '../../models/epa';
 import { Cached, CacheEntry } from './cached';
 import { CoordinatesHelper } from '../';
+import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
@@ -17,6 +18,7 @@ dayjs.extend(utc);
 type UVHourlyForecastWithTz = { uvHourlyForecast: UVHourlyForecast } & Pick<QueriedLocation, 'timeZone'>;
 
 export class EpaHelper {
+  private static readonly CLASS_NAME = 'EpaHelper';
   private static readonly userAgent = process.env.USER_AGENT!;
 
   private static getRequestUrlFor(zipCode: string) {
@@ -31,7 +33,9 @@ export class EpaHelper {
         timeZone ? dayjs.tz(stringToParse, dateTimeFormat, timeZone) : dayjs(stringToParse, dateTimeFormat)
       ).unix();
     } catch (err) {
-      console.log(`[EpaHelper.getParsedUnixTime()]`, `Couldn't parse "${stringToParse}"`, err);
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getParsedUnixTime()`).error(
+        `Couldn't parse "${stringToParse}" - ${err}`
+      );
     }
     return 0;
   }
@@ -55,8 +59,7 @@ export class EpaHelper {
         ? this.getParsedUnixTime(newItem.uvHourlyForecast[newItem.uvHourlyForecast.length - 1], newItem.timeZone)
         : 0;
     },
-    true,
-    '[EpaHelper.hourly]'
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.hourly`)
   );
   static async getHourly(queriedLocation: QueriedLocation) {
     return this.hourly.get(CoordinatesHelper.cityToStr(queriedLocation), queriedLocation);

@@ -24,8 +24,12 @@ import {
 import { CoordinatesHelper } from '../coordinates-helper';
 import { SearchQueryHelper } from '../search-query-helper';
 import { NwsHelper } from './nws-helper';
+import { LoggerHelper } from './logger-helper';
+import { NumberHelper } from '../number-helper';
 
 export class CitiesHelper {
+  private static readonly CLASS_NAME = 'CitiesHelper';
+
   private static sortByPopulation(a: FullCity, b: FullCity) {
     return b.population - a.population;
   }
@@ -132,7 +136,7 @@ export class CitiesHelper {
   }
 
   static async searchFor(query: string) {
-    console.time(query);
+    const perfStart = performance.now();
     if (!query.length) {
       return (await this.usTopCitiesPromise).map(this.mapToCity);
     }
@@ -145,7 +149,9 @@ export class CitiesHelper {
       cities = topResults.map(result => result.item);
     }
 
-    console.timeEnd(query);
+    const duration = performance.now() - perfStart;
+    const formattedDuration = duration < 1000 ? `${duration}ms` : `${NumberHelper.round(duration / 1_000, 2)}s`;
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(`"${query}" took ${formattedDuration}`);
     return cities.map(this.mapToCity);
   }
 

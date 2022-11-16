@@ -8,7 +8,7 @@ export interface Observations extends QueriedLocationInfo {
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsObservations;
   [DataSource.AIRNOW]?: AirNowObservations;
   [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]?: EpaHourlyForecast;
-  [DataSource.SUNRISE_SUNSET]?: SunriseSunsetObservations;
+  [DataSource.SUN_TIMES]?: SunTimesObservations;
 }
 
 export interface BaseObservations {
@@ -44,7 +44,7 @@ export interface EpaHourlyForecast extends BaseObservations {
   hourlyForecast: Array<EpaHourlyForecastItem>;
 }
 
-export interface SunriseSunsetObservations extends BaseObservations, SunriseSunset {}
+export interface SunTimesObservations extends BaseObservations, SunriseSunset {}
 
 export interface Wind {
   speed: number | null;

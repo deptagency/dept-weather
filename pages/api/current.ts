@@ -5,7 +5,7 @@ import {
   CitiesHelper,
   EpaHelper,
   NwsHelper,
-  SunriseSunsetHelper,
+  SunTimesHelper,
   WeatherlinkHelper
 } from '../../helpers/api';
 import { DataSource } from '../../models';
@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       NwsHelper.getCurrent(queriedLocation),
       AirNowHelper.getCurrent(queriedLocation),
       EpaHelper.getHourly(queriedLocation),
-      SunriseSunsetHelper.getSunriseSunset(queriedLocation)
+      SunTimesHelper.getTimes(queriedLocation)
     ];
     if (WeatherlinkHelper.shouldUse(queriedLocation)) {
       promises.push(WeatherlinkHelper.getCurrent());
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapCurrentToNwsObservations(results[0], req.query),
       [DataSource.AIRNOW]: AirNowHelper.mapCurrentToAirNowObservations(results[1]),
       [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]: EpaHelper.mapHourlyToEpaHourlyForecast(results[2]),
-      [DataSource.SUNRISE_SUNSET]: SunriseSunsetHelper.mapSunriseSunsetToSunriseSunsetObservations(results[3]),
+      [DataSource.SUN_TIMES]: SunTimesHelper.mapTimesToSunTimesObservations(results[3]),
       [DataSource.QUERIED_LOCATION]: queriedLocation
     };
     if (results.length > 4) {

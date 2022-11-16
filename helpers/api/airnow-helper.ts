@@ -9,6 +9,7 @@ import { AirNowObservations } from '../../models/api';
 import { QueriedLocation } from '../../models/cities';
 import { Cached, CacheEntry } from './cached';
 import { CoordinatesHelper } from '../';
+import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
@@ -17,6 +18,7 @@ dayjs.extend(utc);
 type CurrentObservationsWithTz = { observations: CurrentObservations } & Pick<QueriedLocation, 'timeZone'>;
 
 export class AirNowHelper {
+  private static readonly CLASS_NAME = 'AirNowHelper';
   private static readonly apiKey = process.env.AIRNOW_API_KEY!;
   private static readonly userAgent = process.env.USER_AGENT!;
 
@@ -31,7 +33,9 @@ export class AirNowHelper {
       try {
         return dayjs.tz(stringToParse, 'YYYY-M-D H', observationsWithTz.timeZone).unix();
       } catch (err) {
-        console.log(`[AirNowHelper.getLatestReadTime()]`, `Couldn't parse "${stringToParse}"`, err);
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.getLatestReadTime()`).error(
+          `Couldn't parse "${stringToParse}" - ${err}`
+        );
         return 0;
       }
     });
@@ -52,8 +56,7 @@ export class AirNowHelper {
       const latestReadTime = this.getLatestReadTime(newItem);
       return latestReadTime ? latestReadTime + AIRNOW_RECORDING_INTERVAL + AIRNOW_UPLOAD_DELAY : 0;
     },
-    true,
-    '[AirNowHelper.current]'
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
   );
   static async getCurrent(queriedLocation: QueriedLocation) {
     return this.current.get(CoordinatesHelper.cityToStr(queriedLocation), queriedLocation);

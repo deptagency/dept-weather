@@ -3,11 +3,12 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { getSunrise, getSunset } from 'sunrise-sunset-js';
-import { SunriseSunsetObservations } from '../../models/api';
+import { SunTimesObservations } from '../../models/api';
 import { QueriedLocation } from '../../models/cities';
 import { SunriseSunset } from '../../models/sunrise-sunset';
-import { CoordinatesHelper } from '../';
+import { CoordinatesHelper } from '..';
 import { Cached, CacheEntry } from './cached';
+import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
@@ -15,22 +16,22 @@ dayjs.extend(utc);
 
 type SunriseSunsetWithTz = { sunriseSunset: SunriseSunset } & Pick<QueriedLocation, 'timeZone'>;
 
-export class SunriseSunsetHelper {
+export class SunTimesHelper {
+  private static readonly CLASS_NAME = 'SunTimesHelper';
+
   static getSun(riseOrSet: 'rise' | 'set', queriedLocation: QueriedLocation, day: Dayjs) {
     try {
       const coordinatesNumArr = CoordinatesHelper.cityToNumArr(queriedLocation);
       const sunFn = riseOrSet === 'rise' ? getSunrise : getSunset;
       return dayjs(sunFn(coordinatesNumArr[0], coordinatesNumArr[1], day.toDate()));
     } catch (err) {
-      console.log(
-        `[SunriseSunsetHelper.getSun()]`,
-        `Couldn't get sun${riseOrSet} for "${CoordinatesHelper.cityToStr(queriedLocation)}"`,
-        err
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getSun()`).error(
+        `Couldn't get sun${riseOrSet} for "${CoordinatesHelper.cityToStr(queriedLocation)}"`
       );
     }
   }
 
-  private static readonly sunrisesunset = new Cached<SunriseSunsetWithTz, QueriedLocation>(
+  private static readonly times = new Cached<SunriseSunsetWithTz, QueriedLocation>(
     async (queriedLocation: QueriedLocation) => {
       const currentLocalTime = dayjs().tz(queriedLocation.timeZone);
 
@@ -61,16 +62,13 @@ export class SunriseSunsetHelper {
       };
     },
     async (_: string, newItem: SunriseSunsetWithTz) => dayjs().tz(newItem.timeZone).endOf('day').unix(),
-    true,
-    '[SunriseSunsetHelper.sunrisesunset]'
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.times`)
   );
-  static async getSunriseSunset(queriedLocation: QueriedLocation) {
-    return this.sunrisesunset.get(CoordinatesHelper.cityToStr(queriedLocation), queriedLocation);
+  static async getTimes(queriedLocation: QueriedLocation) {
+    return this.times.get(CoordinatesHelper.cityToStr(queriedLocation), queriedLocation);
   }
 
-  static mapSunriseSunsetToSunriseSunsetObservations(
-    cacheEntry: CacheEntry<SunriseSunsetWithTz>
-  ): SunriseSunsetObservations {
+  static mapTimesToSunTimesObservations(cacheEntry: CacheEntry<SunriseSunsetWithTz>): SunTimesObservations {
     return {
       ...cacheEntry.item.sunriseSunset,
       readTime: dayjs().tz(cacheEntry.item.timeZone).startOf('day').unix(),

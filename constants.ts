@@ -54,3 +54,9 @@ export const API_GEONAMEID_KEY = 'id';
 export const LOCAL_STORAGE_RECENT_CITIES_KEY = 'recentCities';
 
 export const IME_UNSETTLED_KEY_CODE = '229';
+
+export const LOG_TIMESTAMP_FORMAT = 'YY-MM-DD HH:mm:ss';
+export const LOG_LEVEL_STR_PADDING = 7;
+export const LOG_LABEL_STR_PADDING = 22;
+export const MIN_LOG_LEVEL_DEV = 'verbose';
+export const MIN_LOG_LEVEL_PROD = 'info';
