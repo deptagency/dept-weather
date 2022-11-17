@@ -18,6 +18,10 @@
   width: 1.5rem;
 }
 
+.condition__icon__image {
+  object-fit: contain;
+}
+
 .condition__label {
   margin: 0.25rem 0rem 0rem;
   font-size: 2rem;

@@ -32,7 +32,7 @@ const WeatherIcon = (condition: string, size: ConditionSize, isNight?: boolean) 
   const iconSrc = getWeatherIconSrc(condition, isNight);
   return iconSrc ? (
     <div className={`${styles.condition__icon}  ${size === 'small' ? styles['condition__icon--small'] : ''}`}>
-      <Image src={iconSrc} layout="fill" objectFit="contain" alt=""></Image>
+      <Image src={iconSrc} className={styles.condition__icon__image} fill sizes="2rem" alt=""></Image>
     </div>
   ) : (
     <></>
