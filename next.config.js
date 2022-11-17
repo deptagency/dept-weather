@@ -16,13 +16,9 @@ const nextConfig = {
         headers: STATIC_ASSET_CACHE_HEADERS
       },
       // {
-      //   source: '/favicons/(.*)',
+      //   source: '/favicon.svg',
       //   headers: STATIC_ASSET_CACHE_HEADERS
       // },
-      {
-        source: '/fonts/(.*)',
-        headers: STATIC_ASSET_CACHE_HEADERS
-      },
       {
         source: '/weather-icons/(.*)',
         headers: STATIC_ASSET_CACHE_HEADERS
