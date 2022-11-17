@@ -1,5 +1,5 @@
-import { WlPressure } from '../../../../models/api';
-import { toFixedOrEmDash } from '../../../../utils';
+import { WlPressure } from 'models/api';
+import { toFixedOrEmDash } from 'utils';
 import Measurement from '../Measurement';
 type PressureArg = (Pick<WlPressure, 'atSeaLevel'> & Partial<Pick<WlPressure, 'trend'>>) | null | undefined;
 

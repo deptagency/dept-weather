@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { DefaultIconMapping, DefaultIcons, IconCondition } from '../../../models';
+import { DefaultIconMapping, DefaultIcons, IconCondition } from 'models';
 import styles from './Condition.module.css';
 
 type ConditionSize = 'small' | 'large';

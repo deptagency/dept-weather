@@ -1,6 +1,6 @@
 import { AQILevelName } from '../airnow';
-import { DataSource } from '../data-source.enum';
-import { SunriseSunset } from '../sunrise-sunset/sunrise-sunset';
+import { DataSource } from 'models';
+import { SunriseSunset } from '../sunrise-sunset';
 import { QueriedLocationInfo } from './queried-location-info.model';
 
 export interface Observations extends QueriedLocationInfo {

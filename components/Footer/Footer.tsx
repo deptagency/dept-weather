@@ -1,4 +1,4 @@
-import homeStyles from '../../styles/Home.module.css';
+import homeStyles from 'styles/Home.module.css';
 import styles from './Footer.module.css';
 
 export default function Footer() {

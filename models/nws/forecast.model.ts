@@ -1,5 +1,4 @@
-import { DetailedWindDirection } from '../detailed-wind-direction.enum';
-import { WindDirection } from '../wind-direction.enum';
+import { DetailedWindDirection, WindDirection } from 'models';
 import { Geometry } from './geometry.model';
 import { QuantitativeMinMaxValue, QuantitativeValue } from './quantitative-value.model';
 

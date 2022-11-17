@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CitiesHelper, LoggerHelper, NwsHelper } from '../../helpers/api';
-import { DataSource } from '../../models';
-import { APIRoute, Forecast, getPath, Response } from '../../models/api';
+import { CitiesHelper, LoggerHelper, NwsHelper } from 'helpers/api';
+import { DataSource } from 'models';
+import { APIRoute, Forecast, getPath, Response } from 'models/api';
 
 const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 

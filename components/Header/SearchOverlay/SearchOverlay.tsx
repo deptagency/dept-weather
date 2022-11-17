@@ -1,11 +1,11 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS } from '../../../constants';
-import { SearchQueryHelper } from '../../../helpers';
-import { useDebounce } from '../../../hooks';
-import { APIRoute, getPath } from '../../../models/api';
-import { CitiesGIDCache, SearchResultCity } from '../../../models/cities';
+import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS } from '@constants';
+import { SearchQueryHelper } from 'helpers';
+import { useDebounce } from 'hooks';
+import { APIRoute, getPath } from 'models/api';
+import { CitiesGIDCache, SearchResultCity } from 'models/cities';
+import homeStyles from 'styles/Home.module.css';
 import styles from './SearchOverlay.module.css';
-import homeStyles from '../../../styles/Home.module.css';
 
 const RecentIcon = ({ isHidden }: { isHidden: boolean }) => (
   <svg

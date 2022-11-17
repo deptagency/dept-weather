@@ -1,4 +1,4 @@
-import { Observations, SunTimesObservations } from '../../models/api';
+import { Observations, SunTimesObservations } from 'models/api';
 import CardHeader from './CardHeader/CardHeader';
 import Condition from './Condition/Condition';
 import CurrentTemp from './CurrentTemp/CurrentTemp';

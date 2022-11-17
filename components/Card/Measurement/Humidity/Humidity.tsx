@@ -1,4 +1,4 @@
-import { roundOrEmDash } from '../../../../utils';
+import { roundOrEmDash } from 'utils';
 import Measurement from '../Measurement';
 
 const HumidityIcon = () => (

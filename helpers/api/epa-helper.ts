@@ -4,11 +4,11 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import geo2zip from 'geo2zip';
 import fetch from 'node-fetch';
-import { EpaHourlyForecast, EpaHourlyForecastItem } from '../../models/api';
-import { QueriedLocation } from '../../models/cities';
-import { UVHourlyForecast, UVHourlyForecastItem } from '../../models/epa';
+import { CoordinatesHelper } from 'helpers';
+import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api';
+import { QueriedLocation } from 'models/cities';
+import { UVHourlyForecast, UVHourlyForecastItem } from 'models/epa';
 import { Cached, CacheEntry } from './cached';
-import { CoordinatesHelper } from '../';
 import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(customParseFormat);

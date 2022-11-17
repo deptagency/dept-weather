@@ -1,4 +1,4 @@
-import { NwsForecastPeriod } from '../../models/api';
+import { NwsForecastPeriod } from 'models/api';
 import CardHeader from './CardHeader/CardHeader';
 import ForecastPeriod from './ForecastPeriod/ForecastPeriod';
 import ForecastTemps from './ForecastTemps/ForecastTemps';

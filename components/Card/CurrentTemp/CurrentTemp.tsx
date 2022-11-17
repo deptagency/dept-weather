@@ -1,4 +1,4 @@
-import { floorOrEmDash } from '../../../utils';
+import { floorOrEmDash } from 'utils';
 import styles from './CurrentTemp.module.css';
 
 export default function CurrentTemp({

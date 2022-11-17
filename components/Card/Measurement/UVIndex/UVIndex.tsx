@@ -1,5 +1,5 @@
-import { UVLevelName } from '../../../../models';
-import { EpaHourlyForecast, EpaHourlyForecastItem } from '../../../../models/api';
+import { UVLevelName } from 'models';
+import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api';
 import Measurement from '../Measurement';
 
 const uvValueToLevelName = (uvValue: number | null | undefined) => {

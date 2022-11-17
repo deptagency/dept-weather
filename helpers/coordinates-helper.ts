@@ -1,5 +1,5 @@
-import { MAX_COORDINATE_PRECISION } from '../constants';
-import { City } from '../models/cities';
+import { MAX_COORDINATE_PRECISION } from '@constants';
+import { City } from 'models/cities';
 import { NumberHelper } from './number-helper';
 
 export class CoordinatesHelper {

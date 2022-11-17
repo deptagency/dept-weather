@@ -1,6 +1,4 @@
-import { DataSource } from '../data-source.enum';
-import { DetailedWindDirection } from '../detailed-wind-direction.enum';
-import { WindDirection } from '../wind-direction.enum';
+import { DataSource, DetailedWindDirection, WindDirection } from 'models';
 import { Wind } from './observations.model';
 import { QueriedLocationInfo } from './queried-location-info.model';
 

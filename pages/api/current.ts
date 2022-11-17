@@ -8,9 +8,9 @@ import {
   NwsHelper,
   SunTimesHelper,
   WeatherlinkHelper
-} from '../../helpers/api';
-import { DataSource } from '../../models';
-import { APIRoute, BaseObservations, getPath, Observations, Response } from '../../models/api';
+} from 'helpers/api';
+import { DataSource } from 'models';
+import { APIRoute, BaseObservations, getPath, Observations, Response } from 'models/api';
 
 const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 

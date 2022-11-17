@@ -1,10 +1,10 @@
 import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, useState } from 'react';
-import { IME_UNSETTLED_KEY_CODE } from '../../constants';
-import { SearchQueryHelper } from '../../helpers';
-import { CitiesGIDCache, SearchResultCity } from '../../models/cities';
-import homeStyles from '../../styles/Home.module.css';
-import styles from './Header.module.css';
+import { IME_UNSETTLED_KEY_CODE } from '@constants';
+import { SearchQueryHelper } from 'helpers';
+import { CitiesGIDCache, SearchResultCity } from 'models/cities';
 import SearchOverlay from './SearchOverlay/SearchOverlay';
+import homeStyles from 'styles/Home.module.css';
+import styles from './Header.module.css';
 
 const DEPTLogo = () => (
   <svg

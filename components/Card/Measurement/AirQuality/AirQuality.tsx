@@ -1,4 +1,4 @@
-import { AirNowObservations } from '../../../../models/api';
+import { AirNowObservations } from 'models/api';
 import Measurement from '../Measurement';
 
 const AirQualityIcon = () => (

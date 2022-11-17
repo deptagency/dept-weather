@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import type { Logger } from 'winston';
-import { LOG_TIMESTAMP_FORMAT } from '../../constants';
+import { LOG_TIMESTAMP_FORMAT } from '@constants';
 
 export interface CacheEntry<Item> {
   item: Item;

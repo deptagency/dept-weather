@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { NextRouter, useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
-import { Footer, Header, Main } from '../components';
+import { Footer, Header, Main } from 'components';
 import {
   API_GEONAMEID_KEY,
   APP_MASK_ICON_COLOR,
@@ -12,10 +12,10 @@ import {
   GID_CACHE_FILENAME,
   LOCAL_STORAGE_RECENT_CITIES_KEY,
   SEARCH_PANEL_ANIMATION_DURATION
-} from '../constants';
-import { SearchQueryHelper } from '../helpers';
-import { APIRoute, getPath, QueryParams } from '../models/api';
-import { CitiesGIDCache, SearchResultCity } from '../models/cities';
+} from '@constants';
+import { SearchQueryHelper } from 'helpers';
+import { APIRoute, getPath, QueryParams } from 'models/api';
+import { CitiesGIDCache, SearchResultCity } from 'models/cities';
 
 const getGeonameidFromUrl = (router: NextRouter) => {
   let geonameidStr = router.query[API_GEONAMEID_KEY];

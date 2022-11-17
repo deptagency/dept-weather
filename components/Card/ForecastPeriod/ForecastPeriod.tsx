@@ -1,4 +1,4 @@
-import { NwsForecastPeriod } from '../../../models/api';
+import { NwsForecastPeriod } from 'models/api';
 import Condition from '../Condition/Condition';
 import { PrecipitationForecast, WindForecast } from '../Measurement';
 import styles from './ForecastPeriod.module.css';

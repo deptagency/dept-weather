@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js';
-import { readFile, readdir } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import path from 'path';
 import {
   API_COORDINATES_KEY,
@@ -13,8 +13,9 @@ import {
   CITY_SEARCH_QUERY_CACHE_FILENAME,
   CITY_SEARCH_RESULT_LIMIT,
   DEFAULT_CITY
-} from '../../constants';
-import { ReqQuery } from '../../models/api';
+} from '@constants';
+import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
+import { ReqQuery } from 'models/api';
 import {
   CitiesById,
   CitiesQueryCache,
@@ -23,12 +24,9 @@ import {
   InputCity,
   QueriedCoordinates,
   QueriedLocation
-} from '../../models/cities';
-import { CoordinatesHelper } from '../coordinates-helper';
-import { SearchQueryHelper } from '../search-query-helper';
-import { NwsHelper } from './nws-helper';
+} from 'models/cities';
 import { LoggerHelper } from './logger-helper';
-import { NumberHelper } from '../number-helper';
+import { NwsHelper } from './nws-helper';
 
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';

@@ -1,5 +1,5 @@
 import { QueriedLocation } from '../cities';
-import { DataSource } from '../data-source.enum';
+import { DataSource } from 'models';
 
 export interface QueriedLocationInfo {
   [DataSource.QUERIED_LOCATION]: QueriedLocation;

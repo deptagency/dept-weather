@@ -1,4 +1,4 @@
-import { Unit } from '../unit.enum';
+import { Unit } from 'models';
 
 export const NwsUnits: Record<string, Unit> = {
   'wmoUnit:degC': Unit.C,

@@ -1,6 +1,6 @@
-import { roundOrEmDash } from '../../../../utils';
-import { WindForecast as WindForecastModel } from '../../../../models/api';
-import { DetailedWindDirection, WindDirection } from '../../../../models';
+import { roundOrEmDash } from 'utils';
+import { DetailedWindDirection, WindDirection } from 'models';
+import { WindForecast as WindForecastModel } from 'models/api';
 import Measurement from '../Measurement';
 import { WindIcon } from './WindIcon';
 

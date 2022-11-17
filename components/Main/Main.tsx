@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, QueryParams, Response } from '../../models/api';
-import homeStyles from '../../styles/Home.module.css';
+import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, QueryParams, Response } from 'models/api';
 import { ForecastCard, ObservationsCard } from '../Card';
+import homeStyles from 'styles/Home.module.css';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
 const useObservations = (

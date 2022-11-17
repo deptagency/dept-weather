@@ -3,10 +3,10 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { getSunrise, getSunset } from 'sunrise-sunset-js';
-import { SunTimesObservations } from '../../models/api';
-import { QueriedLocation } from '../../models/cities';
-import { SunriseSunset } from '../../models/sunrise-sunset';
-import { CoordinatesHelper } from '..';
+import { CoordinatesHelper } from 'helpers';
+import { SunTimesObservations } from 'models/api';
+import { QueriedLocation } from 'models/cities';
+import { SunriseSunset } from 'models/sunrise-sunset';
 import { Cached, CacheEntry } from './cached';
 import { LoggerHelper } from './logger-helper';
 

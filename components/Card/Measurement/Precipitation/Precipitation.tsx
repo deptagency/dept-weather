@@ -1,4 +1,4 @@
-import { toFixedOrEmDash } from '../../../../utils';
+import { toFixedOrEmDash } from 'utils';
 import Measurement from '../Measurement';
 import { PrecipitationIcon } from './PrecipitationIcon';
 

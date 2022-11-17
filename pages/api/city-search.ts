@@ -1,10 +1,10 @@
 import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULTS_MAX_AGE } from '../../constants';
-import { SearchQueryHelper } from '../../helpers';
-import { CitiesHelper, LoggerHelper } from '../../helpers/api';
-import { APIRoute, getPath, Response } from '../../models/api';
-import { City } from '../../models/cities';
+import { API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULTS_MAX_AGE } from '@constants';
+import { SearchQueryHelper } from 'helpers';
+import { CitiesHelper, LoggerHelper } from 'helpers/api';
+import { APIRoute, getPath, Response } from 'models/api';
+import { City } from 'models/cities';
 
 const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 

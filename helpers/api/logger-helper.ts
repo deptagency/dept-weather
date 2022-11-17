@@ -6,7 +6,7 @@ import {
   LOG_TIMESTAMP_FORMAT,
   MIN_LOG_LEVEL_DEV,
   MIN_LOG_LEVEL_PROD
-} from '../../constants';
+} from '@constants';
 
 export class LoggerHelper {
   private static readonly FORMAT_COLORIZE = winston.format.colorize({
