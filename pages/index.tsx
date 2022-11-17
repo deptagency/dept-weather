@@ -15,7 +15,6 @@ import {
 import { SearchQueryHelper } from '../helpers';
 import { APIRoute, getPath, QueryParams } from '../models/api';
 import { CitiesGIDCache, SearchResultCity } from '../models/cities';
-import styles from '../styles/Home.module.css';
 
 const getGeonameidFromUrl = (router: NextRouter) => {
   let geonameidStr = router.query[API_GEONAMEID_KEY];
@@ -149,7 +148,7 @@ export default function Home() {
   }, [showSearchOverlay]);
 
   return (
-    <div className={`${styles.container} ${showSearchOverlay ? styles['container--overlay-visible'] : ''}`}>
+    <>
       <Head>
         <title>
           {selectedCity != null ? `${SearchQueryHelper.getCityAndStateCode(selectedCity)} | ${APP_TITLE}` : APP_TITLE}
@@ -158,7 +157,7 @@ export default function Home() {
           name="description"
           content={`The ${APP_TITLE} app provides up-to-date weather information and forecasts for locations across the U.S.`}
         />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" />
       </Head>
       <Header
         showSearchOverlay={showSearchOverlay}
@@ -170,6 +169,6 @@ export default function Home() {
       ></Header>
       <Main queryParams={queryParams}></Main>
       <Footer></Footer>
-    </div>
+    </>
   );
 }
