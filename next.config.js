@@ -6,24 +6,17 @@ const STATIC_ASSET_CACHE_HEADERS = [
     value: 'public, immutable, max-age=7776000' // 90 days
   }
 ];
+const CACHED_STATIC_ASSET_SOURCES = [
+  '/cities-top10000-gid-cache.json',
+  '/weather-icons/(.*)',
+  '/favicon.svg',
+  '/apple-touch-icon.png'
+];
 
 const nextConfig = {
   reactStrictMode: true,
   async headers() {
-    return [
-      {
-        source: '/cities-top10000-gid-cache.json',
-        headers: STATIC_ASSET_CACHE_HEADERS
-      },
-      // {
-      //   source: '/favicon.svg',
-      //   headers: STATIC_ASSET_CACHE_HEADERS
-      // },
-      {
-        source: '/weather-icons/(.*)',
-        headers: STATIC_ASSET_CACHE_HEADERS
-      }
-    ];
+    return CACHED_STATIC_ASSET_SOURCES.map(source => ({ source, headers: STATIC_ASSET_CACHE_HEADERS }));
   }
 };
 

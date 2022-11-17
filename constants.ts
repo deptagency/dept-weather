@@ -3,6 +3,8 @@ import { Unit, UnitType } from './models';
 import { City, FullCity } from './models/cities';
 
 export const APP_TITLE = 'DEPT® Weather';
+export const APP_THEME_COLOR = '#5115f7';
+export const APP_MASK_ICON_COLOR = '#000000';
 export const GID_CACHE_FILENAME = 'cities-top10000-gid-cache.json';
 export const SEARCH_PANEL_ANIMATION_DURATION = 300;
 
