@@ -143,7 +143,8 @@ export class CitiesHelper {
     }
 
     const duration = performance.now() - perfStart;
-    const formattedDuration = duration < 1000 ? `${duration}ms` : `${NumberHelper.round(duration / 1_000, 2)}s`;
+    const formattedDuration =
+      duration < 1000 ? `${NumberHelper.round(duration, 0)}ms` : `${NumberHelper.round(duration / 1_000, 2)}s`;
     LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(`"${query}" took ${formattedDuration}`);
     return cities.map(this.mapToCity);
   }

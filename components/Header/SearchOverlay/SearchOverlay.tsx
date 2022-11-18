@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS, CITY_SEARCH_RESULT_LIMIT } from '@constants';
 import { SearchQueryHelper } from 'helpers';
 import { useDebounce } from 'hooks';
@@ -49,12 +49,21 @@ export default function SearchOverlay({
   const debouncedSearchQuery: string = useDebounce<string>(searchQuery, CITY_SEARCH_DEBOUNCE_MS);
   const controllerRef = useRef<AbortController | undefined>();
 
+  const findInRecentCities = useCallback(
+    (city: SearchResultCity) => recentCities.find(recentCity => recentCity.geonameid === city.geonameid),
+    [recentCities]
+  );
+  const sortRecentsToFront = useCallback(
+    (a: SearchResultCity, b: SearchResultCity) => (findInRecentCities(a) ? -1 : findInRecentCities(b) ? 1 : 0),
+    [findInRecentCities]
+  );
+
   useEffect(() => {
     const abortSearchCallAndUse = (newResults: SearchResultCity[]) => {
       if (controllerRef.current) {
         controllerRef.current.abort();
       }
-      setResults(newResults);
+      setResults(newResults.sort(sortRecentsToFront));
       setHighlightedIndexDistance(0);
     };
 
@@ -80,7 +89,7 @@ export default function SearchOverlay({
 
     // Set searchQuery so a /city-search API call can be debounced
     setSearchQuery(formattedQuery);
-  }, [rawSearchQuery, recentCities, citiesGIDCache, setResults, setHighlightedIndexDistance]);
+  }, [rawSearchQuery, recentCities, citiesGIDCache, sortRecentsToFront, setResults, setHighlightedIndexDistance]);
 
   useEffect(() => {
     const search = async (searchQuery: string) => {
@@ -95,6 +104,7 @@ export default function SearchOverlay({
           signal: controllerRef.current?.signal
         });
         const resJSON = await res.json();
+        setResults(resJSON.data.sort(sortRecentsToFront));
         setResults(resJSON.data);
         setHighlightedIndexDistance(0);
       } catch (e) {
@@ -107,7 +117,7 @@ export default function SearchOverlay({
     if (debouncedSearchQuery) {
       search(debouncedSearchQuery);
     }
-  }, [debouncedSearchQuery, setResults, setHighlightedIndexDistance]);
+  }, [debouncedSearchQuery, sortRecentsToFront, setResults, setHighlightedIndexDistance]);
 
   return (
     <div
