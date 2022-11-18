@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import {
   AirNowHelper,
   CacheEntry,
-  CitiesHelper,
+  CitiesReqQueryHelper,
   EpaHelper,
   LoggerHelper,
   NwsHelper,
@@ -16,7 +16,7 @@ const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { queriedLocation, warnings } = await CitiesHelper.parseQueriedLocation(req.query);
+    const { queriedLocation, warnings } = await CitiesReqQueryHelper.parseQueriedLocation(req.query);
     const promises: Array<Promise<CacheEntry<any>>> = [
       NwsHelper.getCurrent(queriedLocation),
       AirNowHelper.getCurrent(queriedLocation),

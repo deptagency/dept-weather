@@ -27,9 +27,8 @@ export interface SearchResultCity
 
 export interface InputCityById extends Omit<City, 'geonameid' | 'cityAndStateCode'> {}
 
-export interface QueriedLocation extends QueriedCoordinates, Pick<FullCity, 'timeZone'> {}
-
-export interface QueriedCoordinates extends Pick<FullCity, 'latitude' | 'longitude'> {}
+export interface QueriedLocation extends CityWithCoordinates, Pick<FullCity, 'timeZone'> {}
+export interface CityWithCoordinates extends Pick<FullCity, 'latitude' | 'longitude'> {}
 
 export type CitiesById = Record<string, InputCityById>;
 

@@ -1,7 +1,7 @@
-import { API_COORDINATES_KEY, API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY } from '@constants';
+import { API_COORDINATES_KEY, API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, DEFAULT_CITY } from '@constants';
 import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
 import { ReqQuery } from 'models/api';
-import { City, ClosestCity } from 'models/cities';
+import { City, ClosestCity, QueriedLocation } from 'models/cities';
 import { CitiesHelper } from './cities-helper';
 
 export class CitiesReqQueryHelper {
@@ -66,5 +66,33 @@ export class CitiesReqQueryHelper {
     }
 
     return cities;
+  }
+
+  static async parseQueriedLocation(reqQuery: ReqQuery) {
+    const warnings: string[] = [];
+    const getReturnValFor = (city: City) => {
+      const coordinatesNumArr = CoordinatesHelper.adjustPrecision(CoordinatesHelper.cityToNumArr(city));
+      const queriedLocation: QueriedLocation = {
+        latitude: coordinatesNumArr[0],
+        longitude: coordinatesNumArr[1],
+        timeZone: city.timeZone
+      };
+      return {
+        queriedLocation,
+        warnings
+      };
+    };
+
+    const keys = [API_GEONAMEID_KEY, API_COORDINATES_KEY];
+
+    const cityFromId = await CitiesReqQueryHelper.getCityFromId(reqQuery, keys.slice(1), warnings);
+    if (cityFromId != null) return getReturnValFor(cityFromId);
+
+    const closestCityFromCoordinates = await CitiesReqQueryHelper.getClosestCityFromCoordinates(reqQuery, [], warnings);
+    if (closestCityFromCoordinates != null) return getReturnValFor(closestCityFromCoordinates);
+
+    warnings.push(`No valid query param was provided; valid keys are: '${keys.join(`', '`)}'`);
+    warnings.push(`Returned data is for the default city of '${SearchQueryHelper.getCityAndStateCode(DEFAULT_CITY)}'`);
+    return getReturnValFor(DEFAULT_CITY);
   }
 }

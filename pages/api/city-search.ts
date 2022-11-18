@@ -11,7 +11,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const getPartialResponse = async (): Promise<Pick<Response<City[] | null>, 'data' | 'warnings' | 'errors'>> => {
     const warnings: string[] = [];
     const errors: string[] = [];
-
     const keys = [API_GEONAMEID_KEY, API_COORDINATES_KEY, API_SEARCH_QUERY_KEY];
 
     const cityFromId = await CitiesReqQueryHelper.getCityFromId(req.query, keys.slice(1), warnings);

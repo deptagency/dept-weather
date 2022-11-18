@@ -13,24 +13,12 @@ import {
   CITY_SEARCH_INDEX_FILENAME,
   CITY_SEARCH_POPULATION_SORT_THRESHOLD,
   CITY_SEARCH_QUERY_CACHE_FILENAME,
-  CITY_SEARCH_RESULT_LIMIT,
-  DEFAULT_CITY
+  CITY_SEARCH_RESULT_LIMIT
 } from '@constants';
 import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
-import { ReqQuery } from 'models/api';
-import {
-  CitiesById,
-  CitiesQueryCache,
-  City,
-  ClosestCity,
-  FullCity,
-  InputCity,
-  QueriedCoordinates,
-  QueriedLocation
-} from 'models/cities';
+import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCity } from 'models/cities';
 import { Unit } from 'models';
 import { LoggerHelper } from './logger-helper';
-import { NwsHelper } from './nws-helper';
 
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';
@@ -196,57 +184,5 @@ export class CitiesHelper {
           ) as number
         }
       : undefined;
-  }
-
-  static async parseQueriedLocation(reqQuery: ReqQuery) {
-    const warnings: string[] = [];
-    const geonameidStr = reqQuery[API_GEONAMEID_KEY];
-    const coordinatesStr = reqQuery[API_COORDINATES_KEY];
-
-    const getReturnValFor = async (partialQueriedLocation: Partial<QueriedLocation> & QueriedCoordinates) => {
-      const coordinatesNumArr = CoordinatesHelper.adjustPrecision(
-        CoordinatesHelper.cityToNumArr(partialQueriedLocation)
-      );
-      const queriedLocation: QueriedLocation = {
-        latitude: coordinatesNumArr[0],
-        longitude: coordinatesNumArr[1],
-        timeZone: partialQueriedLocation.timeZone
-          ? partialQueriedLocation.timeZone
-          : (await NwsHelper.getPoints(CoordinatesHelper.numArrToStr(coordinatesNumArr))).item.properties.timeZone
-      };
-      return {
-        queriedLocation,
-        warnings
-      };
-    };
-
-    // Use "id" queryParam if provided
-    if (typeof geonameidStr === 'string' && geonameidStr.length) {
-      const matchingCity = await CitiesHelper.getCityWithId(geonameidStr);
-      if (matchingCity != null) {
-        if (coordinatesStr != null) {
-          warnings.push(`'${API_COORDINATES_KEY}' was ignored since '${API_GEONAMEID_KEY}' takes precedence`);
-        }
-        return getReturnValFor(matchingCity);
-      }
-      warnings.push(`'${API_GEONAMEID_KEY}' was invalid`);
-    }
-
-    // Use "coordinates" queryParam if provided
-    if (typeof coordinatesStr === 'string' && coordinatesStr.length) {
-      const inputCoordinatesNumArr = CoordinatesHelper.strToNumArr(coordinatesStr);
-      if (CoordinatesHelper.areValid(inputCoordinatesNumArr)) {
-        return getReturnValFor({ latitude: inputCoordinatesNumArr[0], longitude: inputCoordinatesNumArr[1] });
-      }
-      warnings.push(`'${API_COORDINATES_KEY}' was invalid`);
-    }
-
-    // Use DEFAULT_CITY coordinates
-    warnings.push(
-      `Data is for the default city of '${SearchQueryHelper.getCityAndStateCode(
-        DEFAULT_CITY
-      )}' since neither '${API_GEONAMEID_KEY}' nor '${API_COORDINATES_KEY}' were valid`
-    );
-    return getReturnValFor(DEFAULT_CITY);
   }
 }

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CitiesHelper, LoggerHelper, NwsHelper } from 'helpers/api';
+import { CitiesReqQueryHelper, LoggerHelper, NwsHelper } from 'helpers/api';
 import { DataSource } from 'models';
 import { APIRoute, Forecast, getPath, Response } from 'models/api';
 
@@ -7,7 +7,7 @@ const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { queriedLocation, warnings } = await CitiesHelper.parseQueriedLocation(req.query);
+    const { queriedLocation, warnings } = await CitiesReqQueryHelper.parseQueriedLocation(req.query);
     const forecast = await NwsHelper.getForecast(queriedLocation);
 
     const data: Forecast = {

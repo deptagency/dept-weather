@@ -1,5 +1,5 @@
 import { MAX_COORDINATE_PRECISION } from '@constants';
-import { City } from 'models/cities';
+import { CityWithCoordinates } from 'models/cities';
 import { NumberHelper } from './number-helper';
 
 export class CoordinatesHelper {
@@ -46,13 +46,13 @@ export class CoordinatesHelper {
   }
 
   /* From City */
-  static cityToStr(city: Pick<City, 'latitude' | 'longitude'>): string {
+  static cityToStr(city: CityWithCoordinates): string {
     return this.strArrToStr(this.cityToStrArr(city));
   }
-  static cityToStrArr(city: Pick<City, 'latitude' | 'longitude'>): string[] {
+  static cityToStrArr(city: CityWithCoordinates): string[] {
     return this.numArrToStrArr(this.cityToNumArr(city));
   }
-  static cityToNumArr(city: Pick<City, 'latitude' | 'longitude'>): number[] {
+  static cityToNumArr(city: CityWithCoordinates): number[] {
     return [city.latitude, city.longitude];
   }
 }
