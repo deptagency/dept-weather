@@ -16,14 +16,14 @@ const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { queriedLocation, warnings } = await CitiesReqQueryHelper.parseQueriedLocation(req.query);
+    const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(req.query);
     const promises: Array<Promise<CacheEntry<any>>> = [
-      NwsHelper.getCurrent(queriedLocation),
-      AirNowHelper.getCurrent(queriedLocation),
-      EpaHelper.getHourly(queriedLocation),
-      SunTimesHelper.getTimes(queriedLocation)
+      NwsHelper.getCurrent(minimalQueriedCity),
+      AirNowHelper.getCurrent(minimalQueriedCity),
+      EpaHelper.getHourly(minimalQueriedCity),
+      SunTimesHelper.getTimes(minimalQueriedCity)
     ];
-    if (WeatherlinkHelper.shouldUse(queriedLocation)) {
+    if (WeatherlinkHelper.shouldUse(minimalQueriedCity)) {
       promises.push(WeatherlinkHelper.getCurrent());
     }
 
@@ -32,15 +32,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const maxAge = Math.min(...results.map(result => result.maxAge));
 
     const data: Observations = {
+      ...(results.length > 4
+        ? { [DataSource.WEATHERLINK]: WeatherlinkHelper.mapCurrentToWlObservations(results[4], req.query) }
+        : {}),
       [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapCurrentToNwsObservations(results[0], req.query),
       [DataSource.AIRNOW]: AirNowHelper.mapCurrentToAirNowObservations(results[1]),
       [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]: EpaHelper.mapHourlyToEpaHourlyForecast(results[2]),
       [DataSource.SUN_TIMES]: SunTimesHelper.mapTimesToSunTimesObservations(results[3]),
-      [DataSource.QUERIED_LOCATION]: queriedLocation
+      [DataSource.QUERIED_CITY]: queriedCity
     };
-    if (results.length > 4) {
-      data[DataSource.WEATHERLINK] = WeatherlinkHelper.mapCurrentToWlObservations(results[4], req.query);
-    }
     const latestReadTime = Math.max(
       ...Object.values(data)
         .map((observation: BaseObservations) => observation.readTime)

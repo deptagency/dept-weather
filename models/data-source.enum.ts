@@ -4,5 +4,5 @@ export enum DataSource {
   AIRNOW = 'airnow',
   ENVIRONMENTAL_PROTECTION_AGENCY = 'epa',
   SUN_TIMES = 'sun',
-  QUERIED_LOCATION = 'queriedLocation'
+  QUERIED_CITY = 'queriedCity'
 }

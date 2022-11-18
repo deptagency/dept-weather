@@ -7,7 +7,7 @@ import { AIRNOW_RECORDING_INTERVAL, AIRNOW_UPLOAD_DELAY } from '@constants';
 import { CoordinatesHelper } from 'helpers';
 import { CurrentObservations } from 'models/airnow';
 import { AirNowObservations } from 'models/api';
-import { QueriedLocation } from 'models/cities';
+import { MinimalQueriedCity } from 'models/cities';
 import { Cached, CacheEntry } from './cached';
 import { LoggerHelper } from './logger-helper';
 
@@ -15,15 +15,15 @@ dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-type CurrentObservationsWithTz = { observations: CurrentObservations } & Pick<QueriedLocation, 'timeZone'>;
+type CurrentObservationsWithTz = { observations: CurrentObservations } & Pick<MinimalQueriedCity, 'timeZone'>;
 
 export class AirNowHelper {
   private static readonly CLASS_NAME = 'AirNowHelper';
   private static readonly apiKey = process.env.AIRNOW_API_KEY!;
   private static readonly userAgent = process.env.USER_AGENT!;
 
-  private static getRequestUrlFor(queriedLocation: QueriedLocation) {
-    const coordinatesArr = CoordinatesHelper.cityToNumArr(queriedLocation);
+  private static getRequestUrlFor(minQueriedCity: MinimalQueriedCity) {
+    const coordinatesArr = CoordinatesHelper.cityToNumArr(minQueriedCity);
     return `https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${coordinatesArr[0]}&longitude=${coordinatesArr[1]}&distance=100&API_KEY=${this.apiKey}`;
   }
 
@@ -42,14 +42,14 @@ export class AirNowHelper {
     return Math.max(0, ...readTimes);
   }
 
-  private static readonly current = new Cached<CurrentObservationsWithTz, QueriedLocation>(
-    async (queriedLocation: QueriedLocation) => {
+  private static readonly current = new Cached<CurrentObservationsWithTz, MinimalQueriedCity>(
+    async (minQueriedCity: MinimalQueriedCity) => {
       const currentObservations = (await (
-        await fetch(this.getRequestUrlFor(queriedLocation), { headers: { 'User-Agent': this.userAgent } })
+        await fetch(this.getRequestUrlFor(minQueriedCity), { headers: { 'User-Agent': this.userAgent } })
       ).json()) as CurrentObservations;
       return {
         observations: currentObservations,
-        timeZone: queriedLocation.timeZone
+        timeZone: minQueriedCity.timeZone
       };
     },
     async (_: string, newItem: CurrentObservationsWithTz) => {
@@ -58,8 +58,8 @@ export class AirNowHelper {
     },
     LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
   );
-  static async getCurrent(queriedLocation: QueriedLocation) {
-    return this.current.get(CoordinatesHelper.cityToStr(queriedLocation), queriedLocation);
+  static async getCurrent(minQueriedCity: MinimalQueriedCity) {
+    return this.current.get(CoordinatesHelper.cityToStr(minQueriedCity), minQueriedCity);
   }
 
   static mapCurrentToAirNowObservations(cacheEntry: CacheEntry<CurrentObservationsWithTz>): AirNowObservations {

@@ -7,12 +7,12 @@ const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { queriedLocation, warnings } = await CitiesReqQueryHelper.parseQueriedLocation(req.query);
-    const forecast = await NwsHelper.getForecast(queriedLocation);
+    const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(req.query);
+    const forecast = await NwsHelper.getForecast(minimalQueriedCity);
 
     const data: Forecast = {
       [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapForecastToNwsForecast(forecast, req.query),
-      [DataSource.QUERIED_LOCATION]: queriedLocation
+      [DataSource.QUERIED_CITY]: queriedCity
     };
 
     const response: Response<Forecast> = {

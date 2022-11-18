@@ -1,8 +1,8 @@
 import { DataSource, DetailedWindDirection, WindDirection } from 'models';
 import { Wind } from './observations.model';
-import { QueriedLocationInfo } from './queried-location-info.model';
+import { QueriedCityInfo } from './queried-location-info.model';
 
-export interface Forecast extends QueriedLocationInfo {
+export interface Forecast extends QueriedCityInfo {
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsForecast;
 }
 

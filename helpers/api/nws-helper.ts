@@ -5,7 +5,7 @@ import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '@constants';
 import { CoordinatesHelper, NumberHelper } from 'helpers';
 import { Unit, UnitType } from 'models';
 import { NwsForecast, NwsForecastPeriod, NwsObservations, ReqQuery, WindForecast } from 'models/api';
-import { QueriedLocation } from 'models/cities';
+import { MinimalQueriedCity } from 'models/cities';
 import {
   ForecastPeriod,
   ForecastResponse,
@@ -73,9 +73,9 @@ export class NwsHelper {
     },
     LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
   );
-  static async getCurrent(queriedLocation: QueriedLocation) {
+  static async getCurrent(minQueriedCity: MinimalQueriedCity) {
     const stationId =
-      (await this.getNearestStation(CoordinatesHelper.cityToStr(queriedLocation)))?.properties?.stationIdentifier ?? '';
+      (await this.getNearestStation(CoordinatesHelper.cityToStr(minQueriedCity)))?.properties?.stationIdentifier ?? '';
     return this.current.get(stationId, stationId);
   }
 
@@ -157,8 +157,8 @@ export class NwsHelper {
     },
     LoggerHelper.getLogger(`${this.CLASS_NAME}.forecast`)
   );
-  static async getForecast(queriedLocation: QueriedLocation) {
-    const points = await this.getPoints(CoordinatesHelper.cityToStr(queriedLocation));
+  static async getForecast(minQueriedCity: MinimalQueriedCity) {
+    const points = await this.getPoints(CoordinatesHelper.cityToStr(minQueriedCity));
     const forecastUrl = points.item.properties.forecast;
     return this.forecast.get(forecastUrl, forecastUrl);
   }

@@ -1,7 +1,7 @@
 import { API_COORDINATES_KEY, API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, DEFAULT_CITY } from '@constants';
 import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
 import { ReqQuery } from 'models/api';
-import { City, ClosestCity, QueriedLocation } from 'models/cities';
+import { City, ClosestCity, MinimalQueriedCity, MinimalQueriedCity } from 'models/cities';
 import { CitiesHelper } from './cities-helper';
 
 export class CitiesReqQueryHelper {
@@ -68,17 +68,18 @@ export class CitiesReqQueryHelper {
     return cities;
   }
 
-  static async parseQueriedLocation(reqQuery: ReqQuery) {
+  static async parseQueriedCity(reqQuery: ReqQuery) {
     const warnings: string[] = [];
-    const getReturnValFor = (city: City) => {
-      const coordinatesNumArr = CoordinatesHelper.adjustPrecision(CoordinatesHelper.cityToNumArr(city));
-      const queriedLocation: QueriedLocation = {
+    const getReturnValFor = (queriedCity: City | ClosestCity) => {
+      const coordinatesNumArr = CoordinatesHelper.adjustPrecision(CoordinatesHelper.cityToNumArr(queriedCity));
+      const minimalQueriedCity: MinimalQueriedCity = {
         latitude: coordinatesNumArr[0],
         longitude: coordinatesNumArr[1],
-        timeZone: city.timeZone
+        timeZone: queriedCity.timeZone
       };
       return {
-        queriedLocation,
+        queriedCity,
+        minimalQueriedCity,
         warnings
       };
     };

@@ -6,7 +6,7 @@ import geo2zip from 'geo2zip';
 import fetch from 'node-fetch';
 import { CoordinatesHelper } from 'helpers';
 import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api';
-import { QueriedLocation } from 'models/cities';
+import { MinimalQueriedCity } from 'models/cities';
 import { UVHourlyForecast, UVHourlyForecastItem } from 'models/epa';
 import { Cached, CacheEntry } from './cached';
 import { LoggerHelper } from './logger-helper';
@@ -15,7 +15,7 @@ dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-type UVHourlyForecastWithTz = { uvHourlyForecast: UVHourlyForecast } & Pick<QueriedLocation, 'timeZone'>;
+type UVHourlyForecastWithTz = { uvHourlyForecast: UVHourlyForecast } & Pick<MinimalQueriedCity, 'timeZone'>;
 
 export class EpaHelper {
   private static readonly CLASS_NAME = 'EpaHelper';
@@ -40,9 +40,9 @@ export class EpaHelper {
     return 0;
   }
 
-  private static readonly hourly = new Cached<UVHourlyForecastWithTz, QueriedLocation>(
-    async (queriedLocation: QueriedLocation) => {
-      const coordinatesNumArr = CoordinatesHelper.cityToNumArr(queriedLocation);
+  private static readonly hourly = new Cached<UVHourlyForecastWithTz, MinimalQueriedCity>(
+    async (minQueriedCity: MinimalQueriedCity) => {
+      const coordinatesNumArr = CoordinatesHelper.cityToNumArr(minQueriedCity);
       const closestZipArr = await geo2zip(coordinatesNumArr);
       const closestZip = closestZipArr?.length > 0 ? closestZipArr[0] : '';
 
@@ -51,7 +51,7 @@ export class EpaHelper {
       ).json()) as UVHourlyForecast;
       return {
         uvHourlyForecast,
-        timeZone: queriedLocation.timeZone
+        timeZone: minQueriedCity.timeZone
       };
     },
     async (_: string, newItem: UVHourlyForecastWithTz) => {
@@ -61,8 +61,8 @@ export class EpaHelper {
     },
     LoggerHelper.getLogger(`${this.CLASS_NAME}.hourly`)
   );
-  static async getHourly(queriedLocation: QueriedLocation) {
-    return this.hourly.get(CoordinatesHelper.cityToStr(queriedLocation), queriedLocation);
+  static async getHourly(minQueriedCity: MinimalQueriedCity) {
+    return this.hourly.get(CoordinatesHelper.cityToStr(minQueriedCity), minQueriedCity);
   }
 
   static mapHourlyToEpaHourlyForecast(cacheEntry: CacheEntry<UVHourlyForecastWithTz>): EpaHourlyForecast {

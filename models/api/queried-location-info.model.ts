@@ -1,6 +1,6 @@
-import { QueriedLocation } from '../cities';
+import { City, ClosestCity } from '../cities';
 import { DataSource } from 'models';
 
-export interface QueriedLocationInfo {
-  [DataSource.QUERIED_LOCATION]: QueriedLocation;
+export interface QueriedCityInfo {
+  [DataSource.QUERIED_CITY]: City | ClosestCity;
 }
