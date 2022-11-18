@@ -150,7 +150,7 @@ export class CitiesHelper {
 
   static async getCityWithId(geonameidStr: string) {
     const geonameid = Number(geonameidStr);
-    if (Number.isInteger(geonameid) && geonameid >= 0) {
+    if (Number.isInteger(geonameid) && geonameid > 0) {
       const usCitiesById = await this.usCitiesByIdPromise;
       const match = usCitiesById[String(geonameid)];
       if (match != null) {

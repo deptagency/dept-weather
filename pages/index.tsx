@@ -67,7 +67,6 @@ export default function Home() {
           cityAndStateCode: SearchQueryHelper.getCityAndStateCode(selectedCity),
           geonameid: selectedCity.geonameid
         });
-        newRecentCities = newRecentCities.slice(0, CITY_SEARCH_RESULT_LIMIT);
 
         const newRecentCitiesStr = JSON.stringify(newRecentCities);
         localStorage.setItem(LOCAL_STORAGE_RECENT_CITIES_KEY, newRecentCitiesStr);
@@ -117,7 +116,7 @@ export default function Home() {
         searchAndSetSelectedCity(getQueryParamsForGeonameid(geonameid));
       }
     } else if (router.isReady) {
-      setSelectedCity(recentCities?.length ? recentCities[0] : DEFAULT_CITY);
+      setSelectedCity(recentCities.length ? recentCities[0] : DEFAULT_CITY);
     }
   }, [geonameid, recentCities, selectedCity, router.isReady]);
 

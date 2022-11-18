@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS } from '@constants';
+import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS, CITY_SEARCH_RESULT_LIMIT } from '@constants';
 import { SearchQueryHelper } from 'helpers';
 import { useDebounce } from 'hooks';
 import { APIRoute, getPath } from 'models/api';
@@ -74,7 +74,7 @@ export default function SearchOverlay({
       }
       // Else if query is empty string, use recentCities
     } else if (formattedQuery === '') {
-      abortSearchCallAndUse(recentCities);
+      abortSearchCallAndUse(recentCities.slice(0, CITY_SEARCH_RESULT_LIMIT));
       return;
     }
 
