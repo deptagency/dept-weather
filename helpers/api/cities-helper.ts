@@ -1,12 +1,14 @@
 import Fuse from 'fuse.js';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import turf from '@turf/distance';
 import {
   API_COORDINATES_KEY,
   API_GEONAMEID_KEY,
   CITY_SEARCH_CITIES_BY_ID_FILENAME,
   CITY_SEARCH_CITIES_FILENAME,
   CITY_SEARCH_DATA_FOLDER,
+  CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL,
   CITY_SEARCH_FUSE_OPTIONS,
   CITY_SEARCH_INDEX_FILENAME,
   CITY_SEARCH_POPULATION_SORT_THRESHOLD,
@@ -20,11 +22,13 @@ import {
   CitiesById,
   CitiesQueryCache,
   City,
+  ClosestCity,
   FullCity,
   InputCity,
   QueriedCoordinates,
   QueriedLocation
 } from 'models/cities';
+import { Unit } from 'models';
 import { LoggerHelper } from './logger-helper';
 import { NwsHelper } from './nws-helper';
 
@@ -156,7 +160,7 @@ export class CitiesHelper {
     return cities.map(this.mapToCity);
   }
 
-  static async getByGeonameid(geonameidStr: string) {
+  static async getCityWithId(geonameidStr: string) {
     const geonameid = Number(geonameidStr);
     if (Number.isInteger(geonameid) && geonameid >= 0) {
       const usCitiesById = await this.usCitiesByIdPromise;
@@ -168,6 +172,30 @@ export class CitiesHelper {
         });
       }
     }
+  }
+
+  static async getClosestCity(coordinatesNumArr: number[]): Promise<ClosestCity | undefined> {
+    const usCities = await this.usCitiesPromise;
+    let radDistanceToClosestCity = Number.MAX_SAFE_INTEGER;
+    let closestCity: FullCity | undefined;
+    for (const city of usCities) {
+      const radDistanceToCity = turf(coordinatesNumArr, CoordinatesHelper.cityToNumArr(city), { units: 'radians' });
+      if (radDistanceToCity < radDistanceToClosestCity) {
+        closestCity = city;
+        radDistanceToClosestCity = radDistanceToCity;
+      }
+    }
+    return closestCity != null
+      ? {
+          ...this.mapToCity(closestCity),
+          distanceFromQueried: NumberHelper.round(
+            turf(coordinatesNumArr, CoordinatesHelper.cityToNumArr(closestCity), {
+              units: Unit.MILES
+            }),
+            CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL
+          ) as number
+        }
+      : undefined;
   }
 
   static async parseQueriedLocation(reqQuery: ReqQuery) {
@@ -194,7 +222,7 @@ export class CitiesHelper {
 
     // Use "id" queryParam if provided
     if (typeof geonameidStr === 'string' && geonameidStr.length) {
-      const matchingCity = await CitiesHelper.getByGeonameid(geonameidStr);
+      const matchingCity = await CitiesHelper.getCityWithId(geonameidStr);
       if (matchingCity != null) {
         if (coordinatesStr != null) {
           warnings.push(`'${API_COORDINATES_KEY}' was ignored since '${API_GEONAMEID_KEY}' takes precedence`);

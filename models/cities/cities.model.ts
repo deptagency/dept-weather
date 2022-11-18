@@ -16,6 +16,10 @@ export interface InputCity extends Omit<FullCity, 'cityAndStateCode'> {}
 export interface City
   extends Pick<FullCity, 'cityName' | 'stateCode' | 'latitude' | 'longitude' | 'timeZone' | 'geonameid'> {}
 
+export interface ClosestCity extends City {
+  distanceFromQueried: number;
+}
+
 export interface SearchResultCity
   extends Pick<FullCity, 'geonameid'>,
     Partial<Pick<FullCity, 'cityName' | 'stateCode'>>,

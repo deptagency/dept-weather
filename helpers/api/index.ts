@@ -1,6 +1,7 @@
 export * from './airnow-helper';
 export * from './cached';
 export * from './cities-helper';
+export * from './cities-req-query-helper';
 export * from './epa-helper';
 export * from './logger-helper';
 export * from './nws-helper';

@@ -20,6 +20,7 @@ const BOSTON_CITY: City = {
 };
 export const DEFAULT_CITY = BOSTON_CITY;
 
+export const CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL = 2;
 export const CITY_SEARCH_RESULT_LIMIT = 5;
 export const CITY_SEARCH_POPULATION_SORT_THRESHOLD = 10e-4;
 export const CITY_SEARCH_RESULTS_MAX_AGE = 90 * 24 * 60 * 60; // 90 days;
