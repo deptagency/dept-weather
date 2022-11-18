@@ -91,6 +91,13 @@ export default function Home() {
       if (controllerRef.current) {
         controllerRef.current.abort();
       }
+
+      const recentCityWithMatchingId = recentCities.find(city => city.geonameid === geonameid);
+      if (recentCityWithMatchingId != null) {
+        setSelectedCity(recentCityWithMatchingId);
+        return;
+      }
+
       const controller = new AbortController();
       controllerRef.current = controller;
 

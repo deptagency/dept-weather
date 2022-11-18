@@ -54,7 +54,8 @@ export default function SearchOverlay({
     [recentCities]
   );
   const sortRecentsToFront = useCallback(
-    (a: SearchResultCity, b: SearchResultCity) => (findInRecentCities(a) ? -1 : findInRecentCities(b) ? 1 : 0),
+    (a: SearchResultCity, b: SearchResultCity) =>
+      Number(findInRecentCities(a) != null) - Number(findInRecentCities(b) != null),
     [findInRecentCities]
   );
 
