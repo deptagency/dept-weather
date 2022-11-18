@@ -132,8 +132,6 @@ export default function Header({
                 e.preventDefault();
                 if (!showSearchOverlay) {
                   setRawSearchQuery('');
-                  setResults(recentCities);
-                  setHighlightedIndexDistance(0);
                   setShowSearchOverlay(true);
                 }
               }}
