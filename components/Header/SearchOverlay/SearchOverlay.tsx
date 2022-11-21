@@ -9,8 +9,8 @@ import styles from './SearchOverlay.module.css';
 
 const RecentIcon = ({ isHidden }: { isHidden: boolean }) => (
   <svg
-    className={`${styles['search__overlay__result__icon']} ${
-      isHidden ? styles['search__overlay__result__icon--hidden'] : ''
+    className={`${styles['search-overlay__result__icon']} ${
+      isHidden ? styles['search-overlay__result__icon--hidden'] : ''
     }`}
     aria-label="Recent City"
     viewBox="0 0 16 16"
@@ -24,7 +24,7 @@ const RecentIcon = ({ isHidden }: { isHidden: boolean }) => (
 
 const LocateIcon = () => (
   <svg
-    className={styles['search__overlay__result__icon']}
+    className={styles['search-overlay__result__icon']}
     aria-label="Locate"
     viewBox="0 0 16 16"
     fill="none"
@@ -141,8 +141,8 @@ export default function SearchOverlay({
 
   return (
     <div
-      className={`${styles.search__overlay} ${
-        showSearchOverlay ? styles['search__overlay--visible'] : styles['search__overlay--hidden']
+      className={`${styles['search-overlay']} ${
+        showSearchOverlay ? styles['search-overlay--visible'] : styles['search-overlay--hidden']
       }`}
       onClick={e => {
         if (!e.defaultPrevented) {
@@ -150,8 +150,8 @@ export default function SearchOverlay({
         }
       }}
     >
-      <div className={`${styles.search__overlay__inner} ${homeStyles['container__content--no-padding']}`}>
-        <ul id="SearchResultsList" className={styles['search__overlay__results-list']} role="listbox">
+      <div className={`${styles['search-overlay__inner']} ${homeStyles['container__content--no-padding']}`}>
+        <ul id="SearchResultsList" className={styles['search-overlay__results-list']} role="listbox">
           {results.map((result, idx) => {
             const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(result);
             const isCurrentLocation = result?.geonameid === CURRENT_LOCATION.geonameid;
@@ -162,11 +162,11 @@ export default function SearchOverlay({
               <li
                 id={`SearchResult${idx}`}
                 key={cityAndStateCode}
-                className={`${styles.search__overlay__result} ${
+                className={`${styles['search-overlay__result']} ${
                   isCurrentLocation && !isRecentAndIsListed
-                    ? styles['search__overlay__result--non-recent-current-location']
+                    ? styles['search-overlay__result--non-recent-current-location']
                     : ''
-                } ${idx === highlightedIndex ? styles['search__overlay__result--highlighted'] : ''}`}
+                } ${idx === highlightedIndex ? styles['search-overlay__result--highlighted'] : ''}`}
                 role="option"
                 aria-selected={idx === highlightedIndex}
                 onFocus={() => setHighlightedIndexDistance(idx)}
