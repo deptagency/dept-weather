@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import Fuse from 'fuse.js';
 import { readFile } from 'fs/promises';
 import path from 'path';
@@ -11,11 +12,13 @@ import {
   CITY_SEARCH_INDEX_FILENAME,
   CITY_SEARCH_POPULATION_SORT_THRESHOLD,
   CITY_SEARCH_QUERY_CACHE_FILENAME,
+  CITY_SEARCH_RESULTS_MAX_AGE,
   CITY_SEARCH_RESULT_LIMIT
 } from '@constants';
 import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
 import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCity } from 'models/cities';
 import { Unit } from 'models';
+import { Cached } from './cached';
 import { LoggerHelper } from './logger-helper';
 
 export class CitiesHelper {
@@ -158,27 +161,35 @@ export class CitiesHelper {
     }
   }
 
-  static async getClosestCity(coordinatesNumArr: number[]): Promise<ClosestCity | undefined> {
-    const usCities = await this.usCitiesPromise;
-    let radDistanceToClosestCity = Number.MAX_SAFE_INTEGER;
-    let closestCity: FullCity | undefined;
-    for (const city of usCities) {
-      const radDistanceToCity = turf(coordinatesNumArr, CoordinatesHelper.cityToNumArr(city), { units: 'radians' });
-      if (radDistanceToCity < radDistanceToClosestCity) {
-        closestCity = city;
-        radDistanceToClosestCity = radDistanceToCity;
-      }
-    }
-    return closestCity != null
-      ? {
-          ...this.mapToCity(closestCity),
-          distanceFromQueried: NumberHelper.round(
-            turf(coordinatesNumArr, CoordinatesHelper.cityToNumArr(closestCity), {
-              units: Unit.MILES
-            }),
-            CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL
-          ) as number
+  private static readonly closestCity = new Cached<ClosestCity | undefined, number[]>(
+    async (coordinatesNumArr: number[]) => {
+      const usCities = await this.usCitiesPromise;
+      let radDistanceToClosestCity = Number.MAX_SAFE_INTEGER;
+      let closestCity: FullCity | undefined;
+      for (const city of usCities) {
+        const radDistanceToCity = turf(coordinatesNumArr, CoordinatesHelper.cityToNumArr(city), { units: 'radians' });
+        if (radDistanceToCity < radDistanceToClosestCity) {
+          closestCity = city;
+          radDistanceToClosestCity = radDistanceToCity;
         }
-      : undefined;
+      }
+      return closestCity != null
+        ? {
+            ...this.mapToCity(closestCity),
+            distanceFromQueried: NumberHelper.round(
+              turf(coordinatesNumArr, CoordinatesHelper.cityToNumArr(closestCity), {
+                units: Unit.MILES
+              }),
+              CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL
+            )!
+          }
+        : undefined;
+    },
+    async () => dayjs().unix() + CITY_SEARCH_RESULTS_MAX_AGE,
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.closestCity`)
+  );
+  static async getClosestCity(coordinatesNumArr: number[]) {
+    const cacheEntry = await this.closestCity.get(CoordinatesHelper.numArrToStr(coordinatesNumArr), coordinatesNumArr);
+    return cacheEntry.item;
   }
 }

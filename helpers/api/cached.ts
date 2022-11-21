@@ -36,7 +36,7 @@ export class Cached<Item, Opts> {
     const isTimeInPast = durationFromNow.asSeconds() < 0;
     const units = ['d', 'hr', 'm', 's'];
     const dfnByUnit = [
-      durationFromNow.days(),
+      Math.floor(durationFromNow.asDays()),
       durationFromNow.hours(),
       durationFromNow.minutes(),
       durationFromNow.seconds()
