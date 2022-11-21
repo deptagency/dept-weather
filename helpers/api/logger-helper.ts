@@ -7,6 +7,7 @@ import {
   MIN_LOG_LEVEL_DEV,
   MIN_LOG_LEVEL_PROD
 } from '@constants';
+import { NumberHelper } from 'helpers/number-helper';
 
 export class LoggerHelper {
   private static readonly FORMAT_COLORIZE = winston.format.colorize({
@@ -50,5 +51,15 @@ export class LoggerHelper {
       );
     }
     return this.loggers.get(label)!;
+  }
+
+  static trackPerformance() {
+    const perfStart = performance.now();
+    return () => {
+      const duration = performance.now() - perfStart;
+      const formattedDuration =
+        duration < 1000 ? `${NumberHelper.round(duration, 0)}ms` : `${NumberHelper.round(duration / 1_000, 2)}s`;
+      return formattedDuration;
+    };
   }
 }

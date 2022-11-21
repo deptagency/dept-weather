@@ -16,7 +16,11 @@ const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    let getFormattedDuration = LoggerHelper.trackPerformance();
     const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(req.query);
+    LoggerHelper.getLogger(LOGGER_LABEL).verbose(`parseQueriedCity() took ${getFormattedDuration()}`);
+
+    getFormattedDuration = LoggerHelper.trackPerformance();
     const promises: Array<Promise<CacheEntry<any>>> = [
       NwsHelper.getCurrent(minimalQueriedCity),
       AirNowHelper.getCurrent(minimalQueriedCity),
@@ -30,6 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const results = await Promise.all(promises);
     const validUntil = Math.min(...results.map(result => result.validUntil));
     const maxAge = Math.min(...results.map(result => result.maxAge));
+    LoggerHelper.getLogger(LOGGER_LABEL).verbose(`Promise.all() took ${getFormattedDuration()}`);
 
     const data: Observations = {
       ...(results.length > 4

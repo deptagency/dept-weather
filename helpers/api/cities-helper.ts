@@ -3,8 +3,6 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import turf from '@turf/distance';
 import {
-  API_COORDINATES_KEY,
-  API_GEONAMEID_KEY,
   CITY_SEARCH_CITIES_BY_ID_FILENAME,
   CITY_SEARCH_CITIES_FILENAME,
   CITY_SEARCH_DATA_FOLDER,
@@ -129,7 +127,7 @@ export class CitiesHelper {
   }
 
   static async searchFor(query: string) {
-    const perfStart = performance.now();
+    const getFormattedDuration = LoggerHelper.trackPerformance();
     if (!query.length) {
       return (await this.usTopCitiesPromise).map(this.mapToCity);
     }
@@ -142,10 +140,7 @@ export class CitiesHelper {
       cities = topResults.map(result => result.item);
     }
 
-    const duration = performance.now() - perfStart;
-    const formattedDuration =
-      duration < 1000 ? `${NumberHelper.round(duration, 0)}ms` : `${NumberHelper.round(duration / 1_000, 2)}s`;
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(`"${query}" took ${formattedDuration}`);
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(`"${query}" took ${getFormattedDuration()}`);
     return cities.map(this.mapToCity);
   }
 
