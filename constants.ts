@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js';
 import { Unit, UnitType } from './models';
-import { City, FullCity } from './models/cities';
+import { City, FullCity, SearchResultCity } from './models/cities';
 
 export const APP_TITLE = 'DEPT® Weather';
 export const APP_MASK_ICON_COLOR = '#000000';
@@ -19,6 +19,10 @@ const BOSTON_CITY: City = {
   geonameid: 4930956
 };
 export const DEFAULT_CITY = BOSTON_CITY;
+export const CURRENT_LOCATION: SearchResultCity = {
+  cityAndStateCode: 'Current Location',
+  geonameid: 0
+} as SearchResultCity;
 
 export const CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL = 2;
 export const CITY_SEARCH_RESULT_LIMIT = 5;

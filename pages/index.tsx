@@ -4,16 +4,17 @@ import { useEffect, useRef, useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { Footer, Header, Main } from 'components';
 import {
+  API_COORDINATES_KEY,
   API_GEONAMEID_KEY,
   APP_MASK_ICON_COLOR,
   APP_TITLE,
-  CITY_SEARCH_RESULT_LIMIT,
+  CURRENT_LOCATION,
   DEFAULT_CITY,
   GID_CACHE_FILENAME,
   LOCAL_STORAGE_RECENT_CITIES_KEY,
   SEARCH_PANEL_ANIMATION_DURATION
 } from '@constants';
-import { SearchQueryHelper } from 'helpers';
+import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
 import { APIRoute, getPath, QueryParams } from 'models/api';
 import { CitiesGIDCache, SearchResultCity } from 'models/cities';
 
@@ -43,6 +44,7 @@ export default function Home() {
   const router = useRouter();
   const geonameid = getGeonameidFromUrl(router);
   const [selectedCity, setSelectedCity] = useState<SearchResultCity | undefined>(undefined);
+  const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
 
   const citiesGIDCache = useCitiesGIDCache();
 
@@ -55,7 +57,16 @@ export default function Home() {
     return [];
   });
   useEffect(() => {
-    if (recentCities != null && selectedCity != null) {
+    // Wait until selectedCity & queryParams are defined and in-sync before adding to recents
+    //  When the current location is selected, this effectively waits until the user's location is successfully obtained
+    const isCurrentSelected = selectedCity?.geonameid === CURRENT_LOCATION.geonameid;
+    if (
+      recentCities != null &&
+      selectedCity != null &&
+      queryParams != null &&
+      ((!isCurrentSelected && queryParams[API_GEONAMEID_KEY] === selectedCity.geonameid) ||
+        (isCurrentSelected && queryParams[API_COORDINATES_KEY] != null))
+    ) {
       const idxOfSelectedInRecents = recentCities.findIndex(city => city.geonameid === selectedCity.geonameid);
       if (idxOfSelectedInRecents === -1 || idxOfSelectedInRecents > 0) {
         let newRecentCities = [...recentCities];
@@ -70,39 +81,64 @@ export default function Home() {
 
         const newRecentCitiesStr = JSON.stringify(newRecentCities);
         localStorage.setItem(LOCAL_STORAGE_RECENT_CITIES_KEY, newRecentCitiesStr);
-        // Wait for search panel close animation before adding to recents list to avoid showing recent icon before loading city
-        setTimeout(() => setRecentCities(newRecentCities), SEARCH_PANEL_ANIMATION_DURATION);
+
+        if (isCurrentSelected) {
+          setRecentCities(newRecentCities);
+        } else {
+          // Wait for search panel close animation before adding to recents list to avoid showing recent icon before loading city
+          setTimeout(() => setRecentCities(newRecentCities), SEARCH_PANEL_ANIMATION_DURATION);
+        }
       }
     }
-  }, [recentCities, selectedCity]);
+  }, [recentCities, selectedCity, queryParams]);
 
-  const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
   useEffect(() => {
-    if (geonameid != null) {
-      setQueryParams(getQueryParamsForGeonameid(geonameid));
-    } else if (selectedCity != null) {
-      setQueryParams(getQueryParamsForGeonameid(selectedCity.geonameid));
+    // Wait until geonameid & selectedCity are defined and in-sync before calling setQueryParams()
+    if (geonameid != null && selectedCity != null && geonameid === selectedCity.geonameid) {
+      if (geonameid === CURRENT_LOCATION.geonameid) {
+        // Clear previous data by using undefined query params, wait for current location coordinates, then update query params
+        setQueryParams(undefined);
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const adjustedCoordinates = CoordinatesHelper.adjustPrecision(
+              CoordinatesHelper.cityToNumArr(position.coords)
+            );
+            setQueryParams({ [API_COORDINATES_KEY]: CoordinatesHelper.numArrToStr(adjustedCoordinates) });
+          },
+          error => {
+            alert(`Error: ${error.code} - ${error.message}`);
+          }
+        );
+      } else {
+        setQueryParams(getQueryParamsForGeonameid(geonameid));
+      }
     }
-  }, [geonameid, selectedCity]);
+  }, [geonameid, selectedCity, router]);
 
   const controllerRef = useRef<AbortController | undefined>();
   useEffect(() => {
-    const searchAndSetSelectedCity = async (searchQueryParams: QueryParams) => {
+    const searchAndSetSelectedCity = async (searchGeonameid: number) => {
+      // Abort any pending search
       if (controllerRef.current) {
         controllerRef.current.abort();
       }
 
-      const recentCityWithMatchingId = recentCities.find(city => city.geonameid === geonameid);
+      // Avoid calling API for CURRENT_LOCATION or recent city with matching geonameid
+      if (searchGeonameid === CURRENT_LOCATION.geonameid) {
+        setSelectedCity(CURRENT_LOCATION);
+        return;
+      }
+      const recentCityWithMatchingId = recentCities.find(city => city.geonameid === searchGeonameid);
       if (recentCityWithMatchingId != null) {
         setSelectedCity(recentCityWithMatchingId);
         return;
       }
 
+      // Call /city-search API
       const controller = new AbortController();
       controllerRef.current = controller;
-
       try {
-        const res = await fetch(getPath(APIRoute.CITY_SEARCH, searchQueryParams), {
+        const res = await fetch(getPath(APIRoute.CITY_SEARCH, getQueryParamsForGeonameid(searchGeonameid)), {
           signal: controllerRef.current?.signal
         });
         const resJSON = await res.json();
@@ -120,7 +156,7 @@ export default function Home() {
 
     if (geonameid != null) {
       if (selectedCity == null) {
-        searchAndSetSelectedCity(getQueryParamsForGeonameid(geonameid));
+        searchAndSetSelectedCity(geonameid);
       }
     } else if (router.isReady) {
       setSelectedCity(recentCities.length ? recentCities[0] : DEFAULT_CITY);
