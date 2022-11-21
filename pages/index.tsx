@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { NextRouter, useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
-import { Footer, Header, Main } from 'components';
+import { Footer, Header, LocateError, Main } from 'components';
 import {
   API_COORDINATES_KEY,
   API_GEONAMEID_KEY,
@@ -214,7 +214,9 @@ export default function Home() {
         recentCities={recentCities}
         citiesGIDCache={citiesGIDCache}
       ></Header>
-      <Main locateError={locateError} queryParams={queryParams}></Main>
+      <Main queryParams={queryParams}>
+        {locateError != null ? <LocateError locateError={locateError}></LocateError> : undefined}
+      </Main>
       <Footer></Footer>
     </>
   );

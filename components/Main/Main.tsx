@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, QueryParams, Response } from 'models/api';
-import LocateError from './LocateError/LocateError';
 import { ForecastCard, ObservationsCard } from '../Card';
 import homeStyles from 'styles/Home.module.css';
 
@@ -67,13 +66,7 @@ const ForecastCards = ({
   return <>{cards}</>;
 };
 
-export default function Main({
-  queryParams,
-  locateError
-}: {
-  queryParams: QueryParams;
-  locateError: number | undefined;
-}) {
+export default function Main({ queryParams, children }: { queryParams: QueryParams; children?: ReactNode }) {
   const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
 
@@ -106,8 +99,8 @@ export default function Main({
 
   return (
     <main className={homeStyles.container__content}>
-      {locateError != null ? (
-        <LocateError locateError={locateError}></LocateError>
+      {children != null ? (
+        children
       ) : (
         <>
           <ObservationsCard
