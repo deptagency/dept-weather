@@ -45,6 +45,7 @@ export default function Home() {
   const geonameid = getGeonameidFromUrl(router);
   const [selectedCity, setSelectedCity] = useState<SearchResultCity | undefined>(undefined);
   const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
+  const [locateError, setLocateError] = useState<number | undefined>(undefined);
 
   const citiesGIDCache = useCitiesGIDCache();
 
@@ -105,12 +106,11 @@ export default function Home() {
             );
             setQueryParams({ [API_COORDINATES_KEY]: CoordinatesHelper.numArrToStr(adjustedCoordinates) });
           },
-          error => {
-            alert(`Error: ${error.code} - ${error.message}`);
-          }
+          error => setLocateError(error.code)
         );
       } else {
         setQueryParams(getQueryParamsForGeonameid(geonameid));
+        setLocateError(undefined);
       }
     }
   }, [geonameid, selectedCity, router]);
@@ -214,7 +214,7 @@ export default function Home() {
         recentCities={recentCities}
         citiesGIDCache={citiesGIDCache}
       ></Header>
-      <Main queryParams={queryParams}></Main>
+      <Main locateError={locateError} queryParams={queryParams}></Main>
       <Footer></Footer>
     </>
   );

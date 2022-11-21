@@ -1,0 +1,25 @@
+.locate-error {
+  margin: 1.75rem 1rem 1rem;
+}
+
+.locate-error__icon {
+  display: block;
+  height: 6rem;
+  width: 6rem;
+  margin: 0 auto;
+}
+
+.locate-error__icon path {
+  fill: var(--black);
+}
+
+.locate-error__title {
+  text-align: center;
+  margin: 1.5rem 0rem 1rem 0rem;
+}
+
+.locate-error__message {
+  text-align: center;
+  font-size: 1.25rem;
+  margin: 0rem;
+}

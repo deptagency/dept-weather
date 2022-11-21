@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, QueryParams, Response } from 'models/api';
+import LocateError from './LocateError/LocateError';
 import { ForecastCard, ObservationsCard } from '../Card';
 import homeStyles from 'styles/Home.module.css';
 
@@ -66,7 +67,13 @@ const ForecastCards = ({
   return <>{cards}</>;
 };
 
-export default function Main({ queryParams }: { queryParams: QueryParams }) {
+export default function Main({
+  queryParams,
+  locateError
+}: {
+  queryParams: QueryParams;
+  locateError: number | undefined;
+}) {
   const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
 
@@ -99,16 +106,22 @@ export default function Main({ queryParams }: { queryParams: QueryParams }) {
 
   return (
     <main className={homeStyles.container__content}>
-      <ObservationsCard
-        isLoading={observationsIsLoading}
-        latestReadTime={observations?.latestReadTime ? observations.latestReadTime : undefined}
-        observations={observations?.data}
-      ></ObservationsCard>
-      <ForecastCards
-        isLoading={forecastIsLoading}
-        latestReadTime={forecast?.latestReadTime ? forecast.latestReadTime : undefined}
-        forecasts={forecast?.data?.nws?.forecasts?.length ? forecast.data.nws.forecasts : placeholderForecasts}
-      ></ForecastCards>
+      {locateError != null ? (
+        <LocateError locateError={locateError}></LocateError>
+      ) : (
+        <>
+          <ObservationsCard
+            isLoading={observationsIsLoading}
+            latestReadTime={observations?.latestReadTime ? observations.latestReadTime : undefined}
+            observations={observations?.data}
+          ></ObservationsCard>
+          <ForecastCards
+            isLoading={forecastIsLoading}
+            latestReadTime={forecast?.latestReadTime ? forecast.latestReadTime : undefined}
+            forecasts={forecast?.data?.nws?.forecasts?.length ? forecast.data.nws.forecasts : placeholderForecasts}
+          ></ForecastCards>
+        </>
+      )}
     </main>
   );
 }
