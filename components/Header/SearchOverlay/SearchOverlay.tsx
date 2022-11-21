@@ -55,7 +55,7 @@ export default function SearchOverlay({
   );
   const sortRecentsToFront = useCallback(
     (a: SearchResultCity, b: SearchResultCity) =>
-      Number(findInRecentCities(a) != null) - Number(findInRecentCities(b) != null),
+      Number(findInRecentCities(b) != null) - Number(findInRecentCities(a) != null),
     [findInRecentCities]
   );
 
@@ -64,7 +64,7 @@ export default function SearchOverlay({
       if (controllerRef.current) {
         controllerRef.current.abort();
       }
-      setResults(newResults.sort(sortRecentsToFront));
+      setResults([...newResults].sort(sortRecentsToFront));
       setHighlightedIndexDistance(0);
     };
 
@@ -84,7 +84,8 @@ export default function SearchOverlay({
       }
       // Else if query is empty string, use recentCities
     } else if (formattedQuery === '') {
-      abortSearchCallAndUse(recentCities.slice(0, CITY_SEARCH_RESULT_LIMIT));
+      const slicedRecentCities = recentCities.slice(0, CITY_SEARCH_RESULT_LIMIT);
+      abortSearchCallAndUse(slicedRecentCities);
       return;
     }
 
@@ -105,8 +106,7 @@ export default function SearchOverlay({
           signal: controllerRef.current?.signal
         });
         const resJSON = await res.json();
-        setResults(resJSON.data.sort(sortRecentsToFront));
-        setResults(resJSON.data);
+        setResults([...resJSON.data].sort(sortRecentsToFront));
         setHighlightedIndexDistance(0);
       } catch (e) {
         if (e instanceof Error && e?.name !== 'AbortError') {
