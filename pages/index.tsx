@@ -106,7 +106,17 @@ export default function Home() {
             );
             setQueryParams({ [API_COORDINATES_KEY]: CoordinatesHelper.numArrToStr(adjustedCoordinates) });
           },
-          error => setLocateError(error.code)
+          error => {
+            setLocateError(error.code);
+            if ('permissions' in navigator) {
+              navigator.permissions.query({ name: 'geolocation' }).then(permissionStatus => {
+                permissionStatus.onchange = () => {
+                  setSelectedCity(undefined);
+                  setLocateError(undefined);
+                };
+              });
+            }
+          }
         );
       } else {
         setQueryParams(getQueryParamsForGeonameid(geonameid));
