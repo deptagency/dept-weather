@@ -1,5 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import useSWR from 'swr';
+import { OfflineError } from 'components/Errors';
+import { useOnlineStatus } from 'hooks';
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, QueryParams, Response } from 'models/api';
 import { ForecastCard, ObservationsCard } from '../Card';
 import homeStyles from 'styles/Home.module.css';
@@ -67,6 +69,7 @@ const ForecastCards = ({
 };
 
 export default function Main({ queryParams, children }: { queryParams: QueryParams; children?: ReactNode }) {
+  const isOnline = useOnlineStatus();
   const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
 
@@ -101,17 +104,19 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
     <main className={homeStyles.container__content}>
       {children != null ? (
         children
+      ) : !isOnline && observationsIsError && forecastIsError ? (
+        <OfflineError></OfflineError>
       ) : (
         <>
           <ObservationsCard
             isLoading={observationsIsLoading}
-            latestReadTime={observations?.latestReadTime ? observations.latestReadTime : undefined}
+            latestReadTime={observations?.latestReadTime ? observations!.latestReadTime! : undefined}
             observations={observations?.data}
           ></ObservationsCard>
           <ForecastCards
             isLoading={forecastIsLoading}
-            latestReadTime={forecast?.latestReadTime ? forecast.latestReadTime : undefined}
-            forecasts={forecast?.data?.nws?.forecasts?.length ? forecast.data.nws.forecasts : placeholderForecasts}
+            latestReadTime={forecast?.latestReadTime ? forecast!.latestReadTime! : undefined}
+            forecasts={forecast?.data?.nws?.forecasts?.length ? forecast!.data!.nws!.forecasts! : placeholderForecasts}
           ></ForecastCards>
         </>
       )}

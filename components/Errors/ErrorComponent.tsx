@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import styles from './Error.module.css';
+import styles from './ErrorComponent.module.css';
 
-export default function Error({
+export default function ErrorComponent({
   errorTitle,
   errorMessage,
   icon
