@@ -1,24 +1,24 @@
-.locate-error {
+.error {
   margin: 1.75rem 1rem 1rem;
 }
 
-.locate-error__icon {
+.error svg {
   display: block;
   height: 6rem;
   width: 6rem;
   margin: 0 auto;
 }
 
-.locate-error__icon path {
+.error svg path {
   fill: var(--black);
 }
 
-.locate-error__title {
+.error__title {
   text-align: center;
   margin: 2rem 0rem 1rem 0rem;
 }
 
-.locate-error__message {
+.error__message {
   text-align: center;
   font-size: 1.25rem;
   margin: 0rem;
