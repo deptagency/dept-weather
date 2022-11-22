@@ -6,7 +6,6 @@ import { Footer, Header, LocateError, Main } from 'components';
 import {
   API_COORDINATES_KEY,
   API_GEONAMEID_KEY,
-  APP_MASK_ICON_COLOR,
   APP_TITLE,
   CURRENT_LOCATION,
   DEFAULT_CITY,
@@ -206,15 +205,6 @@ export default function Home() {
         <title>
           {selectedCity != null ? `${SearchQueryHelper.getCityAndStateCode(selectedCity)} | ${APP_TITLE}` : APP_TITLE}
         </title>
-        <meta
-          name="description"
-          content={`The ${APP_TITLE} app provides up-to-date weather information and forecasts for locations across the U.S.`}
-        />
-        <meta name="apple-mobile-web-app-title" content={APP_TITLE} />
-        <meta name="application-name" content={APP_TITLE} />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="mask-icon" href="/favicon.svg" color={APP_MASK_ICON_COLOR} />
       </Head>
       <Header
         showSearchOverlay={showSearchOverlay}

@@ -1,0 +1,32 @@
+{
+  "name": "DEPT\u00ae Weather",
+  "short_name": "DEPT\u00ae Weather",
+  "description": "The DEPT\u00ae Weather app provides up-to-date weather information and forecasts for locations across the U.S.",
+  "categories": ["weather"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#5115f7",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/"
+}
