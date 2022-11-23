@@ -20,11 +20,6 @@ const nextConfig = {
   reactStrictMode: true,
   async headers() {
     return CACHED_STATIC_ASSET_SOURCES.map(source => ({ source, headers: STATIC_ASSET_CACHE_HEADERS }));
-  },
-  async rewrites() {
-    return {
-      afterFiles: [{ source: '/:path*', destination: '/_404/:path*' }]
-    };
   }
 };
 

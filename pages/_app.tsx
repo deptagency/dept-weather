@@ -1,5 +1,5 @@
 import localFont from '@next/font/local';
-import { AppProps } from 'next/app';
+import App, { AppContext, AppProps } from 'next/app';
 import styles from 'styles/Home.module.css';
 import '../styles/globals.css';
 
@@ -28,5 +28,18 @@ function MyApp({ Component, pageProps }: AppProps) {
     </div>
   );
 }
+
+MyApp.getInitialProps = async (appContext: AppContext) => {
+  // calls page's `getInitialProps` and fills `appProps.pageProps`
+  const appProps = await App.getInitialProps(appContext);
+
+  if (appContext.ctx.res?.statusCode === 404) {
+    appContext.ctx.res.writeHead(302, { Location: '/' });
+    appContext.ctx.res.end();
+    return;
+  }
+
+  return { ...appProps };
+};
 
 export default MyApp;
