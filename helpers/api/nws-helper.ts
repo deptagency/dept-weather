@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import fetch, { HeadersInit } from 'node-fetch';
 import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '@constants';
@@ -218,14 +218,18 @@ export class NwsHelper {
       return wind;
     };
 
+    const isTimeBeforeEndOfDay = (time: Dayjs) => time.isBefore(dayjs().endOf('day'));
+
     const forecasts =
       forecast?.periods?.map((period): NwsForecastPeriod => {
         const start = dayjs(period.startTime);
-        const dayName = start.isBefore(dayjs().endOf('day'))
-          ? period.isDaytime
-            ? 'Today'
-            : 'Tonight'
-          : dayjs.weekdays()[start.day()];
+        let dayName = dayjs.weekdays()[start.day()];
+        if (isTimeBeforeEndOfDay(start)) {
+          if (period.isDaytime) dayName = 'Today';
+          else if (isTimeBeforeEndOfDay(dayjs(period.endTime))) dayName = 'Overnight';
+          else dayName = 'Tonight';
+        }
+
         return {
           dayName,
           shortDateName: start.format('MMM D'),
