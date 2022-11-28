@@ -19,8 +19,10 @@ const CACHED_STATIC_ASSET_SOURCES = [
 const nextConfig = {
   reactStrictMode: true,
   async headers() {
-    return CACHED_STATIC_ASSET_SOURCES.map(source => ({ source, headers: STATIC_ASSET_CACHE_HEADERS }));
+    return process.env.NODE_ENV !== 'development'
+      ? CACHED_STATIC_ASSET_SOURCES.map(source => ({ source, headers: STATIC_ASSET_CACHE_HEADERS }))
+      : [];
   }
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = process.env.NODE_ENV !== 'development' ? withPWA(nextConfig) : nextConfig;
