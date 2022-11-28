@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 import Fuse from 'fuse.js';
 import { readFile } from 'fs/promises';
+import geodist from 'geodist';
 import path from 'path';
-import turf from '@turf/distance';
 import {
   CITY_SEARCH_CITIES_BY_ID_FILENAME,
   CITY_SEARCH_CITIES_FILENAME,
@@ -164,22 +164,24 @@ export class CitiesHelper {
   private static readonly closestCity = new Cached<ClosestCity | undefined, number[]>(
     async (coordinatesNumArr: number[]) => {
       const usCities = await this.usCitiesPromise;
-      let radDistanceToClosestCity = Number.MAX_SAFE_INTEGER;
+      let distanceToClosestCity = Number.MAX_SAFE_INTEGER;
       let closestCity: FullCity | undefined;
       for (const city of usCities) {
-        const radDistanceToCity = turf(coordinatesNumArr, CoordinatesHelper.cityToNumArr(city), { units: 'radians' });
-        if (radDistanceToCity < radDistanceToClosestCity) {
+        const distance = geodist(coordinatesNumArr, CoordinatesHelper.cityToNumArr(city), {
+          exact: true,
+          unit: Unit.MILES
+        });
+
+        if (distance < distanceToClosestCity) {
           closestCity = city;
-          radDistanceToClosestCity = radDistanceToCity;
+          distanceToClosestCity = distance;
         }
       }
       return closestCity != null
         ? {
             ...this.mapToCity(closestCity),
             distanceFromQueried: NumberHelper.round(
-              turf(coordinatesNumArr, CoordinatesHelper.cityToNumArr(closestCity), {
-                units: Unit.MILES
-              }),
+              distanceToClosestCity,
               CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL
             )!
           }

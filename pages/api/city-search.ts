@@ -5,7 +5,7 @@ import { CitiesReqQueryHelper, LoggerHelper } from 'helpers/api';
 import { APIRoute, getPath, Response } from 'models/api';
 import { City } from 'models/cities';
 
-const LOGGER_LABEL = getPath(APIRoute.CURRENT);
+const LOGGER_LABEL = getPath(APIRoute.CITY_SEARCH);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const getPartialResponse = async (): Promise<Pick<Response<City[] | null>, 'data' | 'warnings' | 'errors'>> => {

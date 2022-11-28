@@ -1,4 +1,4 @@
-import turf from '@turf/distance';
+import geodist from 'geodist';
 import { default as WeatherLink } from 'weatherlink';
 import { AQ_COORDINATES_STR, DEFAULT_UNITS } from '@constants';
 import { CoordinatesHelper, NumberHelper } from 'helpers';
@@ -21,11 +21,12 @@ export class WeatherlinkHelper {
   }
 
   static shouldUse(minQueriedCity: MinimalQueriedCity) {
-    const distanceToAQ = turf(
+    const distanceToAQ = geodist(
       CoordinatesHelper.strToNumArr(AQ_COORDINATES_STR),
       CoordinatesHelper.cityToNumArr(minQueriedCity),
       {
-        units: Unit.MILES
+        exact: true,
+        unit: Unit.MILES
       }
     );
     return distanceToAQ < 5;

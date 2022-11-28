@@ -24,3 +24,16 @@ declare module 'geo2zip' {
 
   export default geo2zip;
 }
+
+declare module 'geodist' {
+  export declare type Point = number[] | { lat: number; lon: number };
+  export interface Options {
+    exact?: boolean;
+    limit?: number;
+    unit?: string;
+  }
+
+  function getDistance(start: Point, end: Point, options?: Options): number;
+
+  export default getDistance;
+}
