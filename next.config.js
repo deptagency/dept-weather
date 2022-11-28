@@ -10,10 +10,11 @@ const STATIC_ASSET_CACHE_HEADERS = [
   }
 ];
 const CACHED_STATIC_ASSET_SOURCES = [
-  '/cities-top10000-gid-cache.json',
+  '/icons/(.*)',
+  '/splash-screens/(.*)',
   '/weather-icons/(.*)',
-  '/favicon.svg',
-  '/apple-touch-icon.png'
+  '/cities-top10000-gid-cache.json',
+  '/favicon.svg'
 ];
 
 const nextConfig = {
