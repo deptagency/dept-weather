@@ -5,7 +5,7 @@
   "categories": ["weather"],
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/icons/icon.svg",
       "type": "image/svg+xml",
       "sizes": "any",
       "purpose": "any"
