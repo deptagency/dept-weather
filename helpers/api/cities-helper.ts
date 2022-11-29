@@ -21,6 +21,11 @@ import { Unit } from 'models';
 import { Cached } from './cached';
 import { LoggerHelper } from './logger-helper';
 
+import leven from 'leven';
+import lunr from 'lunr';
+import fuzzy from 'fuzzy';
+import fuzzysort from 'fuzzysort';
+
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';
 
@@ -76,6 +81,33 @@ export class CitiesHelper {
     return new Fuse(usCities, CITY_SEARCH_FUSE_OPTIONS, fuseIndex);
   })();
 
+  private static _lunrIndex: lunr.Index;
+  private static async getLunrIndex(usCities: FullCity[]) {
+    if (this._lunrIndex == null) {
+      const getFormattedDuration = LoggerHelper.trackPerformance();
+      this._lunrIndex = lunr(function () {
+        this.field('cityAndStateCode');
+        this.ref('geonameid');
+        usCities.map(city => this.add({ ...city, cityAndStateCode: city.cityAndStateCode.toLowerCase() }));
+      });
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getLunrIndex()`).verbose(`Took ${getFormattedDuration()}`);
+    }
+    return this._lunrIndex;
+  }
+
+  private static fuzzySortCities: (FullCity & { prepared: Fuzzysort.Prepared })[];
+  private static async getFuzzysortCities(usCities: FullCity[]) {
+    if (this.fuzzySortCities == null) {
+      const getFormattedDuration = LoggerHelper.trackPerformance();
+      this.fuzzySortCities = [...usCities].map(city => ({
+        ...city,
+        prepared: fuzzysort.prepare(city.cityAndStateCode)
+      }));
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getFuzzysortCities()`).verbose(`Took ${getFormattedDuration()}`);
+    }
+    return this.fuzzySortCities;
+  }
+
   private static getFromCache = async (query: string) => {
     const queryCache = await this.queryCachePromise;
     const usCities = await this.usCitiesPromise;
@@ -129,22 +161,91 @@ export class CitiesHelper {
     return topResults;
   }
 
+  static async searchWithFuse(query: string, getFormattedDuration: () => string): Promise<[FullCity[], string]> {
+    const fuse = await this.fusePromise;
+    const results = fuse.search(query);
+    const topResults = this.getTopResults(results);
+    const cities = topResults.map(result => result.item);
+    return [cities, getFormattedDuration()];
+  }
+
+  static async searchWithLeven(
+    query: string,
+    usCities: FullCity[],
+    getFormattedDuration: () => string
+  ): Promise<[FullCity[], string]> {
+    const usCitiesSortedByLevenDistance = usCities
+      .map(city => ({ ...city, levenDistance: leven(query, city.cityAndStateCode.toLowerCase()) }))
+      .sort((a, b) => (a.levenDistance < b.levenDistance ? -1 : a.levenDistance > b.levenDistance ? 1 : 0));
+    return [usCitiesSortedByLevenDistance.slice(0, CITY_SEARCH_RESULT_LIMIT), getFormattedDuration()];
+  }
+
+  static async searchWithLunr(
+    query: string,
+    usCities: FullCity[],
+    getFormattedDuration: () => string
+  ): Promise<[FullCity[], string]> {
+    const lunrIndex = await this.getLunrIndex(usCities);
+    const results = lunrIndex.search(query);
+    const topResults = results
+      .slice(0, CITY_SEARCH_RESULT_LIMIT)
+      .map(lunrResult => usCities.find(city => city.geonameid == Number(lunrResult.ref))!);
+    return [topResults, getFormattedDuration()];
+  }
+
+  static async searchWithFuzzy(
+    query: string,
+    usCities: FullCity[],
+    getFormattedDuration: () => string
+  ): Promise<[FullCity[], string]> {
+    const results = fuzzy.filter(query, usCities, {
+      extract: city => city.cityAndStateCode.toLowerCase()
+    });
+    const topResults = results
+      .sort((a, b) => (a.score > b.score ? -1 : a.score < b.score ? 1 : 0))
+      .slice(0, CITY_SEARCH_RESULT_LIMIT)
+      .map(fuzzyResult => usCities[fuzzyResult.index]);
+    return [topResults, getFormattedDuration()];
+  }
+
+  static async searchWithFuzzysort(
+    query: string,
+    usCities: FullCity[],
+    getFormattedDuration: () => string
+  ): Promise<[FullCity[], string]> {
+    const fsCities = await this.getFuzzysortCities(usCities);
+    const results = fuzzysort.go(query, fsCities, {
+      key: 'cityAndStateCode',
+      limit: CITY_SEARCH_RESULT_LIMIT
+    });
+    return [results.map(fuzzysortResult => fuzzysortResult.obj), getFormattedDuration()];
+  }
+
   static async searchFor(query: string) {
-    const getFormattedDuration = LoggerHelper.trackPerformance();
     if (!query.length) {
       return (await this.usTopCitiesPromise).map(this.mapToCity);
     }
+    const usCities = await this.usCitiesPromise;
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const searchPkgs = ['Fuse', 'Leven', 'Lunr', 'Fuzzy', 'Fuzzysort'];
+    const allResultsArr = await Promise.all([
+      this.searchWithFuse(query, getFormattedDuration),
+      this.searchWithLeven(query, usCities, getFormattedDuration),
+      this.searchWithLunr(query, usCities, getFormattedDuration),
+      this.searchWithFuzzy(query, usCities, getFormattedDuration),
+      this.searchWithFuzzysort(query, usCities, getFormattedDuration)
+    ]);
+    const allResults: Record<string, [FullCity[], string]> = {};
+    searchPkgs.forEach((pkg, idx) => {
+      allResults[pkg] = allResultsArr[idx];
+    });
 
-    let cities = await this.getFromCache(query);
-    if (cities == null) {
-      const fuse = await this.fusePromise;
-      const results = fuse.search(query);
-      const topResults = this.getTopResults(results);
-      cities = topResults.map(result => result.item);
-    }
-
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(`"${query}" took ${getFormattedDuration()}`);
-    return cities.map(this.mapToCity);
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(
+      `"${query}" performance -${Object.keys(allResults)
+        .map(key => ` ${key}: ${allResults[key][1]}`)
+        .join(', ')}`
+    );
+    return Object.values(allResults).map(results => results[0].map(this.mapToCity));
   }
 
   static async getCityWithId(geonameidStr: string) {
