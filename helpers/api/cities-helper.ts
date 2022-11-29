@@ -25,6 +25,7 @@ import leven from 'leven';
 import lunr from 'lunr';
 import fuzzy from 'fuzzy';
 import fuzzysort from 'fuzzysort';
+import { FullOptions, MatchData, Searcher, sortKind } from 'fast-fuzzy';
 
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';
@@ -33,6 +34,7 @@ export class CitiesHelper {
     return b.population - a.population;
   }
 
+  // Temporarily return with population
   private static mapToCity(extendedCity: City): City {
     return {
       cityName: extendedCity.cityName,
@@ -40,7 +42,9 @@ export class CitiesHelper {
       latitude: extendedCity.latitude,
       longitude: extendedCity.longitude,
       timeZone: extendedCity.timeZone,
-      geonameid: extendedCity.geonameid
+      geonameid: extendedCity.geonameid,
+      // @ts-ignore
+      population: extendedCity.population
     };
   }
 
@@ -106,6 +110,27 @@ export class CitiesHelper {
       LoggerHelper.getLogger(`${this.CLASS_NAME}.getFuzzysortCities()`).verbose(`Took ${getFormattedDuration()}`);
     }
     return this.fuzzySortCities;
+  }
+
+  private static _fastFuzzySearcher: Searcher<FullCity, FullOptions<FullCity>>;
+  private static getFastFuzzySearcher(usCities: FullCity[]) {
+    if (this._fastFuzzySearcher == null) {
+      const getFormattedDuration = LoggerHelper.trackPerformance();
+      this._fastFuzzySearcher = new Searcher(usCities, {
+        keySelector: city => city.cityAndStateCode,
+        threshold: 0.6,
+        ignoreCase: true,
+        ignoreSymbols: false, // this would strip out commas too; here is the list: `~!@#$%^&*()-=_+{}[]\|\;':",./<>?
+        normalizeWhitespace: true,
+        returnMatchData: true,
+        useDamerau: false,
+        useSellers: true,
+        useSeparatedUnicode: false,
+        sortBy: sortKind.bestMatch
+      });
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getFastFuzzySearcher()`).verbose(`Took ${getFormattedDuration()}`);
+    }
+    return this._fastFuzzySearcher;
   }
 
   private static getFromCache = async (query: string) => {
@@ -221,19 +246,30 @@ export class CitiesHelper {
     return [results.map(fuzzysortResult => fuzzysortResult.obj), getFormattedDuration()];
   }
 
+  static async searchWithFastFuzzy(
+    query: string,
+    usCities: FullCity[],
+    getFormattedDuration: () => string
+  ): Promise<[FullCity[], string]> {
+    const searcher = this.getFastFuzzySearcher(usCities);
+    const results = searcher.search(query) as unknown as MatchData<FullCity>[];
+    return [results.slice(0, CITY_SEARCH_RESULT_LIMIT).map(result => result.item), getFormattedDuration()];
+  }
+
   static async searchFor(query: string) {
     if (!query.length) {
       return (await this.usTopCitiesPromise).map(this.mapToCity);
     }
     const usCities = await this.usCitiesPromise;
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const searchPkgs = ['Fuse', 'Leven', 'Lunr', 'Fuzzy', 'Fuzzysort'];
+    const searchPkgs = ['Fuse', 'Leven', 'Lunr', 'Fuzzy', 'Fuzzysort', 'FastFuzzy'];
     const allResultsArr = await Promise.all([
       this.searchWithFuse(query, getFormattedDuration),
       this.searchWithLeven(query, usCities, getFormattedDuration),
       this.searchWithLunr(query, usCities, getFormattedDuration),
       this.searchWithFuzzy(query, usCities, getFormattedDuration),
-      this.searchWithFuzzysort(query, usCities, getFormattedDuration)
+      this.searchWithFuzzysort(query, usCities, getFormattedDuration),
+      this.searchWithFastFuzzy(query, usCities, getFormattedDuration)
     ]);
     const allResults: Record<string, [FullCity[], string]> = {};
     searchPkgs.forEach((pkg, idx) => {
