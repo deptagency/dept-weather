@@ -26,6 +26,8 @@ import lunr from 'lunr';
 import fuzzy from 'fuzzy';
 import fuzzysort from 'fuzzysort';
 import { FullOptions, MatchData, Searcher, sortKind } from 'fast-fuzzy';
+import didyoumean2, { ReturnTypeEnums } from 'didyoumean2';
+import { didyoumean3 } from 'didyoumean3';
 
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';
@@ -44,7 +46,9 @@ export class CitiesHelper {
       timeZone: extendedCity.timeZone,
       geonameid: extendedCity.geonameid,
       // @ts-ignore
-      population: extendedCity.population
+      population: extendedCity.population,
+      // @ts-ignore
+      score: extendedCity.score
     };
   }
 
@@ -200,8 +204,8 @@ export class CitiesHelper {
     getFormattedDuration: () => string
   ): Promise<[FullCity[], string]> {
     const usCitiesSortedByLevenDistance = usCities
-      .map(city => ({ ...city, levenDistance: leven(query, city.cityAndStateCode.toLowerCase()) }))
-      .sort((a, b) => (a.levenDistance < b.levenDistance ? -1 : a.levenDistance > b.levenDistance ? 1 : 0));
+      .map(city => ({ ...city, score: leven(query, city.cityAndStateCode.toLowerCase()) }))
+      .sort((a, b) => (a.score < b.score ? -1 : a.score > b.score ? 1 : 0));
     return [usCitiesSortedByLevenDistance.slice(0, CITY_SEARCH_RESULT_LIMIT), getFormattedDuration()];
   }
 
@@ -256,20 +260,56 @@ export class CitiesHelper {
     return [results.slice(0, CITY_SEARCH_RESULT_LIMIT).map(result => result.item), getFormattedDuration()];
   }
 
+  static async searchWithDidyoumean3(
+    query: string,
+    usCities: FullCity[],
+    getFormattedDuration: () => string
+  ): Promise<[FullCity[], string]> {
+    const results = didyoumean3(
+      query,
+      usCities.map(city => city.cityAndStateCode),
+      { ignore: true, trim: true }
+    ).matched;
+    const topResults = results
+      .sort((a: any, b: any) => (a.score < b.score ? -1 : a.score > b.score ? 1 : 0))
+      .slice(0, CITY_SEARCH_RESULT_LIMIT)
+      .map((result: any) => ({
+        ...usCities.find(city => city.cityAndStateCode === result.target)!,
+        score: result.score
+      }));
+    return [topResults, getFormattedDuration()];
+  }
+  static async searchWithDidyoumean2(
+    query: string,
+    usCities: FullCity[],
+    getFormattedDuration: () => string
+  ): Promise<[FullCity[], string]> {
+    const results = didyoumean2(query, usCities as unknown as any, {
+      threshold: 0,
+      caseSensitive: false,
+      matchPath: ['cityAndStateCode'],
+      returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
+    });
+    return [results.slice(0, CITY_SEARCH_RESULT_LIMIT) as unknown as FullCity[], getFormattedDuration()];
+  }
+
   static async searchFor(query: string) {
     if (!query.length) {
       return (await this.usTopCitiesPromise).map(this.mapToCity);
     }
     const usCities = await this.usCitiesPromise;
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const searchPkgs = ['Fuse', 'Leven', 'Lunr', 'Fuzzy', 'Fuzzysort', 'FastFuzzy'];
+    // const searchPkgs = ['Fuse', 'Leven', 'Lunr', 'Fuzzy', 'Fuzzysort', 'FastFuzzy', 'didyoumean3', 'didyoumean2'];
+    const searchPkgs = ['Fuse', 'Leven'];
     const allResultsArr = await Promise.all([
       this.searchWithFuse(query, getFormattedDuration),
-      this.searchWithLeven(query, usCities, getFormattedDuration),
-      this.searchWithLunr(query, usCities, getFormattedDuration),
-      this.searchWithFuzzy(query, usCities, getFormattedDuration),
-      this.searchWithFuzzysort(query, usCities, getFormattedDuration),
-      this.searchWithFastFuzzy(query, usCities, getFormattedDuration)
+      this.searchWithLeven(query, usCities, getFormattedDuration)
+      // this.searchWithLunr(query, usCities, getFormattedDuration),
+      // this.searchWithFuzzy(query, usCities, getFormattedDuration),
+      // this.searchWithFuzzysort(query, usCities, getFormattedDuration),
+      // this.searchWithFastFuzzy(query, usCities, getFormattedDuration),
+      // this.searchWithDidyoumean3(query, usCities, getFormattedDuration),
+      // this.searchWithDidyoumean2(query, usCities, getFormattedDuration)
     ]);
     const allResults: Record<string, [FullCity[], string]> = {};
     searchPkgs.forEach((pkg, idx) => {
