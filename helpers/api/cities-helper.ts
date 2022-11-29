@@ -166,6 +166,23 @@ export class CitiesHelper {
     return undefined;
   }
 
+  private static getIdxOfDuplicateToRemoveForLeven(topResults: FullCity[]) {
+    // Loop through array backwards and compare i index with first occurring element with the same cityAndStateCode
+    for (let i = topResults.length - 1; i > 0; --i) {
+      const firstMatchIdxInArr = topResults.findIndex(
+        (result: FullCity) => result.cityAndStateCode === topResults[i].cityAndStateCode
+      );
+      if (firstMatchIdxInArr !== i) {
+        // There is more than one element with the same cityAndStateCode
+        //  Return the index of the first occurring element if the population of the last occurring element is greater
+        const idxToRemove =
+          topResults[firstMatchIdxInArr].population < topResults[i].population ? firstMatchIdxInArr : i;
+        return idxToRemove;
+      }
+    }
+    return undefined;
+  }
+
   private static getTopResults(results: Fuse.FuseResult<FullCity>[]) {
     const desiredSize = Math.min(results.length, CITY_SEARCH_RESULT_LIMIT);
     let idxOfNextElem = desiredSize;
@@ -198,6 +215,30 @@ export class CitiesHelper {
     return [cities, getFormattedDuration()];
   }
 
+  private static getTopLevenResults(results: Array<FullCity & { score: number }>) {
+    const desiredSize = Math.min(results.length, CITY_SEARCH_RESULT_LIMIT);
+    let idxOfNextElem = desiredSize;
+    const bestScore = results[0].score;
+    const resultsWithBestScore = results.filter(result => result.score === bestScore);
+
+    const topResults = (
+      resultsWithBestScore.length > idxOfNextElem
+        ? resultsWithBestScore.sort((a, b) => this.sortByPopulation(a, b))
+        : results
+    ).slice(0, idxOfNextElem);
+
+    // Greedily remove duplicates from topResults and replace them if there are more elements in results
+    let idxOfDuplicateToRemove: number | undefined;
+    while ((idxOfDuplicateToRemove = this.getIdxOfDuplicateToRemoveForLeven(topResults)) !== undefined) {
+      topResults.splice(idxOfDuplicateToRemove, 1);
+      if (results.length > idxOfNextElem) {
+        topResults.push(results[idxOfNextElem++]);
+      }
+    }
+
+    return topResults;
+  }
+
   static async searchWithLeven(
     query: string,
     usCities: FullCity[],
@@ -206,7 +247,7 @@ export class CitiesHelper {
     const usCitiesSortedByLevenDistance = usCities
       .map(city => ({ ...city, score: leven(query, city.cityAndStateCode.toLowerCase()) }))
       .sort((a, b) => (a.score < b.score ? -1 : a.score > b.score ? 1 : 0));
-    return [usCitiesSortedByLevenDistance.slice(0, CITY_SEARCH_RESULT_LIMIT), getFormattedDuration()];
+    return [this.getTopLevenResults(usCitiesSortedByLevenDistance), getFormattedDuration()];
   }
 
   static async searchWithLunr(
