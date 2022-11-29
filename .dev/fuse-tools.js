@@ -12,10 +12,12 @@
 //    1. Uncomment/comment desired functionality in run() function at end of file
 //    2. Run "node .dev/fuse-tools.js" in the terminal from the root project directory
 
-import { readFile, writeFile } from 'fs/promises';
 import Fuse from 'fuse.js';
+import { DOT_DATA_PATH } from './constants.js';
+import { cityPopulationSorter, read, write } from './utils.js';
 
-const CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000, 12_500, 15_000, 17_500, 20_000, 22_500, 25_000];
+// const CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000, 12_500, 15_000, 17_500, 20_000, 22_500, 25_000];
+const CACHE_LEVELS = [50];
 
 const RESULT_LIMIT = 5;
 const POPULATION_SORT_THRESHOLD = 10e-4;
@@ -27,9 +29,8 @@ const FUSE_OPTIONS = {
   ]
 };
 
-const readCities = async () => {
-  const inputCitiesFile = await readFile('./.data/cities.json', 'utf-8');
-  const inputCities = JSON.parse(inputCitiesFile);
+const getMinimalCities = async () => {
+  const inputCities = await read(`${DOT_DATA_PATH}cities.json`);
   return inputCities.map(inputCity => ({
     cityAndStateCode: `${inputCity.cityName}, ${inputCity.stateCode}`,
     alternateCityNames: inputCity.alternateCityNames,
@@ -40,23 +41,10 @@ const readCities = async () => {
 
 const createIndex = cities => Fuse.createIndex(FUSE_OPTIONS.keys, cities);
 
-const readIndex = async () => {
-  const indexFile = await readFile('./.data/cities-index.json', 'utf-8');
-  return Fuse.parseIndex(JSON.parse(indexFile));
+const readAndParseIndex = async () => {
+  const index = await read(`${DOT_DATA_PATH}/cities-index.json`);
+  return Fuse.parseIndex(index);
 };
-
-const readQueryCache = async n => {
-  const queryCacheStr = await readFile(`./.data/cities-top${n}-query-cache.json`, 'utf-8');
-  return JSON.parse(queryCacheStr);
-};
-
-const readCityAndStateCodeCache = async n => {
-  const cityAndStateCodeCacheStr = await readFile(`./.data/cities-top${n}-cityAndStateCode-cache.json`, 'utf-8');
-  return JSON.parse(cityAndStateCodeCacheStr);
-};
-
-const citySorter = (city1, city2) => city2.population - city1.population;
-const getSortedCities = cities => [...cities].sort(citySorter);
 
 const getFuse = (cities, index) => new Fuse(cities, FUSE_OPTIONS, index);
 
@@ -71,40 +59,14 @@ const getTopResults = results => {
   let idxOfNextElem = desiredSize;
   const topResults = results.slice(0, idxOfNextElem);
 
-  // Greedily remove duplicates from topResults and replace them if there are more elements in results
-  let idxOfDuplicateToRemove;
-  while ((idxOfDuplicateToRemove = getIdxOfDuplicateToRemove(topResults)) !== undefined) {
-    topResults.splice(idxOfDuplicateToRemove, 1);
-    if (results.length > idxOfNextElem) {
-      topResults.push(results[idxOfNextElem++]);
-    }
-  }
-
   // Sort results that score below (i.e., numerically greater than) threshold by population
   const firstBeyondThreshold = topResults.findIndex(
     result => !result.score || result.score > POPULATION_SORT_THRESHOLD
   );
   const resultsBeyondThreshold = firstBeyondThreshold >= 0 ? topResults.splice(firstBeyondThreshold) : [];
-  resultsBeyondThreshold.sort((result1, result2) => citySorter(result1.item, result2.item));
+  resultsBeyondThreshold.sort((result1, result2) => cityPopulationSorter(result1.item, result2.item));
   topResults.push(...resultsBeyondThreshold);
   return topResults;
-};
-
-const getIdxOfDuplicateToRemove = topResults => {
-  // Loop through array backwards and compare i index with first occurring element with the same cityAndStateCode
-  for (let i = topResults.length - 1; i > 0; --i) {
-    const firstMatchIdxInArr = topResults.findIndex(
-      result => result.item.cityAndStateCode === topResults[i].item.cityAndStateCode
-    );
-    if (firstMatchIdxInArr !== i) {
-      // There is more than one element with the same cityAndStateCode
-      //  Return the index of the first occurring element if the population of the last occurring element is greater
-      const idxToRemove =
-        topResults[firstMatchIdxInArr].item.population < topResults[i].item.population ? firstMatchIdxInArr : i;
-      return idxToRemove;
-    }
-  }
-  return undefined;
 };
 
 const buildQueryCache = async (fuse, cities, startIdx, queryCache) => {
@@ -170,54 +132,50 @@ const write = async (object, fName) => {
 
 const generateIndex = async () => {
   console.time('generate index');
-  const usAllCities = await readCities();
-  const index = createIndex(usAllCities);
-  await writeFile('./.data/cities-index.json', JSON.stringify(index));
+  const cities = await getMinimalCities();
+  await write(`${DOT_DATA_PATH}/cities-index.json`, createIndex(cities));
   console.timeEnd('generate index');
 };
 
 const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, startIdx = 0) => {
   console.time('setup');
-  const usAllCities = await readCities();
-  const usSortedCities = getSortedCities(usAllCities);
+  const cities = await getMinimalCities();
+  const citiesSortedByPop = [...cities].sort(cityPopulationSorter);
 
-  const index = await readIndex();
-  const fuse = getFuse(usAllCities, index);
+  const index = await readAndParseIndex();
+  const fuse = getFuse(cities, index);
   console.timeEnd('setup');
 
-  const levels = CACHE_LEVELS.sort((a, b) => a - b).filter(level => level > startIdx);
-  const usTopCities = usSortedCities.slice(0, levels[levels.length - 1]);
+  const levels = CACHE_LEVELS.sort().filter(level => level > startIdx);
+  const topCities = citiesSortedByPop.slice(0, levels[levels.length - 1]);
   console.log('generating query cache & cityAndStateCode cache for levels:', levels.join(', '));
   console.log();
 
   for (const level of levels) {
     const generateLabel = `L${level} - build query cache`;
     console.time(generateLabel);
-    await buildQueryCache(fuse, usTopCities.slice(0, level), startIdx, queryCache);
+    await buildQueryCache(fuse, topCities.slice(0, level), startIdx, queryCache);
     startIdx = level;
     console.timeEnd(generateLabel);
 
     const qcLabel = `L${level} - order & write query cache`;
     console.time(qcLabel);
     const orderedQueryCache = getOrderedQueryCache(queryCache);
-    await write(orderedQueryCache, `./.data/cities-top${level}-query-cache.json`);
+    await write(`${DOT_DATA_PATH}cities-top${level}-query-cache.json`, orderedQueryCache);
     console.timeEnd(qcLabel);
 
     const cascLabel = `L${level} - build & write cityAndStateCode cache`;
     console.time(cascLabel);
-    buildCityAndStateCodeCache(cityAndStateCodeCache, usAllCities, queryCache);
-    await write(cityAndStateCodeCache, `./.data/cities-top${level}-cityAndStateCode-cache.json`);
+    buildCityAndStateCodeCache(cityAndStateCodeCache, cities, queryCache);
+    await write(`${DOT_DATA_PATH}cities-top${level}-cityAndStateCode-cache.json`, cityAndStateCodeCache);
     console.timeEnd(cascLabel);
 
     const gidLabel = `L${level} - build & write gid cache`;
     console.time(gidLabel);
-    await write(
-      {
-        gidQueryCache: getGidQueryCache(orderedQueryCache, usAllCities),
-        gidCityAndStateCodeCache: getGidCityAndStateCodeCache(cityAndStateCodeCache, usAllCities)
-      },
-      `./.data/cities-top${level}-gid-cache.json`
-    );
+    await write(`${DOT_DATA_PATH}cities-top${level}-gid-cache.json`, {
+      gidQueryCache: getGidQueryCache(orderedQueryCache, cities),
+      gidCityAndStateCodeCache: getGidCityAndStateCodeCache(cityAndStateCodeCache, cities)
+    });
     console.timeEnd(gidLabel);
 
     console.log();
@@ -231,8 +189,8 @@ const run = async () => {
 
   // Use for building upon existing caches
   const topN = 25_000;
-  const queryCache = await readQueryCache(topN);
-  const cityAndStateCodeCache = await readCityAndStateCodeCache(topN);
+  const queryCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-query-cache.json`);
+  const cityAndStateCodeCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-cityAndStateCode-cache.json`);
   await generateCaches(queryCache, cityAndStateCodeCache, topN);
 };
 

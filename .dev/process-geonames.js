@@ -8,12 +8,10 @@
 //    - "cities-formatted.json" file (unformatted output; you need to run the command below to format it)
 //  How to use:
 //    1. Run "node .dev/process-geonames.js" in the terminal from the root project directory
-//    2. Format the "cities-formatted.json" file with "NODE_OPTIONS=--max_old_space_size=8192 npx prettier --write cities-formatted.json"
+//    2. Format the "cities-formatted.json" file with "NODE_OPTIONS=--max_old_space_size=8192 npx prettier --write .data/cities-formatted.json"
 
-import { readFile, writeFile } from 'fs/promises';
-
-const cityPopulationSorter = (city1, city2) => city2.population - city1.population;
-const cityGeonameidSorter = (city1, city2) => city1.geonameid - city2.geonameid;
+import { DOT_DATA_PATH, GEONAME_DATA_PATH } from './constants.js';
+import { cityGeonameidSorter, cityPopulationSorter, write } from './utils.js';
 
 // The following country codes are associated with the United States:
 //   US = United States
@@ -31,7 +29,7 @@ const FEATURE_CLASSES_AND_CODES = {
 };
 
 const run = async () => {
-  const files = await Promise.all(COUNTRY_CODES.map(code => readFile(`.dev/geoname-data/${code}.txt`, 'utf-8')));
+  const files = await Promise.all(COUNTRY_CODES.map(code => readFile(`${GEONAME_DATA_PATH}${code}.txt`, 'utf-8')));
   const cities = [];
 
   console.log('Processing cities...');
@@ -95,9 +93,8 @@ const run = async () => {
     })
     .sort(cityGeonameidSorter);
 
-  const stringified = JSON.stringify(cleanedCities);
-  await writeFile('./.data/cities.json', stringified);
-  await writeFile('./cities-formatted.json', stringified);
+  await write(`${DOT_DATA_PATH}cities.json`, cleanedCities);
+  await write(`${DOT_DATA_PATH}cities-formatted.json`, cleanedCities);
   console.log(' OK!');
 };
 

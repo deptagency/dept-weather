@@ -6,22 +6,12 @@
 //    - "cities-by-id-formatted.json" file (unformatted output; you need to run the command below to format it)
 //  How to use:
 //    1. Run "node .dev/create-cities-by-id.js" in the terminal from the root project directory
-//    2. Format the "cities-by-id-formatted.json" file with "NODE_OPTIONS=--max_old_space_size=8192 npx prettier --write cities-by-id-formatted.json"
+//    2. Format the "cities-by-id-formatted.json" file with "NODE_OPTIONS=--max_old_space_size=8192 npx prettier --write .data/cities-by-id-formatted.json"
 
-import { readFile, writeFile } from 'fs/promises';
+import { DOT_DATA_PATH } from './constants.js';
+import { read, write } from './utils.js';
 
-const write = async (object, fName) => {
-  const objectStr = JSON.stringify(object);
-  await writeFile(fName, objectStr);
-};
-
-const readCities = async () => {
-  const inputCitiesFile = await readFile('./.data/cities.json', 'utf-8');
-  const inputCities = JSON.parse(inputCitiesFile);
-  return inputCities;
-};
-
-const transformCities = cities => {
+const citiesToCitiesById = cities => {
   const citiesById = {};
   for (const city of cities) {
     const cityCopy = { ...city };
@@ -31,22 +21,11 @@ const transformCities = cities => {
   return citiesById;
 };
 
-const getOrderedCitiesById = citiesById => {
-  return Object.keys(citiesById)
-    .sort()
-    .reduce((obj, key) => {
-      obj[key] = citiesById[key];
-      return obj;
-    }, {});
-};
-
 const run = async () => {
-  const cities = await readCities();
-  const citiesById = transformCities(cities);
-  const orderedCitiesById = getOrderedCitiesById(citiesById);
-
-  await write(orderedCitiesById, `./.data/cities-by-id.json`);
-  await write(orderedCitiesById, `./.data/cities-by-id-formatted.json`);
+  const cities = await read(`${DOT_DATA_PATH}cities.json`);
+  const citiesById = citiesToCitiesById(cities);
+  await write(`${DOT_DATA_PATH}cities-by-id.json`, citiesById);
+  await write(`${DOT_DATA_PATH}cities-by-id-formatted.json`, citiesById);
 };
 
 run();
