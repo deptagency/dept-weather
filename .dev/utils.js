@@ -5,8 +5,11 @@ export const cityPopulationSorter = (city1, city2) => city2.population - city1.p
 
 export const read = async fName => {
   const inputFile = await readFile(fName, 'utf-8');
-  const inputObj = JSON.parse(inputFile);
-  return inputObj;
+  if (fName.endsWith('.json')) {
+    const inputObj = JSON.parse(inputFile);
+    return inputObj;
+  }
+  return inputFile;
 };
 
 export const write = async (fName, object) => {

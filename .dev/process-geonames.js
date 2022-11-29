@@ -11,7 +11,7 @@
 //    2. Format the "cities-formatted.json" file with "NODE_OPTIONS=--max_old_space_size=8192 npx prettier --write .data/cities-formatted.json"
 
 import { DOT_DATA_PATH, GEONAME_DATA_PATH } from './constants.js';
-import { cityGeonameidSorter, cityPopulationSorter, write } from './utils.js';
+import { cityGeonameidSorter, cityPopulationSorter, read, write } from './utils.js';
 
 // The following country codes are associated with the United States:
 //   US = United States
@@ -29,7 +29,7 @@ const FEATURE_CLASSES_AND_CODES = {
 };
 
 const run = async () => {
-  const files = await Promise.all(COUNTRY_CODES.map(code => readFile(`${GEONAME_DATA_PATH}${code}.txt`, 'utf-8')));
+  const files = await Promise.all(COUNTRY_CODES.map(code => read(`${GEONAME_DATA_PATH}${code}.txt`)));
   const cities = [];
 
   console.log('Processing cities...');
