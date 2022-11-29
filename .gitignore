@@ -40,3 +40,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# .dev
+.dev/geoname-data/*.txt
