@@ -55,10 +55,7 @@ const searchFor = (fuse, query) => {
 };
 
 const getTopResults = results => {
-  const desiredSize = Math.min(results.length, RESULT_LIMIT);
-  let idxOfNextElem = desiredSize;
-  const topResults = results.slice(0, idxOfNextElem);
-
+  const topResults = results.slice(0, RESULT_LIMIT);
   // Sort results that score below (i.e., numerically greater than) threshold by population
   const firstBeyondThreshold = topResults.findIndex(
     result => !result.score || result.score > POPULATION_SORT_THRESHOLD
