@@ -1,12 +1,12 @@
 import { Unit, UnitType } from './models';
-import { City, FullCity, SearchResultCity } from './models/cities';
+import { City, SearchResultCity } from './models/cities';
 
 export const APP_TITLE = 'DEPT® Weather';
 export const APP_DESCRIPTION = `The ${APP_TITLE} app provides up-to-date weather information and forecasts for locations across the U.S.`;
 export const APP_URL = 'https://dept-weather.vercel.app';
 export const APP_THEME_COLOR = '#ffffff';
 export const APP_MASK_ICON_COLOR = '#000000';
-export const GID_CACHE_FILENAME = 'cities-top10000-gid-cache.json';
+export const GID_CACHE_FILENAME = 'cities-top50-gid-cache.json';
 export const SEARCH_PANEL_ANIMATION_DURATION = 300;
 export const GEOPOSITION_PERMISSION_DENIED_ERROR_CODE = 1;
 
@@ -34,7 +34,7 @@ export const CITY_SEARCH_DEBOUNCE_MS = 250;
 export const CITY_SEARCH_DATA_FOLDER = './data';
 export const CITY_SEARCH_CITIES_FILENAME = 'cities.json';
 export const CITY_SEARCH_CITIES_BY_ID_FILENAME = 'cities-by-id.json';
-export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top25000-query-cache.json';
+export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top50-query-cache.json';
 
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
 export const NWS_UPLOAD_DELAY = 27 * 60; // 27 minutes

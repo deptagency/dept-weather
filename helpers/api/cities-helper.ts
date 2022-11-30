@@ -66,7 +66,6 @@ export class CitiesHelper {
   })();
 
   private static getFromCache = async (query: string) => {
-    return undefined; // TODO - this is only temporary
     const queryCache = await this.queryCachePromise;
     const cities = await this.citiesPromise;
 
