@@ -1,4 +1,3 @@
-import Fuse from 'fuse.js';
 import { Unit, UnitType } from './models';
 import { City, FullCity, SearchResultCity } from './models/cities';
 
@@ -30,20 +29,11 @@ export const CURRENT_LOCATION: SearchResultCity = {
 
 export const CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL = 2;
 export const CITY_SEARCH_RESULT_LIMIT = 5;
-export const CITY_SEARCH_POPULATION_SORT_THRESHOLD = 10e-4;
 export const CITY_SEARCH_RESULTS_MAX_AGE = 90 * 24 * 60 * 60; // 90 days;
-export const CITY_SEARCH_FUSE_OPTIONS: Fuse.IFuseOptions<FullCity> = {
-  includeScore: true,
-  keys: [
-    { name: 'cityAndStateCode', weight: 0.9 },
-    { name: 'alternateCityNames', weight: 0.1 }
-  ]
-};
 export const CITY_SEARCH_DEBOUNCE_MS = 250;
 export const CITY_SEARCH_DATA_FOLDER = './data';
 export const CITY_SEARCH_CITIES_FILENAME = 'cities.json';
 export const CITY_SEARCH_CITIES_BY_ID_FILENAME = 'cities-by-id.json';
-export const CITY_SEARCH_INDEX_FILENAME = 'cities-index.json';
 export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top25000-query-cache.json';
 
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour

@@ -83,21 +83,23 @@ export default function SearchOverlay({
     };
 
     const formattedQuery = SearchQueryHelper.formatQuery(rawSearchQuery);
-    // If query is non-empty string & cache is defined...
-    if (formattedQuery && citiesGIDCache != null) {
-      const cachedQuery = citiesGIDCache.gidQueryCache[formattedQuery.toLowerCase()];
-      // If query is in gidQueryCache...
-      if (cachedQuery?.length) {
-        // Map array of geonameids to array of objects, which also include the cityAndStateCode found in the gidCityAndStateCodeCache
-        const cachedResults = cachedQuery.map(geonameid => ({
-          cityAndStateCode: citiesGIDCache.gidCityAndStateCodeCache[String(geonameid)],
-          geonameid
-        }));
-        abortSearchCallAndUse(cachedResults);
-        return;
-      }
-      // Else if query is empty string, use recentCities
-    } else if (formattedQuery === '') {
+    // TODO - this is only temporary
+    // // If query is non-empty string & cache is defined...
+    // if (formattedQuery && citiesGIDCache != null) {
+    //   const cachedQuery = citiesGIDCache.gidQueryCache[formattedQuery.toLowerCase()];
+    //   // If query is in gidQueryCache...
+    //   if (cachedQuery?.length) {
+    //     // Map array of geonameids to array of objects, which also include the cityAndStateCode found in the gidCityAndStateCodeCache
+    //     const cachedResults = cachedQuery.map(geonameid => ({
+    //       cityAndStateCode: citiesGIDCache.gidCityAndStateCodeCache[String(geonameid)],
+    //       geonameid
+    //     }));
+    //     abortSearchCallAndUse(cachedResults);
+    //     return;
+    //   }
+    //   // Else if query is empty string, use recentCities
+    // } else
+    if (formattedQuery === '') {
       const slicedRecentCities = recentCities.slice(0, CITY_SEARCH_RESULT_LIMIT);
       abortSearchCallAndUse(
         slicedRecentCities.find(recentCity => recentCity?.geonameid === CURRENT_LOCATION.geonameid) ||

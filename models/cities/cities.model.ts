@@ -1,5 +1,6 @@
 export interface FullCity {
   cityAndStateCode: string;
+  cityAndStateCodeLower: string;
   cityName: string;
   alternateCityNames: string[];
   stateCode: string;
@@ -12,6 +13,9 @@ export interface FullCity {
 }
 
 export interface InputCity extends Omit<FullCity, 'cityAndStateCode'> {}
+export interface ScoredCity extends FullCity {
+  score: number;
+}
 
 export interface City
   extends Pick<FullCity, 'cityName' | 'stateCode' | 'latitude' | 'longitude' | 'timeZone' | 'geonameid'> {}

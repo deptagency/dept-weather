@@ -79,7 +79,7 @@ export class SearchQueryHelper {
   }
 
   static formatQuery(query: string) {
-    const formattedQuery = query.replaceAll(new RegExp(' {2,}', 'g'), ' ').trim();
+    const formattedQuery = query.replaceAll(new RegExp(' {2,}', 'g'), ' ').trim().toLowerCase();
     return (
       this.replaceLastSeparated(formattedQuery, ',') ?? this.replaceLastSeparated(formattedQuery, ' ') ?? formattedQuery
     );
