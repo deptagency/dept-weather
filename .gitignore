@@ -42,4 +42,5 @@ yarn-error.log*
 .vercel
 
 # .dev
-.dev/geoname-data/*.txt
+.dev/geoname-data/*
+!.dev/geoname-data/_checksums.json

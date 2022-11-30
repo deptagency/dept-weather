@@ -2,14 +2,12 @@ export interface FullCity {
   cityAndStateCode: string;
   cityAndStateCodeLower: string;
   cityName: string;
-  alternateCityNames: string[];
   stateCode: string;
   population: number;
   latitude: number;
   longitude: number;
   timeZone: string;
   geonameid: number;
-  modified: string;
 }
 
 export interface InputCity extends Omit<FullCity, 'cityAndStateCode'> {}
