@@ -30,11 +30,7 @@ export default function ObservationsCard({
       <CardHeader isLoading={isLoading} lastUpdatedTime={latestReadTime} label="NOW" useIndigo={true}></CardHeader>
       <div className={styles['card-contents']}>
         <div className={styles['card-contents__overview']}>
-          {observations?.wl?.temperature != null ? (
-            <CurrentTemp temperature={observations.wl.temperature} feelsLike={observations.wl.feelsLike}></CurrentTemp>
-          ) : (
-            <CurrentTemp temperature={observations?.nws?.temperature}></CurrentTemp>
-          )}
+          <CurrentTemp observations={observations?.wl ?? observations?.nws}></CurrentTemp>
           <Condition
             condition={observations?.nws?.textDescription}
             size="large"

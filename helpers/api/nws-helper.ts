@@ -17,6 +17,7 @@ import {
   StationsResponse
 } from 'models/nws';
 import { Cached, CacheEntry } from './cached';
+import { FeelsHelper } from './feels-helper';
 import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(localeData);
@@ -89,6 +90,7 @@ export class NwsHelper {
       readTime: nwsCurrent?.timestamp ? dayjs(nwsCurrent.timestamp).unix() : 0,
       validUntil: cacheEntry.validUntil,
       temperature: NumberHelper.convertNws(nwsCurrent?.temperature, UnitType.temp, reqQuery),
+      feelsLike: FeelsHelper.getFromNwsObservations(nwsCurrent, reqQuery),
       heatIndex: NumberHelper.convertNws(nwsCurrent?.heatIndex, UnitType.temp, reqQuery),
       dewPoint: NumberHelper.convertNws(nwsCurrent?.dewpoint, UnitType.temp, reqQuery),
       humidity: NumberHelper.roundNws(nwsCurrent?.relativeHumidity),

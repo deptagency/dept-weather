@@ -18,6 +18,7 @@ export interface BaseObservations {
 
 export interface WeatherObservations extends BaseObservations {
   temperature: number | null;
+  feelsLike: number | null;
   heatIndex: number | null;
   dewPoint: number | null;
   humidity: number | null;
@@ -31,7 +32,6 @@ export interface NwsObservations extends WeatherObservations {
 }
 
 export interface WlObservations extends WeatherObservations {
-  feelsLike: number | null;
   pressure: WlPressure;
   rainfall: WlPrecipitation;
 }

@@ -13,6 +13,30 @@ declare module 'weatherlink' {
   export default WeatherLink;
 }
 
+declare module 'feels' {
+  export interface Options {
+    temp?: number | null;
+    humidity?: number | null;
+    speed?: number | null;
+    dewPoint?: number | null;
+    wvp?: number | null;
+    round?: boolean | ((temp: number, from: string, to: string) => number);
+    units?: {
+      temp: string;
+      speed: string;
+    };
+  }
+
+  export type Method = 'HI' | 'AWBGT' | 'HI_CA' | 'AAT' | 'WCI';
+
+  class Feels {
+    constructor(opts: Options);
+    like(methods: Method[] | Method): number;
+  }
+
+  export default Feels;
+}
+
 declare module 'geo2zip' {
   export declare type PointInput = string | number;
   export interface Options {

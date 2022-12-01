@@ -2200,6 +2200,11 @@ fecha@^4.2.0:
   resolved "https://registry.yarnpkg.com/fecha/-/fecha-4.2.3.tgz#4d9ccdbc61e8629b259fdca67e65891448d569fd"
   integrity sha512-OP2IUU6HeYKJi3i0z4A19kHMQoLVs4Hc+DPqqxI2h/DPZHTm/vjsfC6P0b4jCMy14XizLBqvndQ+UilD7707Jw==
 
+feels@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/feels/-/feels-3.0.0.tgz#9e23e52e6b39cd78c8567991c21f627562b8a525"
+  integrity sha512-rDEOj5oUOq0RpKasXkQhiG7IrCrY3Gfu5dvCtRZqZW3avrWYCZdiDcRbE4ZDE6BQDBVY/4XFKgGwdCuOBCUdfQ==
+
 fetch-blob@^3.1.2, fetch-blob@^3.1.4:
   version "3.2.0"
   resolved "https://registry.npmjs.org/fetch-blob/-/fetch-blob-3.2.0.tgz"

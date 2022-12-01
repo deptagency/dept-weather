@@ -48,6 +48,11 @@ export const DEFAULT_UNITS: Record<UnitType, Unit> = {
   [UnitType.pressure]: Unit.INCHES,
   [UnitType.precipitation]: Unit.INCHES
 };
+export const FEELS_UNITS: Record<UnitType, Unit> = {
+  ...DEFAULT_UNITS,
+  [UnitType.temp]: Unit.C,
+  [UnitType.wind]: Unit.METERS
+};
 
 export const API_ROUTE_PATH = '/api';
 export const API_SEARCH_QUERY_KEY = 'query';
