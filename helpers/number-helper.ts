@@ -1,51 +1,14 @@
 import { DEFAULT_UNITS } from '@constants';
-import { Unit, UnitMapping, Units, UnitType } from 'models';
+import { CONVERSION_FACTORS, Unit, UnitMapping, Units, UnitType } from 'models';
 import { ReqQuery } from 'models/api';
 import { NwsUnits, QuantitativeValue } from 'models/nws';
 
 export class NumberHelper {
-  private static readonly CONVERSION_MAP = {
-    [Unit.C]: {
-      [Unit.F]: (value: number) => (value * 9) / 5 + 32
-    },
-    [Unit.F]: {
-      [Unit.C]: (value: number) => ((value - 32) * 5) / 9
-    },
-    [Unit.KM]: {
-      [Unit.MILES]: (value: number) => value * 0.62137
-    },
-    [Unit.MILES]: {
-      [Unit.KM]: (value: number) => value * 1.609344
-    },
-    [Unit.PASCAL]: {
-      [Unit.INCHES]: (value: number) => value / 3386,
-      [Unit.MILLIBAR]: (value: number) => value / 100
-    },
-    [Unit.MILLIBAR]: {
-      [Unit.PASCAL]: (value: number) => value * 100,
-      [Unit.INCHES]: (value: number) => value / 33.864
-    },
-    [Unit.INCHES]: {
-      [Unit.PASCAL]: (value: number) => value * 3386,
-      [Unit.MILLIBAR]: (value: number) => value * 33.864,
-      [Unit.METERS]: (value: number) => value / 39.37,
-      [Unit.MILLIMETERS]: (value: number) => value * 25.4
-    },
-    [Unit.METERS]: {
-      [Unit.INCHES]: (value: number) => value * 39.37,
-      [Unit.MILLIMETERS]: (value: number) => value * 1000
-    },
-    [Unit.MILLIMETERS]: {
-      [Unit.INCHES]: (value: number) => value / 25.4,
-      [Unit.METERS]: (value: number) => value / 1000
-    }
-  } as Record<Unit, Record<Unit, (value: number) => number>>;
-
-  static round(value: number | null, n: number | undefined = 1, method: 'floor' | 'ceil' | 'round' = 'round') {
+  static round(value: number | null, n: number | null = 1, method: 'floor' | 'ceil' | 'round' = 'round') {
     if (value == null) {
       return null;
     }
-    if (n === undefined) {
+    if (n == null) {
       return value;
     }
 
@@ -63,17 +26,31 @@ export class NumberHelper {
     return roundedX / multiple;
   }
 
-  static roundNws(quantitativeValue: QuantitativeValue | undefined, n: number | undefined = 1) {
+  static roundNws(quantitativeValue: QuantitativeValue | undefined, n: number | null = 1) {
     return this.round(quantitativeValue?.value ?? null, n);
   }
 
-  static convert(value: number | null, unitMapping: UnitMapping | null, roundN: number | undefined = 1) {
+  static convert(value: number | null, unitMapping: UnitMapping | null, roundN: number | null = 1) {
     if (value == null || unitMapping == null) {
       return null;
     }
 
-    const convertedValue =
-      unitMapping.from === unitMapping.to ? value : this.CONVERSION_MAP[unitMapping.from][unitMapping.to](value);
+    let convertedValue: number;
+    if (unitMapping.from === unitMapping.to) {
+      convertedValue = value;
+    } else if (unitMapping.from === Unit.C && unitMapping.to === Unit.F) {
+      convertedValue = (value * 9) / 5 + 32;
+    } else if (unitMapping.from === Unit.F && unitMapping.to === Unit.C) {
+      convertedValue = ((value - 32) * 5) / 9;
+    } else {
+      const fromConversionFactors = CONVERSION_FACTORS[unitMapping.from];
+      if (fromConversionFactors != null && fromConversionFactors[unitMapping.to] != null) {
+        convertedValue = value * fromConversionFactors[unitMapping.to]!;
+      } else {
+        convertedValue = value / CONVERSION_FACTORS[unitMapping.to]![unitMapping.from]!;
+      }
+    }
+
     return this.round(convertedValue, roundN);
   }
 
@@ -82,7 +59,7 @@ export class NumberHelper {
     unitCode: string,
     unitType: UnitType,
     reqQuery: ReqQuery,
-    roundN: number | undefined = 1
+    roundN: number | null = 1
   ) {
     return this.convert(value, this.getUnitMapping(unitType, NwsUnits[unitCode], reqQuery), roundN);
   }
@@ -91,7 +68,7 @@ export class NumberHelper {
     quantitativeValue: QuantitativeValue | undefined,
     unitType: UnitType,
     reqQuery: ReqQuery,
-    roundN: number | undefined = 1
+    roundN: number | null = 1
   ) {
     return quantitativeValue?.value != null && quantitativeValue?.unitCode
       ? this.convertNwsRawValueAndUnitCode(
