@@ -15,8 +15,7 @@ import leven from 'leven';
 import { DOT_DATA_PATH } from './constants.js';
 import { cityPopulationSorter, read, write } from './utils.js';
 
-// const CACHE_LEVELS = [50, 250, 500, 1_000, 2_500, 5_000, 7_500, 10_000, 12_500, 15_000, 17_500, 20_000, 22_500, 25_000];
-const CACHE_LEVELS = [50];
+const CACHE_LEVELS = [50, 500, 1_000, 2_500, 5_000, 10_000, 25_000];
 
 const CITY_SEARCH_RESULT_LIMIT = 5;
 
@@ -174,13 +173,13 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
 
 const run = async () => {
   // Use for generating a brand new cache
-  await generateCaches();
+  // await generateCaches();
 
   // Use for building upon existing caches
-  // const topN = 25_000;
-  // const queryCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-query-cache.json`);
-  // const cityAndStateCodeCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-cityAndStateCode-cache.json`);
-  // await generateCaches(queryCache, cityAndStateCodeCache, topN);
+  const topN = 25_000;
+  const queryCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-query-cache.json`);
+  const cityAndStateCodeCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-cityAndStateCode-cache.json`);
+  await generateCaches(queryCache, cityAndStateCodeCache, topN);
 };
 
 run();
