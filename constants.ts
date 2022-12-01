@@ -34,7 +34,7 @@ export const CITY_SEARCH_DEBOUNCE_MS = 250;
 export const CITY_SEARCH_DATA_FOLDER = './data';
 export const CITY_SEARCH_CITIES_FILENAME = 'cities.json';
 export const CITY_SEARCH_CITIES_BY_ID_FILENAME = 'cities-by-id.json';
-export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top25000-query-cache.json';
+export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top30542-query-cache.json';
 
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
 export const NWS_UPLOAD_DELAY = 27 * 60; // 27 minutes

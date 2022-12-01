@@ -172,11 +172,16 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
 };
 
 const run = async () => {
+  // Use to get the number of cities with population > 0 and add that number to CACHE_LEVELS
+  // const cities = await getMinimalCities();
+  // const numCitiesWithPop = cities.filter(city => city.population).length;
+  // CACHE_LEVELS.push(numCitiesWithPop);
+
   // Use for generating a brand new cache
   // await generateCaches();
 
   // Use for building upon existing caches
-  const topN = 25_000;
+  const topN = 30_542;
   const queryCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-query-cache.json`);
   const cityAndStateCodeCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-cityAndStateCode-cache.json`);
   await generateCaches(queryCache, cityAndStateCodeCache, topN);
