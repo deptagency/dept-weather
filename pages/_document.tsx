@@ -67,7 +67,7 @@ export default function Document() {
         <meta name="msapplication-wide310x150logo" content="/icons/msapplication-558x270.png" />
 
         <meta name="twitter:card" content="app" />
-        <meta name="twitter:title" content={APP_TITLE} />
+        <meta name="twitter:text:title" content={APP_TITLE} />
         <meta name="twitter:description" content={APP_DESCRIPTION} />
         <meta name="twitter:site" content="@DeptAgency" />
         <meta property="og:type" content="website" />
