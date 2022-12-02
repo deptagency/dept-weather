@@ -17,7 +17,7 @@ export default function Precipitation({
         </>
       }
       label={label}
-      icon={PrecipitationIcon()}
+      icon={PrecipitationIcon({ innerDropHeightPercent: 0 })}
     ></Measurement>
   );
 }

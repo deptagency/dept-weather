@@ -15,7 +15,7 @@ export default function PrecipitationForecast({
         </>
       }
       label="Chance of Precip"
-      icon={PrecipitationIcon()}
+      icon={PrecipitationIcon({ innerDropHeightPercent: (chanceOfPrecipitation ?? 0) / 100 })}
     ></Measurement>
   );
 }
