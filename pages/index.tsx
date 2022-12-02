@@ -199,12 +199,18 @@ export default function Home() {
     showSearchOverlay ? document.body.classList.add(className) : document.body.classList.remove(className);
   }, [showSearchOverlay]);
 
+  const [pageTitle, setPageTitle] = useState<string>(APP_TITLE);
+  useEffect(() => {
+    setPageTitle(
+      selectedCity != null ? `${SearchQueryHelper.getCityAndStateCode(selectedCity)} | ${APP_TITLE}` : APP_TITLE
+    );
+  }, [selectedCity]);
+
   return (
     <>
       <Head>
-        <title>
-          {selectedCity != null ? `${SearchQueryHelper.getCityAndStateCode(selectedCity)} | ${APP_TITLE}` : APP_TITLE}
-        </title>
+        <title>{pageTitle}</title>
+        <meta name="twitter:title" content={pageTitle} />
       </Head>
       <Header
         showSearchOverlay={showSearchOverlay}
