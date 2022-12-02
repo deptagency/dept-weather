@@ -67,4 +67,4 @@ export const LOG_TIMESTAMP_FORMAT = 'YY-MM-DD HH:mm:ss';
 export const LOG_LEVEL_STR_PADDING = 7;
 export const LOG_LABEL_STR_PADDING = 22;
 export const MIN_LOG_LEVEL_DEV = 'verbose';
-export const MIN_LOG_LEVEL_PROD = 'debug';
+export const MIN_LOG_LEVEL_PROD = 'verbose';

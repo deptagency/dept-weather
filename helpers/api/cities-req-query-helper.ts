@@ -3,8 +3,11 @@ import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
 import { ReqQuery } from 'models/api';
 import { City, ClosestCity, MinimalQueriedCity } from 'models/cities';
 import { CitiesHelper } from './cities-helper';
+import { LoggerHelper } from './logger-helper';
 
 export class CitiesReqQueryHelper {
+  private static readonly CLASS_NAME = 'CitiesReqQueryHelper';
+
   private static addWarningsForValue(
     value: any,
     reqQuery: ReqQuery,
@@ -77,6 +80,9 @@ export class CitiesReqQueryHelper {
         longitude: coordinatesNumArr[1],
         timeZone: queriedCity.timeZone
       };
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.parseQueriedCity()`).verbose(
+        `Using "${SearchQueryHelper.getCityAndStateCode(queriedCity)}" / ${queriedCity.geonameid}`
+      );
       return {
         queriedCity,
         minimalQueriedCity,
