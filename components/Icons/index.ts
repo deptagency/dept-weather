@@ -1,4 +1,5 @@
 export { default as AirQualityIcon } from './AirQualityIcon';
+export { default as AlertDiamondIcon } from './AlertDiamondIcon';
 export { default as ArrowIcon } from './ArrowIcon';
 export { default as DEPTLogoIcon } from './DEPTLogoIcon';
 export { default as HumidityIcon } from './HumidityIcon';

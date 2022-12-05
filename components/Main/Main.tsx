@@ -3,7 +3,7 @@ import useSWR from 'swr';
 import { OfflineError } from 'components/Errors';
 import { useOnlineStatus } from 'hooks';
 import { APIRoute, Forecast, getPath, NwsForecastPeriod, Observations, QueryParams, Response } from 'models/api';
-import { ForecastCard, ObservationsCard } from '../Card';
+import { AlertCard, ForecastCard, ObservationsCard } from '../Card';
 import homeStyles from 'styles/Home.module.css';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
@@ -108,6 +108,7 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
         <OfflineError></OfflineError>
       ) : (
         <>
+          <AlertCard></AlertCard>
           <ObservationsCard
             isLoading={observationsIsLoading}
             latestReadTime={observations?.latestReadTime ? observations!.latestReadTime! : undefined}
