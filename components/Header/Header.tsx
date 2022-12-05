@@ -92,9 +92,11 @@ export default function Header({
         }}
       >
         <header className={`${styles.header} ${homeStyles.container__content}`}>
-          <h1 className={styles.header__branding}>
-            <DEPTLogoIcon></DEPTLogoIcon>
-            <span className={`${styles.header__text} ${styles.header__branding__text}`}>Weather</span>
+          <h1 className={styles.header__branding} aria-label="DEPT® Weather">
+            <DEPTLogoIcon aria-hidden="true"></DEPTLogoIcon>
+            <span className={`${styles.header__text} ${styles.header__branding__text}`} aria-hidden={true}>
+              Weather
+            </span>
           </h1>
           <div className={styles.header__location}>
             <input
