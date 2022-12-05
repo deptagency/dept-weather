@@ -10,7 +10,8 @@ const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
   if (match == null) {
     const baseCondition = conditionUpped
       .replaceAll(new RegExp(' *isolated *', 'ig'), '')
-      .replaceAll(new RegExp(' *scattered *', 'ig'), '');
+      .replaceAll(new RegExp(' *scattered *', 'ig'), '')
+      .replaceAll(new RegExp(' *periods of *', 'ig'), '');
     match = DefaultIcons[baseCondition.trim() as IconCondition] ?? undefined;
     if (match == null) {
       const subConditions = conditionUpped.split(new RegExp(' *and *', 'i'));
