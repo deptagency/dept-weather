@@ -20,8 +20,8 @@ export default function ForecastCard({
       <CardHeader
         isLoading={isLoading}
         lastUpdatedTime={latestReadTime}
-        label={(dayForecast?.dayName ?? nightForecast?.dayName ?? '').toUpperCase()}
-        secondaryLabel={(dayForecast?.shortDateName ?? nightForecast?.shortDateName ?? '').toUpperCase()}
+        label={dayForecast?.dayName ?? nightForecast?.dayName ?? ''}
+        secondaryLabel={dayForecast?.shortDateName ?? nightForecast?.shortDateName ?? ''}
         useIndigo={false}
       ></CardHeader>
       <div className={styles['card-contents']}>
