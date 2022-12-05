@@ -62,7 +62,7 @@ export class WeatherlinkHelper {
       humidity: NumberHelper.round(wlMain.hum, 0),
       wind: {
         speed: NumberHelper.convert(wlMain.wind_speed_avg_last_10_min, units[UnitType.wind]),
-        direction: NumberHelper.round(wlMain.wind_dir_scalar_avg_last_10_min, 0),
+        directionDeg: NumberHelper.round(wlMain.wind_dir_scalar_avg_last_10_min, 0),
         gustSpeed: NumberHelper.convert(wlMain.wind_speed_hi_last_10_min, units[UnitType.wind])
       },
       feelsLike: NumberHelper.convert(wlMain.thsw_index ?? wlMain.thw_index, units[UnitType.temp]),

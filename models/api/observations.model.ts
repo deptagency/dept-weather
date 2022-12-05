@@ -48,7 +48,7 @@ export interface SunTimesObservations extends BaseObservations, SunriseSunset {}
 
 export interface Wind {
   speed: number | null;
-  direction: number | null;
+  directionDeg: number | null;
   gustSpeed: number | null;
 }
 

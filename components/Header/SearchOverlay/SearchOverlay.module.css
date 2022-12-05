@@ -64,7 +64,7 @@
   padding-right: 0.75rem;
 }
 
-.search-overlay__result__icon {
+.search-overlay__result svg {
   display: inline;
   height: 1rem;
   width: 1rem;
@@ -72,10 +72,6 @@
 
 .search-overlay__result__icon--hidden {
   visibility: hidden;
-}
-
-.search-overlay__result__icon path {
-  fill: var(--black);
 }
 
 .search-overlay__result--highlighted {

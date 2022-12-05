@@ -9,10 +9,6 @@
   margin: 0 auto;
 }
 
-.error svg path {
-  fill: var(--black);
-}
-
 .error__title {
   text-align: center;
   margin: 2rem 0rem 1rem 0rem;

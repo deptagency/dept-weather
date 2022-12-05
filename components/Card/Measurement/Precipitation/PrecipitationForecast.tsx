@@ -1,6 +1,6 @@
+import { PrecipitationIcon } from 'components/Icons';
 import { roundOrEmDash } from 'utils';
 import Measurement from '../Measurement';
-import { PrecipitationIcon } from './PrecipitationIcon';
 
 export default function PrecipitationForecast({
   chanceOfPrecipitation
@@ -15,7 +15,7 @@ export default function PrecipitationForecast({
         </>
       }
       label="Chance of Precip"
-      icon={PrecipitationIcon({ innerDropHeightPercent: (chanceOfPrecipitation ?? 0) / 100 })}
+      icon={<PrecipitationIcon innerDropHeightPercent={(chanceOfPrecipitation ?? 0) / 100}></PrecipitationIcon>}
     ></Measurement>
   );
 }

@@ -1,8 +1,8 @@
+import { WindIcon } from 'components/Icons';
 import { roundOrEmDash } from 'utils';
 import { DetailedWindDirection, WindDirection } from 'models';
 import { WindForecast as WindForecastModel } from 'models/api';
 import Measurement from '../Measurement';
-import { WindIcon } from './WindIcon';
 
 const getWindDirectionDeg = (dir?: WindDirection | DetailedWindDirection | null) => {
   if (dir === WindDirection.N) return 0;
@@ -54,7 +54,7 @@ export default function WindForecast({ wind }: { wind?: WindForecastModel }) {
         </>
       }
       label="Wind"
-      icon={WindIcon(getWindDirectionDeg(wind?.direction))}
+      icon={<WindIcon directionDeg={getWindDirectionDeg(wind?.direction)}></WindIcon>}
     ></Measurement>
   );
 }

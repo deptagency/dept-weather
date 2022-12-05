@@ -1,0 +1,12 @@
+.icon {
+  fill: none;
+}
+
+.icon--hidden {
+  visibility: hidden;
+}
+
+.icon path,
+.icon rect {
+  fill: var(--black);
+}

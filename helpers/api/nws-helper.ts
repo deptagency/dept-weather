@@ -96,7 +96,7 @@ export class NwsHelper {
       humidity: NumberHelper.roundNws(nwsCurrent?.relativeHumidity),
       wind: {
         speed: NumberHelper.convertNws(nwsCurrent?.windSpeed, UnitType.wind, reqQuery),
-        direction: nwsCurrent?.windDirection?.value,
+        directionDeg: nwsCurrent?.windDirection?.value,
         gustSpeed: NumberHelper.convertNws(nwsCurrent?.windGust, UnitType.wind, reqQuery)
       },
       pressure: {

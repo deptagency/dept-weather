@@ -33,7 +33,7 @@
   padding: 0rem 0rem;
 }
 
-.header__branding__logo {
+.header__branding svg {
   width: 73px;
   height: 20px;
   margin-right: 0.25rem;

@@ -1,4 +1,4 @@
-import { cloneElement, ReactElement } from 'react';
+import { ReactElement } from 'react';
 import styles from './Measurement.module.css';
 
 export default function Measurement({
@@ -17,11 +17,7 @@ export default function Measurement({
       <p className={styles.measurement__value}>{value}</p>
       {secondaryValue ? <p className={styles['measurement__secondary-value']}>{secondaryValue}</p> : <></>}
       <div className={styles.measurement__description}>
-        {icon != null ? (
-          cloneElement(icon, { className: `${icon.props.className ?? ''} ${styles.measurement__description__icon}` })
-        ) : (
-          <></>
-        )}
+        {icon}
         <p className={styles.measurement__description__label}>{label}</p>
       </div>
     </div>

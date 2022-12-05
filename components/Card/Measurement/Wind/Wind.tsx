@@ -1,8 +1,8 @@
+import { WindIcon } from 'components/Icons';
 import { roundOrEmDash } from 'utils';
 import { WindDirection } from 'models';
 import { Wind as WindModel } from 'models/api';
 import Measurement from '../Measurement';
-import { WindIcon } from './WindIcon';
 
 const getWindDirection = (deg: number) => {
   if (deg > 337.5 || deg <= 22.5) return WindDirection.N;
@@ -23,12 +23,12 @@ export default function Wind({ wind }: { wind?: WindModel }) {
       value={
         <>
           {roundOrEmDash(wind?.speed)} <span>mph</span>
-          {wind?.direction != null ? ` ${getWindDirection(wind.direction)}` : ''}
+          {wind?.directionDeg != null ? ` ${getWindDirection(wind.directionDeg)}` : ''}
         </>
       }
       secondaryValue={`${roundOrEmDash(wind?.gustSpeed)} mph gusts`}
       label="Wind"
-      icon={WindIcon(wind?.direction)}
+      icon={<WindIcon directionDeg={wind?.directionDeg}></WindIcon>}
     ></Measurement>
   );
 }

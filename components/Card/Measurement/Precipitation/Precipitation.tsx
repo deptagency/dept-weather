@@ -1,6 +1,6 @@
+import { PrecipitationIcon } from 'components/Icons';
 import { toFixedOrEmDash } from 'utils';
 import Measurement from '../Measurement';
-import { PrecipitationIcon } from './PrecipitationIcon';
 
 export default function Precipitation({
   precipitation,
@@ -17,7 +17,7 @@ export default function Precipitation({
         </>
       }
       label={label}
-      icon={PrecipitationIcon({ innerDropHeightPercent: 0 })}
+      icon={<PrecipitationIcon innerDropHeightPercent={0}></PrecipitationIcon>}
     ></Measurement>
   );
 }
