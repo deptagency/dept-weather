@@ -10,3 +10,8 @@
 .icon rect {
   fill: var(--black);
 }
+
+.icon--inverse-fill path,
+.icon--inverse-fill rect {
+  fill: var(--white);
+}
