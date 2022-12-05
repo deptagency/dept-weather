@@ -45,7 +45,7 @@ export default function CardHeader({
     <header
       className={`${styles['card-header']} ${useIndigo ? styles['card-header--indigo'] : styles['card-header--onyx']}`}
     >
-      <h2 className={styles['card-header__title']}>
+      <h2 className={styles['card-header__title']} aria-label={`${label}${secondaryLabel ? ` ${secondaryLabel}` : ''}`}>
         {label}
         {secondaryLabel != null ? (
           <>

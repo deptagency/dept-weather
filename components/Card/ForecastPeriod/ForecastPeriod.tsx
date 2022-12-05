@@ -1,4 +1,5 @@
 import { NwsForecastPeriod } from 'models/api';
+import { useEffect, useState } from 'react';
 import Condition from '../Condition/Condition';
 import { PrecipitationForecast, WindForecast } from '../Measurement';
 import styles from './ForecastPeriod.module.css';
@@ -40,10 +41,14 @@ const getChanceOfPrecip = (detailedForecast: string | null | undefined) => {
 export default function ForecastPeriod({ forecast, isDaytime }: { forecast?: NwsForecastPeriod; isDaytime: boolean }) {
   const condition = shortenForecastToCondition(forecast);
   const chanceOfPrecipitation = getChanceOfPrecip(forecast?.detailedForecast);
+  const [periodLabel, setPeriodLabel] = useState<string>('');
+  useEffect(() => setPeriodLabel(isDaytime ? 'Day' : 'Night'), [isDaytime]);
   return (
     <div className={styles['forecast-period']}>
       <div className={styles['forecast-period__overview']}>
-        <h4 className={styles['forecast-period__overview__label']}>{isDaytime ? 'DAY' : 'NIGHT'}</h4>{' '}
+        <h4 className={styles['forecast-period__overview__label']} aria-label={periodLabel}>
+          {periodLabel.toUpperCase()}
+        </h4>{' '}
         <Condition condition={condition} size="small" isNight={forecast?.isDaytime === false}></Condition>
       </div>
       <div className={styles['forecast-period__measurements']}>

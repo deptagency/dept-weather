@@ -42,36 +42,41 @@ export default function Header({
   }, [results, highlightedIndex, highlightedIndexDistance]);
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = event => {
+    // Show search overlay on keydown, since input would be focused here
+    if (!showSearchOverlay && event.key !== 'Tab') {
+      setRawSearchQuery('');
+      setShowSearchOverlay(true);
+      return;
+    }
+
     // Roughly based on material-ui implementation: https://github.com/mui/material-ui/blob/5b7b17c5f0761e71a971b8fb449a3ad27f55b933/packages/mui-base/src/AutocompleteUnstyled/useAutocomplete.js#L728
     // Wait until Input Monitor Editor is settled.
     if (event.code !== IME_UNSETTLED_KEY_CODE) {
-      switch (event.key) {
-        case 'ArrowDown':
-          // Prevent cursor move
-          event.preventDefault();
-          onHighlightedIndexDistanceChange(1);
-          break;
-        case 'ArrowUp':
-          // Prevent cursor move
-          event.preventDefault();
-          onHighlightedIndexDistanceChange(-1);
-          break;
-        case 'Enter':
-          if (results.length) {
-            setSelectedCity(results[highlightedIndex]);
-          }
-          setShowSearchOverlay(false);
-          inputRef?.current?.blur();
-          break;
-        case 'Escape':
+      if (event.key === 'ArrowDown') {
+        // Prevent cursor move
+        event.preventDefault();
+        onHighlightedIndexDistanceChange(1);
+      } else if (event.key === 'ArrowUp') {
+        // Prevent cursor move
+        event.preventDefault();
+        onHighlightedIndexDistanceChange(-1);
+      } else if (event.key === 'Enter') {
+        if (results.length) {
+          setSelectedCity(results[highlightedIndex]);
+        }
+        setShowSearchOverlay(false);
+        inputRef?.current?.blur();
+      } else if (event.key === 'Escape' || event.key === 'Tab') {
+        if (event.key === 'Escape') {
           // Avoid Opera to exit fullscreen mode.
           event.preventDefault();
           // Avoid the Modal to handle the event.
           event.stopPropagation();
-          setShowSearchOverlay(false);
+        }
+        setShowSearchOverlay(false);
+        if (event.key === 'Escape') {
           inputRef?.current?.blur();
-          break;
-        default:
+        }
       }
     }
   };
@@ -87,9 +92,11 @@ export default function Header({
         }}
       >
         <header className={`${styles.header} ${homeStyles.container__content}`}>
-          <h1 className={styles.header__branding}>
-            <DEPTLogoIcon></DEPTLogoIcon>
-            <span className={`${styles.header__text} ${styles.header__branding__text}`}>Weather</span>
+          <h1 className={styles.header__branding} aria-label="DEPT® Weather">
+            <DEPTLogoIcon aria-hidden="true"></DEPTLogoIcon>
+            <span className={`${styles.header__text} ${styles.header__branding__text}`} aria-hidden={true}>
+              Weather
+            </span>
           </h1>
           <div className={styles.header__location}>
             <input
@@ -105,9 +112,8 @@ export default function Header({
               autoComplete="off"
               type="text"
               ref={inputRef}
-              onClick={e => e.preventDefault()}
               onChange={e => setRawSearchQuery(e.target.value)}
-              onFocus={e => {
+              onClick={e => {
                 e.preventDefault();
                 if (!showSearchOverlay) {
                   setRawSearchQuery('');
@@ -132,7 +138,12 @@ export default function Header({
               aria-controls="SearchResultsList"
               onClick={e => {
                 e.preventDefault();
-                showSearchOverlay ? setShowSearchOverlay(false) : inputRef?.current?.focus();
+                if (showSearchOverlay) {
+                  setShowSearchOverlay(false);
+                } else {
+                  inputRef?.current?.click();
+                  inputRef?.current?.focus();
+                }
               }}
             >
               <ArrowIcon></ArrowIcon>
