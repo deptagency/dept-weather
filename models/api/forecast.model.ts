@@ -27,7 +27,7 @@ export interface NwsForecastPeriod {
   detailedForecast: string | null;
 }
 
-export interface WindForecast extends Omit<Wind, 'direction'> {
+export interface WindForecast extends Omit<Wind, 'directionDeg'> {
   minSpeed: number | null;
   maxSpeed: number | null;
   minGustSpeed: number | null;
