@@ -62,11 +62,6 @@
   display: block;
   height: 1rem;
   width: 1rem;
-  transition: transform 0.3s ease;
-}
-
-.header__location__arrow--expanded svg {
-  transform: scaleY(-1);
 }
 
 .header__location__input {
@@ -78,11 +73,6 @@
 
 .header__location__input:focus {
   outline: none;
-}
-
-.header__branding__logo path,
-.header__location__arrow svg path {
-  fill: var(--black);
 }
 
 @media screen and (max-width: 460px) {

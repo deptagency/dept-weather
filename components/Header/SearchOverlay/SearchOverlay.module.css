@@ -6,6 +6,7 @@
   left: 0rem;
 
   z-index: 1;
+  transition-property: opacity, visibility;
 }
 
 @media screen and (max-width: 576px) {
@@ -23,13 +24,11 @@
 .search-overlay--hidden {
   visibility: hidden;
   opacity: 0;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .search-overlay--visible {
   visibility: visible;
   opacity: 1;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .search-overlay__inner {

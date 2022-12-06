@@ -130,9 +130,7 @@ export default function Header({
               }
             ></input>
             <button
-              className={`${styles.header__location__arrow} ${
-                showSearchOverlay ? styles['header__location__arrow--expanded'] : ''
-              }`}
+              className={styles.header__location__arrow}
               aria-label={'Location search panel'}
               aria-expanded={showSearchOverlay}
               aria-controls="SearchResultsList"
@@ -146,7 +144,7 @@ export default function Header({
                 }
               }}
             >
-              <ArrowIcon></ArrowIcon>
+              <ArrowIcon animationState={showSearchOverlay ? 'end' : 'start'}></ArrowIcon>
             </button>
           </div>
         </header>
