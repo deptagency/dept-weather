@@ -1,0 +1,7 @@
+.icon__arrow__animated {
+  transition-property: transform;
+}
+
+.icon__arrow__animated--end {
+  transform: scaleY(-1);
+}

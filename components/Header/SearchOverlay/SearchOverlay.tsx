@@ -115,7 +115,7 @@ export default function SearchOverlay({
 
   return (
     <div
-      className={`${styles['search-overlay']} ${
+      className={`animated ${styles['search-overlay']} ${
         showSearchOverlay ? styles['search-overlay--visible'] : styles['search-overlay--hidden']
       }`}
       onClick={e => {
