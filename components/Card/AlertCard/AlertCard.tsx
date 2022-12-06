@@ -1,7 +1,7 @@
-import { ReactNode, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import TimeAgo, { Formatter, Suffix, Unit as TimeAgoUnit } from 'react-timeago';
-import { AlertCircleIcon, AlertDiamondIcon, AlertTriangleIcon, ArrowIcon } from 'components/Icons';
+import { AlertCircleIcon, AlertDiamondIcon, AlertHexagonIcon, AlertTriangleIcon, ArrowIcon } from 'components/Icons';
 import baseStyles from '../Card.module.css';
 import styles from './AlertCard.module.css';
 
@@ -45,6 +45,19 @@ export default function AlertCard({
 }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
+  const [alertIcon, setAlertIcon] = useState<ReactNode>(<></>);
+
+  useEffect(() => {
+    let newAlertIconType: (props: { useInverseFill?: boolean | undefined }) => ReactElement;
+
+    if (severity === 'extreme') newAlertIconType = AlertHexagonIcon;
+    else if (severity === 'severe') newAlertIconType = AlertDiamondIcon;
+    else if (severity === 'moderate') newAlertIconType = AlertTriangleIcon;
+    else newAlertIconType = AlertCircleIcon;
+
+    setAlertIcon(newAlertIconType({ useInverseFill: true }));
+  }, [severity]);
+
   return (
     <article className={baseStyles.card}>
       <button
@@ -58,16 +71,7 @@ export default function AlertCard({
         aria-expanded={isExpanded}
         aria-controls={ANIMATED_CONTENTS_WRAPPER_ID}
       >
-        <div className={styles['alert-card-accordian__alert-icon']}>
-          {severity === 'extreme' || severity === 'severe' ? (
-            <AlertDiamondIcon useInverseFill={true}></AlertDiamondIcon>
-          ) : severity === 'moderate' ? (
-            <AlertTriangleIcon useInverseFill={true}></AlertTriangleIcon>
-          ) : (
-            <AlertCircleIcon useInverseFill={true}></AlertCircleIcon>
-          )}
-        </div>
-
+        <div className={styles['alert-card-accordian__alert-icon']}>{alertIcon}</div>
         <div className={`${styles['alert-card-accordian__header']}`}>
           <h2 className={styles['alert-card-accordian__header__title']}>{title}</h2>
           <p className={styles['alert-card-accordian__header__expiration']}>

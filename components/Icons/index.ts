@@ -1,6 +1,7 @@
 export { default as AirQualityIcon } from './AirQualityIcon';
 export { default as AlertCircleIcon } from './AlertCircleIcon';
 export { default as AlertDiamondIcon } from './AlertDiamondIcon';
+export { default as AlertHexagonIcon } from './AlertHexagonIcon';
 export { default as AlertTriangleIcon } from './AlertTriangleIcon';
 export { default as ArrowIcon } from './ArrowIcon';
 export { default as DEPTLogoIcon } from './DEPTLogoIcon';

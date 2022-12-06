@@ -72,6 +72,21 @@ const now = new Date().getTime() / 1_000;
 const MOCK_ALERTS = [
   {
     severity: 'extreme',
+    title: 'Tornado Warning',
+    expiration: now + 1 * 60 * 60, // now + 1 hour
+    description: (
+      <p>
+        A tornado has been sighted in the area, and you should take immediate action to protect yourself and your
+        property. Seek shelter in a sturdy building, and stay away from windows and doors. If you are in a vehicle, get
+        out and find shelter immediately. The tornado is moving in a southeasterly direction and is expected to reach
+        the town of Wichita within the next 30 minutes. This is a life-threatening situation, and you should follow the
+        instructions of local authorities and emergency responders. The National Weather Service will provide updates as
+        more information becomes available.
+      </p>
+    )
+  },
+  {
+    severity: 'severe',
     title: 'Winter Storm Warning',
     expiration: now + 15 * 60, // now + 15 mins
     description: (
