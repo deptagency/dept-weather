@@ -68,6 +68,66 @@ const ForecastCards = ({
   return <>{cards}</>;
 };
 
+const now = new Date().getTime() / 1_000;
+const MOCK_ALERTS = [
+  {
+    severity: 'extreme',
+    title: 'Winter Storm Warning',
+    expiration: now + 15 * 60, // now + 15 mins
+    description: (
+      <>
+        <p>* WHAT...Heavy snow expected. Total snow accumulations of 8 to 10 inches.</p>
+        <p>* WHERE...Deltana and Tanana Flats.</p>
+        <p>* WHEN...From 9 PM this evening to 9 PM AKST Thursday.</p>
+        <p>* IMPACTS...Travel could be very difficult to impossible.</p>
+        <p>* ADDITIONAL DETAILS...Heaviest snow east of Delta Junction</p>
+        <p>
+          A Winter Storm Warning for snow means severe winter weather conditions are expected or occurring. This will
+          make travel very difficult or impossible. The latest road conditions can be obtained by calling 5 1 1.
+        </p>
+      </>
+    )
+  },
+  {
+    severity: 'moderate',
+    title: 'Winter Weather Advisory',
+    expiration: now + 3 * 60 * 60, // now + 3 hours
+    description: (
+      <>
+        <p>* WHAT...Snow expected. Total snow accumulations of 6 to 12 inches. Winds gusting as high as 45 mph.</p>
+        <p>* WHERE...Eastern Alaska Range.</p>
+        <p>* WHEN...From 9 PM this evening to 9 PM AKST Thursday.</p>
+        <p>
+          * IMPACTS...Travel could be very difficult. Areas of blowing snow could significantly reduce visibility
+          especially south of Trims Camp. The cold wind chills as low as 25 below zero could cause frostbite on exposed
+          skin in as little as 30 minutes.
+        </p>
+        <p>* ADDITIONAL DETAILS...Low visibility in snow and blowing snow expected south of Trims Camp.</p>
+        <p>Slow down and use caution while traveling. The latest road conditions can be obtained by calling 5 1 1.</p>
+      </>
+    )
+  },
+  {
+    severity: 'minor',
+    title: 'Small Craft Advisory',
+    expiration: now + 4 * 24 * 60 * 60, // now + 4 days
+    description: (
+      <>
+        <p>.TODAY...Variable wind less than 10 kt becoming E 10 kt in the afternoon. Seas 2 ft. Rain and snow.</p>
+        <p>.TONIGHT...E wind 10 kt becoming W 15 kt after midnight. Seas 2 ft. Snow and rain.</p>
+        <p>
+          .WED...W wind 20 kt increasing to 30 kt in the afternoon. Gusts to 30 kt increasing to 40 kt in the afternoon,
+          strongest near Whittier. Seas 4 ft. Snow.
+        </p>
+        <p>.WED NIGHT...W wind 30 kt. Seas 5 ft.</p>
+        <p>.THU...W wind 30 kt. Seas 5 ft.</p>
+        <p>.FRI...W wind 20 kt. Seas 3 ft.</p>
+        <p>.SAT...W wind 10 kt. Seas 2 ft.</p>
+      </>
+    )
+  }
+];
+
 export default function Main({ queryParams, children }: { queryParams: QueryParams; children?: ReactNode }) {
   const isOnline = useOnlineStatus();
   const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);
@@ -108,7 +168,9 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
         <OfflineError></OfflineError>
       ) : (
         <>
-          <AlertCard></AlertCard>
+          {MOCK_ALERTS.map((mockAlert, i) => (
+            <AlertCard key={i} {...mockAlert}></AlertCard>
+          ))}
           <ObservationsCard
             isLoading={observationsIsLoading}
             latestReadTime={observations?.latestReadTime ? observations!.latestReadTime! : undefined}

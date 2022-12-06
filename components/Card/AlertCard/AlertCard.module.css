@@ -10,7 +10,7 @@
   width: 100%;
   min-height: 3.5rem;
   border-radius: 0.25rem;
-  transition: border-radius 0.3s ease;
+  transition-property: border-radius;
 }
 
 /* Offset the outline when focused for improved visibility */
@@ -22,6 +22,13 @@
 .alert-card-accordian--extreme,
 .alert-card-accordian--severe {
   background-color: #a00a00;
+}
+.alert-card-accordian--moderate {
+  background-color: #cc6e00;
+}
+.alert-card-accordian--minor,
+.alert-card-accordian--unknown {
+  background-color: #128087;
 }
 
 .alert-card-accordian--expanded {
@@ -42,14 +49,6 @@
   width: 1rem;
 }
 
-.alert-card-accordian > svg {
-  transition: transform 0.3s ease;
-}
-
-.alert-card-accordian--expanded > svg {
-  transform: scaleY(-1);
-}
-
 .alert-card-accordian__header {
   display: flex;
   justify-content: space-between;
@@ -68,6 +67,7 @@
 }
 
 .alert-card-accordian__header__title {
+  text-transform: uppercase;
   margin-bottom: -0.25rem;
 }
 
@@ -75,11 +75,14 @@
   font-weight: 300;
 }
 
-.alert-card-accordian__contents--collapsed {
-  height: 0;
-  overflow: hidden;
+.alert-card-accordian__content {
+  padding: 1rem;
 }
 
-.alert-card-accordian__contents--expanded {
-  height: auto;
+.alert-card-accordian__content > p:first-child {
+  margin-top: 0rem;
+}
+
+.alert-card-accordian__content > p:last-child {
+  margin-bottom: 0rem;
 }
