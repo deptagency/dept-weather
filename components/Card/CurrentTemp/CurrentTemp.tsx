@@ -10,7 +10,6 @@ export default function CurrentTemp({ observations }: { observations?: WeatherOb
   const [feelsLikeTxt, setFeelsLikeTxt] = useState<string>('');
 
   useEffect(() => {
-    console.log(observations?.temperature);
     const newTemp = floorOrEmDash(observations?.temperature);
     const newFractionalTemp = observations?.temperature != null ? (observations.temperature * 10) % 10 : '';
     let newTempAriaLabel = String(newTemp);
