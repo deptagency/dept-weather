@@ -10,6 +10,21 @@ import { getTimeAgoFormatter } from 'helpers';
 
 const ANIMATED_CONTENTS_WRAPPER_ID = 'AlertCardAccordianContentsWrapper';
 
+const TimeAgoLabel = ({ effective, expires }: Pick<NwsAlert, 'effective' | 'expires'>) => {
+  const useEffective = effective > new Date().getTime() / 1_000;
+  return (
+    <p className={styles['alert-card-accordian__header__expiration']}>
+      {useEffective ? 'Effective ' : 'Expires '}
+      {
+        <TimeAgo
+          date={(useEffective ? effective : expires) * 1_000}
+          formatter={getTimeAgoFormatter({ exclude: 'past', useJustNow: false })}
+        />
+      }
+    </p>
+  );
+};
+
 export default function AlertCard({ alert }: { alert: NwsAlert }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
@@ -41,15 +56,7 @@ export default function AlertCard({ alert }: { alert: NwsAlert }) {
         <div className={styles['alert-card-accordian__alert-icon']}>{alertIcon}</div>
         <div className={`${styles['alert-card-accordian__header']}`}>
           <h2 className={styles['alert-card-accordian__header__title']}>{alert.title}</h2>
-          <p className={styles['alert-card-accordian__header__expiration']}>
-            Expires{' '}
-            {
-              <TimeAgo
-                date={alert.expires * 1_000}
-                formatter={getTimeAgoFormatter({ exclude: 'past', useJustNow: false })}
-              />
-            }
-          </p>
+          <TimeAgoLabel effective={alert.effective} expires={alert.expires}></TimeAgoLabel>
         </div>
         <ArrowIcon useInverseFill={true} animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>
       </button>
