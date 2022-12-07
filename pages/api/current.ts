@@ -10,7 +10,7 @@ import {
   WeatherlinkHelper
 } from 'helpers/api';
 import { DataSource } from 'models';
-import { APIRoute, BaseObservations, getPath, Observations, Response } from 'models/api';
+import { APIRoute, BaseData, getPath, Observations, Response } from 'models/api';
 
 const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
     const latestReadTime = Math.max(
       ...Object.values(data)
-        .map((observation: BaseObservations) => observation.readTime)
+        .map((observation: BaseData) => observation.readTime)
         .filter(readTime => Number.isInteger(readTime))
     );
 
