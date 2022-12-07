@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import fetch, { HeadersInit } from 'node-fetch';
-import { NWS_ALERTS_BODY_REGEX, NWS_ALERTS_HEADING_REGEX, NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '@constants';
+import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '@constants';
 import { CoordinatesHelper, NumberHelper } from 'helpers';
 import { Unit, UnitType } from 'models';
 import {
@@ -32,6 +32,9 @@ import { FeelsHelper } from './feels-helper';
 import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(localeData);
+
+const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
+const NWS_ALERTS_BODY_REGEX = /(?<=\.{3})(.*)/m;
 
 export class NwsHelper {
   private static readonly CLASS_NAME = 'NwsHelper';
