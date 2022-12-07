@@ -14,11 +14,13 @@ export default function Measurement({
 }) {
   return (
     <div className={styles.measurement}>
-      <p className={styles.measurement__value}>{value}</p>
-      {secondaryValue ? <p className={styles['measurement__secondary-value']}>{secondaryValue}</p> : <></>}
       <div className={styles.measurement__description}>
         {icon}
         <p className={styles.measurement__description__label}>{label}</p>
+      </div>
+      <div>
+        <p className={styles.measurement__value}>{value}</p>
+        {secondaryValue ? <p className={styles['measurement__secondary-value']}>{secondaryValue}</p> : <></>}
       </div>
     </div>
   );

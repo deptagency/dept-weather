@@ -1,4 +1,7 @@
 .measurement {
+  display: flex;
+  flex-direction: column-reverse;
+
   width: 9.5rem;
   margin: 1rem 0.25rem;
 }
