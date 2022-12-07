@@ -1,32 +1,6 @@
-import TimeAgo, { Formatter, Suffix, Unit as TimeAgoUnit } from 'react-timeago';
+import { getTimeAgoFormatter } from 'helpers';
+import TimeAgo from 'react-timeago';
 import styles from './CardHeader.module.css';
-
-const timeAgoFormatter = ((
-  value: number,
-  unit: TimeAgoUnit,
-  suffix: Suffix,
-  epochMiliseconds: number,
-  nextFormatter: Formatter
-) => {
-  if (suffix === 'from now' || (unit === 'second' && value < 30)) {
-    return <>just now</>;
-  } else if ((unit === 'second' && value >= 30) || (unit === 'minute' && value < 2)) {
-    return <>a moment {suffix}</>;
-  } else if (unit === 'minute') {
-    return (
-      <>
-        {value}m {suffix}
-      </>
-    );
-  } else if (unit === 'hour') {
-    return (
-      <>
-        {value}hr {suffix}
-      </>
-    );
-  }
-  return nextFormatter(value, unit, suffix, epochMiliseconds);
-}) as Formatter;
 
 export default function CardHeader({
   isLoading,
@@ -60,7 +34,15 @@ export default function CardHeader({
         {isLoading ? (
           <>Updating...</>
         ) : lastUpdatedTime ? (
-          <>Updated {<TimeAgo date={lastUpdatedTime * 1_000} formatter={timeAgoFormatter} />}</>
+          <>
+            Updated{' '}
+            {
+              <TimeAgo
+                date={lastUpdatedTime * 1_000}
+                formatter={getTimeAgoFormatter({ exclude: 'future', useJustNow: true })}
+              />
+            }
+          </>
         ) : (
           <>Update failed</>
         )}

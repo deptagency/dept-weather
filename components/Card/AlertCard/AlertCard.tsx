@@ -1,40 +1,14 @@
 import { Fragment, ReactElement, ReactNode, useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import TimeAgo, { Formatter, Suffix, Unit as TimeAgoUnit } from 'react-timeago';
+import TimeAgo from 'react-timeago';
 import { AlertCircleIcon, AlertDiamondIcon, AlertHexagonIcon, AlertTriangleIcon, ArrowIcon } from 'components/Icons';
 import baseStyles from '../Card.module.css';
 import styles from './AlertCard.module.css';
 import { NwsAlert } from 'models/api';
 import { AlertSeverity } from 'models/nws/alerts.model';
+import { getTimeAgoFormatter } from 'helpers';
 
 const ANIMATED_CONTENTS_WRAPPER_ID = 'AlertCardAccordianContentsWrapper';
-
-const timeAgoFormatter = ((
-  value: number,
-  unit: TimeAgoUnit,
-  suffix: Suffix,
-  epochMiliseconds: number,
-  nextFormatter: Formatter
-) => {
-  const customPrefix = suffix === 'from now' ? 'in ' : '';
-  const customSuffix = suffix === 'from now' ? '' : ` ${suffix}`;
-
-  // TODO - adapt this for re-use with timeAgoFormatter in CardHeader
-  let formattedValue: string | undefined;
-  if (unit === 'second' || (unit === 'minute' && value < 2)) formattedValue = 'a moment';
-  else if (unit === 'minute') formattedValue = `${value}m`;
-  else if (unit === 'hour') formattedValue = `${value}hr`;
-  else if (unit === 'day') formattedValue = `${value}d`;
-  else if (unit === 'week') formattedValue = `${value}w`;
-  else if (unit === 'month') formattedValue = `${value}mo`;
-  else if (unit === 'year') formattedValue = `${value}yr`;
-
-  return formattedValue ? (
-    <>{`${customPrefix}${formattedValue}${customSuffix}`}</>
-  ) : (
-    nextFormatter(value, unit, suffix, epochMiliseconds)
-  );
-}) as Formatter;
 
 export default function AlertCard({ alert }: { alert: NwsAlert }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
@@ -68,7 +42,13 @@ export default function AlertCard({ alert }: { alert: NwsAlert }) {
         <div className={`${styles['alert-card-accordian__header']}`}>
           <h2 className={styles['alert-card-accordian__header__title']}>{alert.title}</h2>
           <p className={styles['alert-card-accordian__header__expiration']}>
-            Expires {<TimeAgo date={alert.expires * 1_000} formatter={timeAgoFormatter} />}
+            Expires{' '}
+            {
+              <TimeAgo
+                date={alert.expires * 1_000}
+                formatter={getTimeAgoFormatter({ exclude: 'past', useJustNow: false })}
+              />
+            }
           </p>
         </div>
         <ArrowIcon useInverseFill={true} animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>
