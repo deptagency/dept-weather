@@ -76,7 +76,7 @@ export default function AlertCard({ alert }: { alert: NwsAlert }) {
               </p>
             </Fragment>
           ))}
-          {alert.instruction ? (
+          {alert.instruction.length ? (
             <p className={styles['alert-card-accordian__content__instructions']}>{alert.instruction.join(' ')}</p>
           ) : (
             <></>

@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import fetch, { HeadersInit } from 'node-fetch';
-import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '@constants';
+import { NWS_ALERTS_BODY_REGEX, NWS_ALERTS_HEADING_REGEX, NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '@constants';
 import { CoordinatesHelper, NumberHelper } from 'helpers';
 import { Unit, UnitType } from 'models';
 import {
@@ -276,11 +276,16 @@ export class NwsHelper {
       .filter(alert => dayjs(alert.properties.expires).isAfter(dayjs()))
       .map((alert): NwsAlert => {
         const rawDescription = alert.properties.description;
-        const splitRawDescriptionOn = rawDescription.includes('\n\n') ? '\n\n' : '\n';
-        const description = rawDescription.split(splitRawDescriptionOn).map((descItemStr): DescriptionItem => {
+
+        // Split raw description on '\n\n' if present or '\n' if it has headings; otherwise, don't split
+        let splitRawDescription = [rawDescription];
+        if (rawDescription.includes('\n\n')) splitRawDescription = rawDescription.split('\n\n');
+        else if (NWS_ALERTS_HEADING_REGEX.exec(rawDescription)) splitRawDescription = rawDescription.split('\n');
+
+        const description = splitRawDescription.map((descItemStr): DescriptionItem => {
           const normDescItemStr = descItemStr.replaceAll('\n', ' ');
-          const headingExecd = /(\w+( +\w+)*)(?=\.{3})/.exec(normDescItemStr);
-          const bodyExecd = /(?<=\.{3})(.*)/m.exec(normDescItemStr);
+          const headingExecd = NWS_ALERTS_HEADING_REGEX.exec(normDescItemStr);
+          const bodyExecd = NWS_ALERTS_BODY_REGEX.exec(normDescItemStr);
 
           let heading = headingExecd && headingExecd.length > 0 ? headingExecd[0].toUpperCase() : undefined;
           let body = bodyExecd && bodyExecd.length > 0 ? bodyExecd[0] : undefined;
