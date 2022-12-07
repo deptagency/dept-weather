@@ -1,3 +1,4 @@
+export * from './alerts.model';
 export * from './cloud-layer.model';
 export * from './forecast.model';
 export * from './geometry.model';

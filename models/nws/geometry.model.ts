@@ -1,3 +1,3 @@
 export interface Geometry {
-  coordinates: number[];
+  coordinates: number[] | number[][][];
 }

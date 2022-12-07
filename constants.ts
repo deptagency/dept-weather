@@ -54,6 +54,8 @@ export const FEELS_UNITS: Record<UnitType, Unit> = {
   [UnitType.wind]: Unit.METERS
 };
 
+export const ALERTS_MAX_AGE = 10; // 10 seconds
+
 export const API_ROUTE_PATH = '/api';
 export const API_SEARCH_QUERY_KEY = 'query';
 export const API_COORDINATES_KEY = 'coordinates';

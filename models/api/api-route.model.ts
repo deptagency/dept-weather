@@ -1,6 +1,7 @@
 import { API_ROUTE_PATH } from '@constants';
 
 export enum APIRoute {
+  ALERTS = 'alerts',
   CITY_SEARCH = 'city-search',
   CURRENT = 'current',
   FORECAST = 'forecast',
@@ -10,10 +11,14 @@ export enum APIRoute {
 export type QueryParams = Record<string, string | number> | undefined;
 
 export const getPath = (route: APIRoute, queryParams?: QueryParams) => {
-  let path = `${API_ROUTE_PATH}/${route}`;
+  return `${API_ROUTE_PATH}/${route}${getQueryParamsStr(queryParams)}`;
+};
+
+export const getQueryParamsStr = (queryParams?: QueryParams) => {
+  let queryParamsStr = '';
   if (queryParams != null && Object.keys(queryParams).length > 0) {
     const formattedQueryParams = Object.keys(queryParams).map(key => `${key}=${queryParams[key]}`);
-    path += `?${formattedQueryParams.join('&')}`;
+    queryParamsStr += `?${formattedQueryParams.join('&')}`;
   }
-  return path;
+  return queryParamsStr;
 };

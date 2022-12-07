@@ -1,17 +1,13 @@
 import { DataSource, DetailedWindDirection, WindDirection } from 'models';
 import { Wind } from './observations.model';
 import { QueriedCityInfo } from './queried-location-info.model';
+import { BaseData } from './response.model';
 
 export interface Forecast extends QueriedCityInfo {
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsForecast;
 }
 
-export interface BaseForecast {
-  readTime: number;
-  validUntil: number;
-}
-
-export interface NwsForecast extends BaseForecast {
+export interface NwsForecast extends BaseData {
   forecasts: Array<NwsForecastPeriod>;
 }
 

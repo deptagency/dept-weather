@@ -2,6 +2,7 @@ import { AQILevelName } from '../airnow';
 import { DataSource } from 'models';
 import { SunriseSunset } from '../sunrise-sunset';
 import { QueriedCityInfo } from './queried-location-info.model';
+import { BaseData } from './response.model';
 
 export interface Observations extends QueriedCityInfo {
   [DataSource.WEATHERLINK]?: WlObservations;
@@ -11,12 +12,7 @@ export interface Observations extends QueriedCityInfo {
   [DataSource.SUN_TIMES]?: SunTimesObservations;
 }
 
-export interface BaseObservations {
-  readTime: number;
-  validUntil: number;
-}
-
-export interface WeatherObservations extends BaseObservations {
+export interface WeatherObservations extends BaseData {
   temperature: number | null;
   feelsLike: number | null;
   heatIndex: number | null;
@@ -36,15 +32,15 @@ export interface WlObservations extends WeatherObservations {
   rainfall: WlPrecipitation;
 }
 
-export interface AirNowObservations extends BaseObservations {
+export interface AirNowObservations extends BaseData {
   observations: Array<AirNowObservation>;
 }
 
-export interface EpaHourlyForecast extends BaseObservations {
+export interface EpaHourlyForecast extends BaseData {
   hourlyForecast: Array<EpaHourlyForecastItem>;
 }
 
-export interface SunTimesObservations extends BaseObservations, SunriseSunset {}
+export interface SunTimesObservations extends BaseData, SunriseSunset {}
 
 export interface Wind {
   speed: number | null;

@@ -1,3 +1,4 @@
+export * from './alerts.model';
 export * from './api-route.model';
 export * from './forecast.model';
 export * from './observations.model';
