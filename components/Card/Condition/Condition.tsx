@@ -12,12 +12,22 @@ const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
       .replaceAll(new RegExp(' *isolated *', 'ig'), '')
       .replaceAll(new RegExp(' *scattered *', 'ig'), '')
       .replaceAll(new RegExp(' *occasional *', 'ig'), '')
-      .replaceAll(new RegExp(' *periods of *', 'ig'), '');
+      .replaceAll(new RegExp(' *periods of *', 'ig'), '')
+      .replaceAll(new RegExp(' *areas of *', 'ig'), '');
     match = DefaultIcons[baseCondition.trim() as IconCondition] ?? undefined;
     if (match == null) {
       const subConditions = conditionUpped.split(new RegExp(' *and *', 'i'));
       for (const subCon of subConditions) {
         match = DefaultIcons[subCon.trim() as IconCondition] ?? undefined;
+        if (match != null) {
+          break;
+        }
+      }
+    }
+    if (match == null) {
+      const conditionWordsReversed = conditionUpped.split(' ').reverse();
+      for (const word of conditionWordsReversed) {
+        match = DefaultIcons[word.trim() as IconCondition] ?? undefined;
         if (match != null) {
           break;
         }
