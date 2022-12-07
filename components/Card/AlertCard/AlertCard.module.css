@@ -18,7 +18,6 @@
   outline-offset: 0.25rem;
 }
 
-/* Extreme, Severe, Moderate, Minor, Unknown */
 .alert-card-accordian--extreme {
   background-color: #480082;
 }
@@ -81,10 +80,23 @@
   padding: 1rem;
 }
 
-.alert-card-accordian__content > p:first-child {
+.alert-card-accordian__content > :first-child {
   margin-top: 0rem;
 }
 
-.alert-card-accordian__content > p:last-child {
+.alert-card-accordian__content > :last-child {
   margin-bottom: 0rem;
+}
+
+.alert-card-accordian__content__description-heading {
+  text-transform: uppercase;
+  margin: 0rem 0rem 0.5rem;
+}
+
+.alert-card-accordian__content__description-body {
+  margin: 0rem 0rem 1.5rem 0.5rem;
+}
+
+.alert-card-accordian__content__instructions {
+  font-weight: 700;
 }

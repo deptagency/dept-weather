@@ -272,36 +272,38 @@ export class NwsHelper {
   }
 
   static mapAlertsToNwsAlerts(alertsResp: AlertsResponse): NwsAlerts {
-    const alerts = alertsResp.features.map((alert): NwsAlert => {
-      const rawDescription = alert.properties.description;
-      const splitRawDescriptionOn = rawDescription.includes('\n\n') ? '\n\n' : '\n';
-      const description = rawDescription.split(splitRawDescriptionOn).map((descItemStr): DescriptionItem => {
-        const normDescItemStr = descItemStr.replaceAll('\n', ' ');
-        const headingExecd = /(\w+( +\w+)*)(?=\.{3})/.exec(normDescItemStr);
-        const bodyExecd = /(?<=\.{3})(.*)/m.exec(normDescItemStr);
+    const alerts = alertsResp.features
+      .filter(alert => dayjs(alert.properties.expires).isAfter(dayjs()))
+      .map((alert): NwsAlert => {
+        const rawDescription = alert.properties.description;
+        const splitRawDescriptionOn = rawDescription.includes('\n\n') ? '\n\n' : '\n';
+        const description = rawDescription.split(splitRawDescriptionOn).map((descItemStr): DescriptionItem => {
+          const normDescItemStr = descItemStr.replaceAll('\n', ' ');
+          const headingExecd = /(\w+( +\w+)*)(?=\.{3})/.exec(normDescItemStr);
+          const bodyExecd = /(?<=\.{3})(.*)/m.exec(normDescItemStr);
 
-        let heading = headingExecd && headingExecd.length > 0 ? headingExecd[0].toUpperCase() : undefined;
-        let body = bodyExecd && bodyExecd.length > 0 ? bodyExecd[0] : undefined;
-        return heading != null && body != null
-          ? {
-              heading,
-              body
-            }
-          : { body: normDescItemStr };
+          let heading = headingExecd && headingExecd.length > 0 ? headingExecd[0].toUpperCase() : undefined;
+          let body = bodyExecd && bodyExecd.length > 0 ? bodyExecd[0] : undefined;
+          return heading != null && body != null
+            ? {
+                heading,
+                body
+              }
+            : { body: normDescItemStr };
+        });
+        const instruction =
+          alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
+
+        return {
+          effective: dayjs(alert.properties.effective).unix(),
+          expires: dayjs(alert.properties.expires).unix(),
+          severity: alert.properties.severity,
+          senderName: alert.properties.senderName,
+          title: alert.properties.event,
+          description,
+          instruction
+        };
       });
-      const instruction =
-        alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
-
-      return {
-        effective: dayjs(alert.properties.effective).unix(),
-        expires: dayjs(alert.properties.expires).unix(),
-        severity: alert.properties.severity,
-        senderName: alert.properties.senderName,
-        title: alert.properties.event,
-        description,
-        instruction
-      };
-    });
 
     return {
       readTime: dayjs(alertsResp.updated).unix(),

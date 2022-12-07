@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { CitiesReqQueryHelper, LoggerHelper, NwsHelper } from 'helpers/api';
 import { DataSource } from 'models';
 import { Alerts, APIRoute, getPath, Response } from 'models/api';
-import { ALERTS_MAX_AGE } from '@constants';
 
 const LOGGER_LABEL = getPath(APIRoute.ALERTS);
 
@@ -24,9 +23,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       latestReadTime: data.nws!.readTime
     };
 
-    if (process.env.NODE_ENV !== 'development') {
-      res.setHeader('Cache-Control', `public, stale-while-revalidate, max-age=${ALERTS_MAX_AGE}`);
-    }
     res.status(200).json(response);
   } catch (err) {
     LoggerHelper.getLogger(LOGGER_LABEL).error(err);
