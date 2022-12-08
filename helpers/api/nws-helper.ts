@@ -329,7 +329,7 @@ export class NwsHelper {
         const instruction =
           alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
 
-        const onsetDayjs = dayjs().tz(response.timeZone).startOf('hour').add(1, 'hour');
+        const onsetDayjs = dayjs().tz(response.timeZone);
         const onsetFormatted = getFormatted(now, onsetDayjs);
         const expiresDayjs = dayjs(alert.properties.expires).tz(response.timeZone);
         const expiresFormatted = getFormatted(now, expiresDayjs);
