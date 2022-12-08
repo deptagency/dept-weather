@@ -293,6 +293,8 @@ export class NwsHelper {
       shortTz: time.format('z')
     });
 
+    const getIsoTzString = (time: Dayjs) => time.format('YYYY-MM-DDTHH:mm:ssZ');
+
     const mapToNumericSeverity = (severity: AlertSeverity) => {
       if (severity === AlertSeverity.EXTREME) return 4;
       else if (severity === AlertSeverity.SEVERE) return 3;
@@ -329,16 +331,18 @@ export class NwsHelper {
         const instruction =
           alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
 
-        const onsetDayjs = dayjs().tz(response.timeZone);
+        const onsetDayjs = dayjs(alert.properties.onset ?? alert.properties.expires).tz(response.timeZone);
         const onsetFormatted = getFormatted(now, onsetDayjs);
         const expiresDayjs = dayjs(alert.properties.expires).tz(response.timeZone);
         const expiresFormatted = getFormatted(now, expiresDayjs);
 
         return {
           onset: onsetDayjs.unix(),
+          onsetIsoTz: getIsoTzString(onsetDayjs),
           onsetLabel: onsetFormatted.label,
           onsetShortTz: onsetFormatted.shortTz,
           expires: expiresDayjs.unix(),
+          expiresIsoTz: getIsoTzString(expiresDayjs),
           expiresLabel: expiresFormatted.label,
           expiresShortTz: expiresFormatted.shortTz,
           severity: alert.properties.severity,

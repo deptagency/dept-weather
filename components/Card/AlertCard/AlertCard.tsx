@@ -24,7 +24,7 @@ const TimeLabel = ({ alert }: { alert: NwsAlert }) => {
       {showOnset ? (
         <>
           {'From '}
-          <time dateTime={new Date(alert.onset * 1_000).toISOString()}>{`${alert.onsetLabel}${
+          <time dateTime={alert.onsetIsoTz}>{`${alert.onsetLabel}${
             alert.onsetShortTz !== alert.expiresShortTz ? ` ${alert.onsetShortTz}` : ''
           }`}</time>
           {' to '}
@@ -32,9 +32,7 @@ const TimeLabel = ({ alert }: { alert: NwsAlert }) => {
       ) : (
         <>Until </>
       )}
-      <time
-        dateTime={new Date(alert.expires * 1_000).toISOString()}
-      >{`${alert.expiresLabel} ${alert.expiresShortTz}`}</time>
+      <time dateTime={alert.expiresIsoTz}>{`${alert.expiresLabel} ${alert.expiresShortTz}`}</time>
     </p>
   );
 };
