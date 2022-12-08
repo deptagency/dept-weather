@@ -1,5 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs';
+import advancedFormat from 'dayjs/plugin/advancedFormat';
 import localeData from 'dayjs/plugin/localeData';
+import timezone from 'dayjs/plugin/timezone';
 import fetch, { HeadersInit } from 'node-fetch';
 import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '@constants';
 import { CoordinatesHelper, NumberHelper } from 'helpers';
@@ -32,7 +34,11 @@ import { Cached, CacheEntry } from './cached';
 import { FeelsHelper } from './feels-helper';
 import { LoggerHelper } from './logger-helper';
 
+dayjs.extend(advancedFormat);
 dayjs.extend(localeData);
+dayjs.extend(timezone);
+
+type AlertsResponseWithTz = { alertsResp: AlertsResponse } & Pick<MinimalQueriedCity, 'timeZone'>;
 
 const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
 const NWS_ALERTS_BODY_REGEX = /(?<=\.{3})(.*)/m;
@@ -48,14 +54,6 @@ export class NwsHelper {
 
   private static async fetch(url: string, headers?: HeadersInit) {
     return fetch(url, { headers: { ...(headers ?? {}), 'User-Agent': this.userAgent } });
-  }
-
-  private static mapToNumericSeverity(severity: AlertSeverity) {
-    if (severity === AlertSeverity.EXTREME) return 4;
-    else if (severity === AlertSeverity.SEVERE) return 3;
-    else if (severity === AlertSeverity.MODERATE) return 2;
-    else if (severity === AlertSeverity.MINOR) return 1;
-    return 0;
   }
 
   private static readonly points = new Cached<PointsResponse, string>(
@@ -275,17 +273,37 @@ export class NwsHelper {
     };
   }
 
-  static async getAlerts(minQueriedCity: MinimalQueriedCity) {
+  static async getAlerts(minQueriedCity: MinimalQueriedCity): Promise<AlertsResponseWithTz> {
     const coordinatesStr = CoordinatesHelper.cityToStr(minQueriedCity);
-    const alertsResponse = await this.fetch(
-      `${this.BASE_URL}alerts/active${getQueryParamsStr({ point: coordinatesStr })}`
-    );
-    return alertsResponse.json() as Promise<AlertsResponse>;
+    const alertsResp = (await (
+      await this.fetch(`${this.BASE_URL}alerts/active${getQueryParamsStr({ point: coordinatesStr })}`)
+    ).json()) as AlertsResponse;
+    return {
+      alertsResp,
+      timeZone: minQueriedCity.timeZone
+    };
   }
 
-  static mapAlertsToNwsAlerts(alertsResp: AlertsResponse): NwsAlerts {
-    const alerts = alertsResp.features
-      .filter(alert => dayjs(alert.properties.expires).isAfter(dayjs()))
+  static mapAlertsToNwsAlerts(response: AlertsResponseWithTz): NwsAlerts {
+    const getDayjsFormatTemplate = (now: Dayjs, time: Dayjs) =>
+      `${!time.isSame(now, 'day') ? 'ddd ' : ''}h${time.minute() > 0 ? ':mm' : ''}a`;
+
+    const getFormatted = (now: Dayjs, time: Dayjs) => ({
+      label: time.format(getDayjsFormatTemplate(now, time)),
+      shortTz: time.format('z')
+    });
+
+    const mapToNumericSeverity = (severity: AlertSeverity) => {
+      if (severity === AlertSeverity.EXTREME) return 4;
+      else if (severity === AlertSeverity.SEVERE) return 3;
+      else if (severity === AlertSeverity.MODERATE) return 2;
+      else if (severity === AlertSeverity.MINOR) return 1;
+      return 0;
+    };
+
+    const now = dayjs().tz(response.timeZone);
+    const alerts = response.alertsResp.features
+      .filter(alert => dayjs(alert.properties.expires).isAfter(now))
       .map((alert): NwsAlert => {
         const rawDescription = alert.properties.description;
 
@@ -311,9 +329,18 @@ export class NwsHelper {
         const instruction =
           alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
 
+        const onsetDayjs = dayjs().tz(response.timeZone).startOf('hour').add(1, 'hour');
+        const onsetFormatted = getFormatted(now, onsetDayjs);
+        const expiresDayjs = dayjs(alert.properties.expires).tz(response.timeZone);
+        const expiresFormatted = getFormatted(now, expiresDayjs);
+
         return {
-          onset: dayjs(alert.properties.onset ? alert.properties.onset : alert.properties.effective).unix(),
-          expires: dayjs(alert.properties.expires).unix(),
+          onset: onsetDayjs.unix(),
+          onsetLabel: onsetFormatted.label,
+          onsetShortTz: onsetFormatted.shortTz,
+          expires: expiresDayjs.unix(),
+          expiresLabel: expiresFormatted.label,
+          expiresShortTz: expiresFormatted.shortTz,
           severity: alert.properties.severity,
           senderName: alert.properties.senderName,
           title: alert.properties.event,
@@ -321,12 +348,10 @@ export class NwsHelper {
           instruction
         };
       })
-      .sort(
-        (alert1, alert2) => this.mapToNumericSeverity(alert2.severity) - this.mapToNumericSeverity(alert1.severity)
-      );
+      .sort((alert1, alert2) => mapToNumericSeverity(alert2.severity) - mapToNumericSeverity(alert1.severity));
 
     return {
-      readTime: dayjs(alertsResp.updated).unix(),
+      readTime: dayjs(response.alertsResp.updated).unix(),
       alerts
     };
   }

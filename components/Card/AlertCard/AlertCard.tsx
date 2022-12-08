@@ -1,26 +1,40 @@
 import { Fragment, ReactElement, ReactNode, useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import TimeAgo from 'react-timeago';
 import { AlertCircleIcon, AlertDiamondIcon, AlertHexagonIcon, AlertTriangleIcon, ArrowIcon } from 'components/Icons';
 import baseStyles from '../Card.module.css';
 import styles from './AlertCard.module.css';
 import { NwsAlert } from 'models/api';
 import { AlertSeverity } from 'models/nws/alerts.model';
-import { getTimeAgoFormatter } from 'helpers';
 
 const ANIMATED_CONTENTS_WRAPPER_ID = 'AlertCardAccordianContentsWrapper';
 
-const TimeAgoLabel = ({ onset, expires }: Pick<NwsAlert, 'onset' | 'expires'>) => {
-  const useOnset = onset > new Date().getTime() / 1_000;
+const TimeLabel = ({ alert }: { alert: NwsAlert }) => {
+  const [now, setNow] = useState<number>(new Date().getTime() / 1_000);
+  useEffect(() => {
+    // Update "now" every 5 seconds
+    const nowTimer = setInterval(() => setNow(new Date().getTime() / 1_000), 5_000);
+    return () => clearInterval(nowTimer);
+  }, []);
+
+  const [showOnset, setShowOnset] = useState<boolean>(false);
+  useEffect(() => setShowOnset(now < alert.onset), [now, alert.onset]);
+
   return (
     <p className={styles['alert-card-accordian__header__expiration']}>
-      {useOnset ? 'Starts ' : 'Expires '}
-      {
-        <TimeAgo
-          date={(useOnset ? onset : expires) * 1_000}
-          formatter={getTimeAgoFormatter({ exclude: 'past', useJustNow: false })}
-        />
-      }
+      {showOnset ? (
+        <>
+          {'From '}
+          <time dateTime={new Date(alert.onset * 1_000).toISOString()}>{`${alert.onsetLabel}${
+            alert.onsetShortTz !== alert.expiresShortTz ? ` ${alert.onsetShortTz}` : ''
+          }`}</time>
+          {' to '}
+        </>
+      ) : (
+        <>Until </>
+      )}
+      <time
+        dateTime={new Date(alert.expires * 1_000).toISOString()}
+      >{`${alert.expiresLabel} ${alert.expiresShortTz}`}</time>
     </p>
   );
 };
@@ -56,7 +70,7 @@ export default function AlertCard({ alert }: { alert: NwsAlert }) {
         <div className={styles['alert-card-accordian__alert-icon']}>{alertIcon}</div>
         <div className={`${styles['alert-card-accordian__header']}`}>
           <h2 className={styles['alert-card-accordian__header__title']}>{alert.title}</h2>
-          <TimeAgoLabel onset={alert.onset} expires={alert.expires}></TimeAgoLabel>
+          <TimeLabel alert={alert}></TimeLabel>
         </div>
         <ArrowIcon useInverseFill={true} animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>
       </button>

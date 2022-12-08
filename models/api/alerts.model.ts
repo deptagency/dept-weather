@@ -13,7 +13,11 @@ export interface NwsAlerts extends Omit<BaseData, 'validUntil'> {
 
 export interface NwsAlert {
   onset: number;
+  onsetLabel: string;
+  onsetShortTz: string;
   expires: number;
+  expiresLabel: string;
+  expiresShortTz: string;
   severity: AlertSeverity;
   senderName: string;
   title: string;
