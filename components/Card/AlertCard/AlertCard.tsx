@@ -25,14 +25,14 @@ const TimeLabel = ({ alert }: { alert: NwsAlert }) => {
         <>
           {'From '}
           <time dateTime={alert.onsetIsoTz}>{`${alert.onsetLabel}${
-            alert.onsetShortTz !== alert.expiresShortTz ? ` ${alert.onsetShortTz}` : ''
+            alert.onsetShortTz !== alert.endsShortTz ? ` ${alert.onsetShortTz}` : ''
           }`}</time>
           {' to '}
         </>
       ) : (
         <>Until </>
       )}
-      <time dateTime={alert.expiresIsoTz}>{`${alert.expiresLabel} ${alert.expiresShortTz}`}</time>
+      <time dateTime={alert.endsIsoTz}>{`${alert.endsLabel} ${alert.endsShortTz}`}</time>
     </p>
   );
 };

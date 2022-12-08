@@ -16,10 +16,10 @@ export interface NwsAlert {
   onsetIsoTz: string;
   onsetLabel: string;
   onsetShortTz: string;
-  expires: number;
-  expiresIsoTz: string;
-  expiresLabel: string;
-  expiresShortTz: string;
+  ends: number;
+  endsIsoTz: string;
+  endsLabel: string;
+  endsShortTz: string;
   severity: AlertSeverity;
   senderName: string;
   title: string;

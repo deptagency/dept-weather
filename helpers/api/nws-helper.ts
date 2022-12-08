@@ -285,11 +285,11 @@ export class NwsHelper {
   }
 
   static mapAlertsToNwsAlerts(response: AlertsResponseWithTz): NwsAlerts {
-    const getDayjsFormatTemplate = (now: Dayjs, time: Dayjs) =>
-      `${!time.isSame(now, 'day') ? 'ddd ' : ''}h${time.minute() > 0 ? ':mm' : ''}a`;
+    const getDayjsFormatTemplate = (includeDay: boolean, time: Dayjs) =>
+      `${includeDay ? 'ddd ' : ''}h${time.minute() > 0 ? ':mm' : ''}a`;
 
-    const getFormatted = (now: Dayjs, time: Dayjs) => ({
-      label: time.format(getDayjsFormatTemplate(now, time)),
+    const getFormatted = (includeDay: boolean, time: Dayjs) => ({
+      label: time.format(getDayjsFormatTemplate(includeDay, time)),
       shortTz: time.format('z')
     });
 
@@ -305,7 +305,7 @@ export class NwsHelper {
 
     const now = dayjs().tz(response.timeZone);
     const alerts = response.alertsResp.features
-      .filter(alert => dayjs(alert.properties.expires).isAfter(now))
+      .filter(alert => dayjs(alert.properties.ends ?? alert.properties.expires).isAfter(now))
       .map((alert): NwsAlert => {
         const rawDescription = alert.properties.description;
 
@@ -331,20 +331,24 @@ export class NwsHelper {
         const instruction =
           alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
 
-        const onsetDayjs = dayjs(alert.properties.onset ?? alert.properties.expires).tz(response.timeZone);
-        const onsetFormatted = getFormatted(now, onsetDayjs);
-        const expiresDayjs = dayjs(alert.properties.expires).tz(response.timeZone);
-        const expiresFormatted = getFormatted(now, expiresDayjs);
+        const onsetDayjs = dayjs(alert.properties.onset ?? alert.properties.effective).tz(response.timeZone);
+        const onsetIncludeDay = !onsetDayjs.isSame(now, 'day');
+        const onsetFormatted = getFormatted(onsetIncludeDay, onsetDayjs);
+
+        const endsDayjs = dayjs(alert.properties.ends ?? alert.properties.expires).tz(response.timeZone);
+        const endsIncludeDay =
+          !endsDayjs.isSame(now, 'day') && !(endsDayjs.isSame(onsetDayjs, 'day') && onsetDayjs.isAfter(now));
+        const endsFormatted = getFormatted(endsIncludeDay, endsDayjs);
 
         return {
           onset: onsetDayjs.unix(),
           onsetIsoTz: getIsoTzString(onsetDayjs),
           onsetLabel: onsetFormatted.label,
           onsetShortTz: onsetFormatted.shortTz,
-          expires: expiresDayjs.unix(),
-          expiresIsoTz: getIsoTzString(expiresDayjs),
-          expiresLabel: expiresFormatted.label,
-          expiresShortTz: expiresFormatted.shortTz,
+          ends: endsDayjs.unix(),
+          endsIsoTz: getIsoTzString(endsDayjs),
+          endsLabel: endsFormatted.label,
+          endsShortTz: endsFormatted.shortTz,
           severity: alert.properties.severity,
           senderName: alert.properties.senderName,
           title: alert.properties.event,
