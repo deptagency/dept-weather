@@ -53,7 +53,6 @@ export default function AlertCard({ alert }: { alert: NwsAlert }) {
     setAlertIcon(newAlertIconType({ useInverseFill: true }));
   }, [alert.severity]);
 
-  // TODO - show effective & expiration timestamps and senderName
   return (
     <article className={baseStyles.card}>
       <button
