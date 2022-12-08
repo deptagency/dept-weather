@@ -312,7 +312,7 @@ export class NwsHelper {
           alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
 
         return {
-          effective: dayjs(alert.properties.effective).unix(),
+          onset: dayjs(alert.properties.onset ? alert.properties.onset : alert.properties.effective).unix(),
           expires: dayjs(alert.properties.expires).unix(),
           severity: alert.properties.severity,
           senderName: alert.properties.senderName,

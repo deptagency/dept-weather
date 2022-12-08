@@ -12,7 +12,7 @@ export interface NwsAlerts extends Omit<BaseData, 'validUntil'> {
 }
 
 export interface NwsAlert {
-  effective: number;
+  onset: number;
   expires: number;
   severity: AlertSeverity;
   senderName: string;
