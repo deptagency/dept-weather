@@ -17,6 +17,7 @@ import {
 } from 'models/api';
 import { MinimalQueriedCity } from 'models/cities';
 import {
+  AlertSeverity,
   AlertsResponse,
   ForecastPeriod,
   ForecastResponse,
@@ -47,6 +48,14 @@ export class NwsHelper {
 
   private static async fetch(url: string, headers?: HeadersInit) {
     return fetch(url, { headers: { ...(headers ?? {}), 'User-Agent': this.userAgent } });
+  }
+
+  private static mapToNumericSeverity(severity: AlertSeverity) {
+    if (severity === AlertSeverity.EXTREME) return 4;
+    else if (severity === AlertSeverity.SEVERE) return 3;
+    else if (severity === AlertSeverity.MODERATE) return 2;
+    else if (severity === AlertSeverity.MINOR) return 1;
+    return 0;
   }
 
   private static readonly points = new Cached<PointsResponse, string>(
@@ -311,7 +320,10 @@ export class NwsHelper {
           description,
           instruction
         };
-      });
+      })
+      .sort(
+        (alert1, alert2) => this.mapToNumericSeverity(alert2.severity) - this.mapToNumericSeverity(alert1.severity)
+      );
 
     return {
       readTime: dayjs(alertsResp.updated).unix(),
