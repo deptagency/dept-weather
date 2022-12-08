@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
   AirNowHelper,
@@ -29,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const results = await Promise.all(promises);
     const validUntil = Math.min(...results.map(result => result.validUntil));
-    const maxAge = Math.min(...results.map(result => result.maxAge));
+    const maxAge = validUntil ? validUntil - dayjs().unix() : 0;
 
     const data: Observations = {
       ...(results.length > 4

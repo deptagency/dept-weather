@@ -5,7 +5,6 @@ import { LOG_TIMESTAMP_FORMAT } from '@constants';
 
 export interface CacheEntry<Item> {
   item: Item;
-  maxAge: number;
   validUntil: number;
   key: string;
 }
@@ -93,9 +92,8 @@ export class Cached<Item, Opts> {
       } catch (err) {
         this.logger?.error(`Couldn't calculate cachedItemExpiration due to an exception: ${err}`);
       }
-      const maxAge = validUntil ? validUntil - this.nowTimeInSeconds : 0;
 
-      this.cacheEntries.set(key, { item, validUntil, maxAge, key });
+      this.cacheEntries.set(key, { item, validUntil, key });
 
       const expiresLogPrefix = `Cache for "${key}"`;
       if (validUntil) {

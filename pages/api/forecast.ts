@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CitiesReqQueryHelper, LoggerHelper, NwsHelper } from 'helpers/api';
 import { DataSource } from 'models';
@@ -22,9 +23,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       validUntil: forecast.validUntil,
       latestReadTime: data.nws!.readTime
     };
+    const maxAge = forecast.validUntil ? forecast.validUntil - dayjs().unix() : 0;
 
     if (process.env.NODE_ENV !== 'development') {
-      res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${forecast.maxAge}`);
+      res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${maxAge}`);
     }
     res.status(200).json(response);
   } catch (err) {
