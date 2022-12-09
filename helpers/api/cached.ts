@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import NodeCache from 'node-cache';
 import type { Logger } from 'winston';
 import { LOG_TIMESTAMP_FORMAT } from '@constants';
 
@@ -16,7 +17,7 @@ export class Cached<Item, Opts> {
   private calculateExpiration: (key: string, newItem: Item) => Promise<number>;
   private logger?: Logger;
 
-  private cacheEntries = new Map<string, CacheEntry<Item>>();
+  private nodeCache: NodeCache;
 
   private get nowTimeInSeconds(): number {
     return dayjs().unix();
@@ -67,23 +68,14 @@ export class Cached<Item, Opts> {
     this.getItemOnMiss = getItemOnMiss;
     this.calculateExpiration = calculateExpiration;
     this.logger = logger;
-  }
 
-  private isCacheValidFor(key: string) {
-    const cacheEntry = this.cacheEntries.get(key);
-    return cacheEntry != null && cacheEntry.item != null && this.nowTimeInSeconds < cacheEntry.validUntil;
+    this.nodeCache = new NodeCache({ useClones: false });
   }
 
   async get(key: string, opts: Opts): Promise<CacheEntry<Item>> {
-    if (!this.isCacheValidFor(key)) {
-      const previousValidUntil = this.cacheEntries.get(key)?.validUntil;
-
-      const missLogPrefix = `Cache MISS for "${key}" because item`;
-      if (previousValidUntil != null) {
-        this.logger?.debug(`${missLogPrefix} expired${this.formatForLog(previousValidUntil)}`);
-      } else {
-        this.logger?.debug(`${missLogPrefix} has not yet been cached`);
-      }
+    let cacheEntry = this.nodeCache.get(key) as CacheEntry<Item> | undefined;
+    if (cacheEntry == null) {
+      this.logger?.debug(`Cache MISS for "${key}"`);
 
       const item = await this.getItemOnMiss(opts);
       let validUntil = 0;
@@ -92,19 +84,20 @@ export class Cached<Item, Opts> {
       } catch (err) {
         this.logger?.error(`Couldn't calculate cachedItemExpiration due to an exception: ${err}`);
       }
+      cacheEntry = { item, validUntil, key };
 
-      this.cacheEntries.set(key, { item, validUntil, key });
-
-      const expiresLogPrefix = `Cache for "${key}"`;
+      const expiresLogPrefix = `Item for "${key}"`;
       if (validUntil) {
-        this.logger?.info(`${expiresLogPrefix} now expires${this.formatForLog(validUntil)}`);
+        const ttl = validUntil - this.nowTimeInSeconds;
+        this.nodeCache.set(key, cacheEntry, ttl);
+        this.logger?.info(`${expiresLogPrefix} has been cached and expires${this.formatForLog(validUntil)}`);
       } else {
-        this.logger?.warn(`${expiresLogPrefix} will be considered invalid`);
+        this.logger?.warn(`${expiresLogPrefix} has NOT been cached`);
       }
     } else {
       this.logger?.debug(`Cache HIT for "${key}"`);
     }
 
-    return this.cacheEntries.get(key)!;
+    return cacheEntry!;
   }
 }
