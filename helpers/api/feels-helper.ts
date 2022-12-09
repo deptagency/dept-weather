@@ -40,7 +40,7 @@ export class FeelsHelper {
       const _feelsLike = feels.like(['AWBGT', 'HI', 'HI_CA', 'WCI']);
       feelsLike = NumberHelper.convert(_feelsLike, tempUnitMapping);
     } catch (err) {
-      LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromNwsObservations()`).error(
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromNwsObservations()`).warn(
         `Couldn't calculate feels like temperature - ${err} - opts were: ${JSON.stringify(feelsOpts)}"`
       );
     }
