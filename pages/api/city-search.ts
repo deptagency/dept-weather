@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { API_COORDINATES_KEY, API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULTS_MAX_AGE } from '@constants';
+import { CITY_SEARCH_RESULTS_MAX_AGE } from 'constants/server';
+import { API_COORDINATES_KEY, API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY } from 'constants/shared';
 import { CitiesReqQueryHelper, LoggerHelper } from 'helpers/api';
 import { APIRoute, getPath, Response } from 'models/api';
 import { City } from 'models/cities';

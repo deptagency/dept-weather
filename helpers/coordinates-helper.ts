@@ -1,4 +1,4 @@
-import { MAX_COORDINATE_PRECISION } from '@constants';
+import { MAX_COORDINATE_PRECISION } from 'constants/shared';
 import { CityWithCoordinates } from 'models/cities';
 import { NumberHelper } from './number-helper';
 

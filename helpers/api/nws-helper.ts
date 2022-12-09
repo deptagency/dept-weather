@@ -3,7 +3,7 @@ import advancedFormat from 'dayjs/plugin/advancedFormat';
 import localeData from 'dayjs/plugin/localeData';
 import timezone from 'dayjs/plugin/timezone';
 import fetch, { HeadersInit } from 'node-fetch';
-import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from '@constants';
+import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from 'constants/server';
 import { CoordinatesHelper, NumberHelper } from 'helpers';
 import { Unit, UnitType } from 'models';
 import {

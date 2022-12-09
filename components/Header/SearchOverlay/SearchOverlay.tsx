@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { API_SEARCH_QUERY_KEY, CITY_SEARCH_DEBOUNCE_MS, CITY_SEARCH_RESULT_LIMIT, CURRENT_LOCATION } from '@constants';
+import { CITY_SEARCH_DEBOUNCE_MS, CURRENT_LOCATION } from 'constants/client';
+import { API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import { LocateIcon, RecentIcon } from 'components/Icons';
 import { SearchQueryHelper } from 'helpers';
 import { useDebounce } from 'hooks';

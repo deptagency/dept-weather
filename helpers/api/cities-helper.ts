@@ -9,9 +9,9 @@ import {
   CITY_SEARCH_DATA_FOLDER,
   CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL,
   CITY_SEARCH_QUERY_CACHE_FILENAME,
-  CITY_SEARCH_RESULTS_MAX_AGE,
-  CITY_SEARCH_RESULT_LIMIT
-} from '@constants';
+  CITY_SEARCH_RESULTS_MAX_AGE
+} from 'constants/server';
+import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
 import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCity, ScoredCity } from 'models/cities';
 import { Unit } from 'models';

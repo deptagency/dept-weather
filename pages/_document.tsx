@@ -1,5 +1,5 @@
-import { APP_DESCRIPTION, APP_MASK_ICON_COLOR, APP_THEME_COLOR, APP_TITLE, APP_URL } from '@constants';
 import { Html, Head, Main, NextScript } from 'next/document';
+import { APP_DESCRIPTION, APP_MASK_ICON_COLOR, APP_THEME_COLOR, APP_TITLE, APP_URL } from 'constants/client';
 
 const AppleSplashLink = ({
   width,

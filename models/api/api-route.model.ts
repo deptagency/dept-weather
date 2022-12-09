@@ -1,4 +1,4 @@
-import { API_ROUTE_PATH } from '@constants';
+import { API_ROUTE_PATH } from 'constants/server';
 
 export enum APIRoute {
   ALERTS = 'alerts',

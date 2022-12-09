@@ -6,8 +6,8 @@ import {
   LOG_TIMESTAMP_FORMAT,
   MIN_LOG_LEVEL_DEV,
   MIN_LOG_LEVEL_PROD
-} from '@constants';
-import { NumberHelper } from 'helpers/number-helper';
+} from 'constants/server';
+import { NumberHelper } from 'helpers';
 
 export class LoggerHelper {
   private static readonly FORMAT_COLORIZE = winston.format.colorize({

@@ -1,4 +1,4 @@
-import { GEOPOSITION_PERMISSION_DENIED_ERROR_CODE } from '@constants';
+import { GEOPOSITION_PERMISSION_DENIED_ERROR_CODE } from 'constants/client';
 import { LocateOffIcon } from 'components/Icons';
 import ErrorComponent from '../ErrorComponent';
 

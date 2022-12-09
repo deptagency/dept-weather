@@ -1,5 +1,5 @@
-import { FEELS_UNITS } from '@constants';
 import Feels from 'feels';
+import { FEELS_UNITS } from 'constants/server';
 import { NumberHelper } from 'helpers';
 import { Unit, UnitType } from 'models';
 import { ReqQuery } from 'models/api';

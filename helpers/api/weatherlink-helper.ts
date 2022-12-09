@@ -1,6 +1,7 @@
 import geodist from 'geodist';
 import { default as WeatherLink } from 'weatherlink';
-import { AQ_COORDINATES_STR, DEFAULT_UNITS } from '@constants';
+import { AQ_COORDINATES_STR } from 'constants/server';
+import { DEFAULT_UNITS } from 'constants/shared';
 import { CoordinatesHelper, NumberHelper } from 'helpers';
 import { Unit, UnitType } from 'models';
 import { MinimalQueriedCity } from 'models/cities';

@@ -4,15 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { Footer, Header, LocateError, Main } from 'components';
 import {
-  API_COORDINATES_KEY,
-  API_GEONAMEID_KEY,
   APP_TITLE,
   CURRENT_LOCATION,
-  DEFAULT_CITY,
   GID_CACHE_FILENAME,
   LOCAL_STORAGE_RECENT_CITIES_KEY,
   SEARCH_PANEL_ANIMATION_DURATION
-} from '@constants';
+} from 'constants/client';
+import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY } from 'constants/shared';
 import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
 import { APIRoute, getPath, QueryParams } from 'models/api';
 import { CitiesGIDCache, SearchResultCity } from 'models/cities';

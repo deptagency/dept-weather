@@ -3,7 +3,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import fetch from 'node-fetch';
-import { AIRNOW_RECORDING_INTERVAL, AIRNOW_UPLOAD_DELAY } from '@constants';
+import { AIRNOW_RECORDING_INTERVAL, AIRNOW_UPLOAD_DELAY } from 'constants/server';
 import { CoordinatesHelper } from 'helpers';
 import { CurrentObservations } from 'models/airnow';
 import { AirNowObservations } from 'models/api';

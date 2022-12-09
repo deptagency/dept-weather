@@ -1,4 +1,4 @@
-import { DEFAULT_UNITS } from '@constants';
+import { DEFAULT_UNITS } from 'constants/shared';
 import { CONVERSION_FACTORS, Unit, UnitMapping, Units, UnitType } from 'models';
 import { ReqQuery } from 'models/api';
 import { NwsUnits, QuantitativeValue } from 'models/nws';

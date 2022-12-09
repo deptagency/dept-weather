@@ -1,5 +1,5 @@
 import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, useState } from 'react';
-import { IME_UNSETTLED_KEY_CODE } from '@constants';
+import { IME_UNSETTLED_KEY_CODE } from 'constants/client';
 import { ArrowIcon, DEPTLogoIcon } from 'components/Icons';
 import { SearchQueryHelper } from 'helpers';
 import { CitiesGIDCache, SearchResultCity } from 'models/cities';
