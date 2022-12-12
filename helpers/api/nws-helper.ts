@@ -311,7 +311,11 @@ export class NwsHelper {
 
     const now = dayjs().tz(response.timeZone);
     const alerts = response.alertsResp.features
-      .filter(alert => dayjs(alert.properties.ends ?? alert.properties.expires).isAfter(now))
+      .filter(
+        alert =>
+          (alert.properties.ends ? dayjs(alert.properties.ends).isAfter(now) : true) &&
+          dayjs(alert.properties.expires).isAfter(now)
+      )
       .map((alert): NwsAlert => {
         const rawDescription = alert.properties.description;
 
