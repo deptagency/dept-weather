@@ -20,10 +20,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data,
       warnings,
       errors: [],
-      validUntil: forecast.validUntil,
+      validUntil: data.nws!.validUntil,
       latestReadTime: data.nws!.readTime
     };
-    const maxAge = forecast.validUntil ? forecast.validUntil - dayjs().unix() : 0;
+    const maxAge = data.nws!.validUntil ? data.nws!.validUntil - dayjs().unix() : 0;
 
     if (process.env.NODE_ENV !== 'development') {
       res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${maxAge}`);
