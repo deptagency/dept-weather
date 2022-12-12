@@ -245,12 +245,17 @@ export class NwsHelper {
 
     const forecasts =
       forecast?.periods?.map((period): NwsForecastPeriod => {
-        const start = dayjs(period.startTime);
+        let start = dayjs(period.startTime);
         let dayName = dayjs.weekdays()[start.day()];
         if (isTimeBeforeEndOfDay(start)) {
-          if (period.isDaytime) dayName = 'Today';
-          else if (isTimeBeforeEndOfDay(dayjs(period.endTime))) dayName = 'Overnight';
-          else dayName = 'Tonight';
+          if (period.isDaytime) {
+            dayName = 'Today';
+          } else if (isTimeBeforeEndOfDay(dayjs(period.endTime))) {
+            start = start.startOf('day').subtract(1, 'second'); // yesterday at 23:59:59
+            dayName = 'Overnight';
+          } else {
+            dayName = 'Tonight';
+          }
         }
 
         return {
