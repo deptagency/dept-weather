@@ -40,6 +40,7 @@ dayjs.extend(timezone);
 
 type AlertsResponseWithTz = { alertsResp: AlertsResponse } & Pick<MinimalQueriedCity, 'timeZone'>;
 
+const NWS_ALERTS_SYSTEM_CODE_REGEX = /^[A-Z]{3}$/;
 const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
 const NWS_ALERTS_BODY_REGEX = /(?<=\.{3})(.*)/m;
 
@@ -319,20 +320,22 @@ export class NwsHelper {
         if (rawDescription.includes('\n\n')) splitRawDescription = rawDescription.split('\n\n');
         else if (NWS_ALERTS_HEADING_REGEX.exec(rawDescription)) splitRawDescription = rawDescription.split('\n');
 
-        const description = splitRawDescription.map((descItemStr): DescriptionItem => {
-          const normDescItemStr = descItemStr.replaceAll('\n', ' ');
-          const headingExecd = NWS_ALERTS_HEADING_REGEX.exec(normDescItemStr);
-          const bodyExecd = NWS_ALERTS_BODY_REGEX.exec(normDescItemStr);
+        const description = splitRawDescription
+          .filter((descItemStr, idx) => !(idx === 0 && NWS_ALERTS_SYSTEM_CODE_REGEX.test(descItemStr)))
+          .map((descItemStr): DescriptionItem => {
+            const normDescItemStr = descItemStr.replaceAll('\n', ' ');
+            const headingExecd = NWS_ALERTS_HEADING_REGEX.exec(normDescItemStr);
+            const bodyExecd = NWS_ALERTS_BODY_REGEX.exec(normDescItemStr);
 
-          let heading = headingExecd && headingExecd.length > 0 ? headingExecd[0].toUpperCase() : undefined;
-          let body = bodyExecd && bodyExecd.length > 0 ? bodyExecd[0] : undefined;
-          return heading != null && body != null
-            ? {
-                heading,
-                body
-              }
-            : { body: normDescItemStr };
-        });
+            let heading = headingExecd && headingExecd.length > 0 ? headingExecd[0].toUpperCase() : undefined;
+            let body = bodyExecd && bodyExecd.length > 0 ? bodyExecd[0] : undefined;
+            return heading != null && body != null
+              ? {
+                  heading,
+                  body
+                }
+              : { body: normDescItemStr };
+          });
         const instruction =
           alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
 
