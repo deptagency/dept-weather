@@ -196,6 +196,7 @@ export class NwsMapHelper {
     forecastGridData: ForecastGridData | undefined,
     startTime: Dayjs,
     endTime: Dayjs,
+    isDaytime: boolean,
     reqQuery: ReqQuery
   ): NwsHourlyPeriodForecast[] {
     const hourlyForecasts: NwsHourlyPeriodForecast[] = [];
@@ -276,15 +277,24 @@ export class NwsMapHelper {
       }
       const shortDateName = startTime.format('MMM D');
 
-      const dayForecast = summaryForecast!.periods[i].isDaytime
-        ? this.getSummaryPeriodForecast(summaryForecast!.periods[i], timeZone, reqQuery)
-        : null;
+      let dayForecast: NwsPeriodForecast | null = null;
+      let dayHourlyForecasts: NwsHourlyPeriodForecast[] = [];
+      if (summaryForecast!.periods[i].isDaytime) {
+        dayForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i], timeZone, reqQuery);
+        dayHourlyForecasts = this.getHourlyForecastsFor(forecastGridData, startTime, endTime, true, reqQuery);
+      }
 
-      let endOfPeriodTime = endTime;
       let nightForecast: NwsPeriodForecast | null = null;
+      let nightHourlyForecasts: NwsHourlyPeriodForecast[] = [];
       if (i + 1 < summaryForecast!.periods.length) {
         nightForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i + 1], timeZone, reqQuery);
-        endOfPeriodTime = dayjs(summaryForecast!.periods[i + 1].endTime).tz(timeZone);
+        nightHourlyForecasts = this.getHourlyForecastsFor(
+          forecastGridData,
+          dayjs(summaryForecast!.periods[i + 1].startTime).tz(timeZone),
+          dayjs(summaryForecast!.periods[i + 1].endTime).tz(timeZone),
+          false,
+          reqQuery
+        );
       }
 
       periods.push({
@@ -292,7 +302,7 @@ export class NwsMapHelper {
         shortDateName,
         dayForecast,
         nightForecast,
-        hourlyForecasts: this.getHourlyForecastsFor(forecastGridData, startTime, endOfPeriodTime, reqQuery)
+        hourlyForecasts: [...dayHourlyForecasts, ...nightHourlyForecasts]
       });
 
       i += summaryForecast!.periods[i].isDaytime ? 2 : 1;
