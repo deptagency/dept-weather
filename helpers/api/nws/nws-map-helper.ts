@@ -10,6 +10,7 @@ import {
   NwsAlert,
   NwsAlerts,
   NwsForecast,
+  NwsHourlyPeriodForecast,
   NwsObservations,
   NwsPeriod,
   NwsPeriodForecast,
@@ -174,12 +175,8 @@ export class NwsMapHelper {
       startIsoTz: this.getIsoTzString(start),
       condition: period.shortForecast,
       temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
-      feelsLike: null, // TODO
-      dewPoint: null, // TODO
-      humidity: null, // TODO
       wind: this.getWind(period, reqQuery),
-      chanceOfPrecip: this.getChanceOfPrecip(period),
-      precipAmount: null // TODO
+      chanceOfPrecip: this.getChanceOfPrecip(period)
     };
   }
 
@@ -200,8 +197,8 @@ export class NwsMapHelper {
     startTime: Dayjs,
     endTime: Dayjs,
     reqQuery: ReqQuery
-  ): NwsPeriodForecast[] {
-    const hourlyForecasts: NwsPeriodForecast[] = [];
+  ): NwsHourlyPeriodForecast[] {
+    const hourlyForecasts: NwsHourlyPeriodForecast[] = [];
     for (let time = startTime; forecastGridData != null && time.isBefore(endTime); time = time.add(1, 'hour')) {
       hourlyForecasts.push({
         start: time.unix(),
