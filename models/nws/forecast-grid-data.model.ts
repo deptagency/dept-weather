@@ -6,12 +6,12 @@ import {
   QuantitativeValue
 } from './quantitative-value.model';
 
-export interface NumericalForecastResponse {
+export interface ForecastGridDataResponse {
   geometry: Geometry;
-  properties: NumericalForecast;
+  properties: ForecastGridData;
 }
 
-export interface NumericalForecast {
+export interface ForecastGridData {
   updateTime: string;
   validTimes: string;
   elevation: QuantitativeValue;
