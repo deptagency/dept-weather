@@ -7,6 +7,7 @@ import {
   EpaHelper,
   LoggerHelper,
   NwsHelper,
+  NwsMapHelper,
   SunTimesHelper,
   WeatherlinkHelper
 } from 'helpers/api';
@@ -36,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...(results.length > 4
         ? { [DataSource.WEATHERLINK]: WeatherlinkHelper.mapCurrentToWlObservations(results[4], req.query) }
         : {}),
-      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapCurrentToNwsObservations(results[0], req.query),
+      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsMapHelper.mapCurrentToNwsObservations(results[0], req.query),
       [DataSource.AIRNOW]: AirNowHelper.mapCurrentToAirNowObservations(results[1]),
       [DataSource.ENVIRONMENTAL_PROTECTION_AGENCY]: EpaHelper.mapHourlyToEpaHourlyForecast(results[2]),
       [DataSource.SUN_TIMES]: SunTimesHelper.mapTimesToSunTimesObservations(results[3]),

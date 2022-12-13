@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CitiesReqQueryHelper, LoggerHelper, NwsHelper } from 'helpers/api';
+import { CitiesReqQueryHelper, LoggerHelper, NwsHelper, NwsMapHelper } from 'helpers/api';
 import { DataSource } from 'models';
 import { Alerts, APIRoute, getPath, Response } from 'models/api';
 
@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const alerts = await NwsHelper.getAlerts(minimalQueriedCity);
 
     const data: Alerts = {
-      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapAlertsToNwsAlerts(alerts),
+      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsMapHelper.mapAlertsToNwsAlerts(alerts, minimalQueriedCity.timeZone),
       [DataSource.QUERIED_CITY]: queriedCity
     };
 

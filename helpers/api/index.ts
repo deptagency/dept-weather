@@ -4,6 +4,7 @@ export * from './cities-helper';
 export * from './cities-req-query-helper';
 export * from './epa-helper';
 export * from './logger-helper';
-export * from './nws-helper';
+export * from './nws/nws-helper';
+export * from './nws/nws-map-helper';
 export * from './sun-times-helper';
 export * from './weatherlink-helper';

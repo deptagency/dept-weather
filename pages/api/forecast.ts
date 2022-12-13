@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CitiesReqQueryHelper, LoggerHelper, NwsHelper } from 'helpers/api';
+import { CitiesReqQueryHelper, LoggerHelper, NwsHelper, NwsMapHelper } from 'helpers/api';
 import { DataSource } from 'models';
 import { APIRoute, Forecast, getPath, Response } from 'models/api';
 import { CoordinatesHelper } from 'helpers';
@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const forecasts = await Promise.all([NwsHelper.getSummaryForecast(points), NwsHelper.getForecastGridData(points)]);
 
     const data: Forecast = {
-      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapForecastsToNwsForecast(...forecasts, timeZone, req.query),
+      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsMapHelper.mapForecastsToNwsForecast(...forecasts, timeZone, req.query),
       [DataSource.QUERIED_CITY]: queriedCity
     };
 
