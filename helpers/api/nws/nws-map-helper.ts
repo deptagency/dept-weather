@@ -1,5 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
+import duration from 'dayjs/plugin/duration';
 import localeData from 'dayjs/plugin/localeData';
 import timezone from 'dayjs/plugin/timezone';
 import { NumberHelper } from 'helpers';
@@ -18,7 +19,9 @@ import {
 import {
   AlertSeverity,
   AlertsResponse,
+  ForecastGridData,
   ForecastGridDataResponse,
+  GridpointQuantitativeValueLayer,
   NwsUnits,
   ObservationResponse,
   QuantitativeMinMaxValue,
@@ -30,6 +33,7 @@ import { CacheEntry } from '../cached';
 import { FeelsHelper } from '../feels-helper';
 
 dayjs.extend(advancedFormat);
+dayjs.extend(duration);
 dayjs.extend(localeData);
 dayjs.extend(timezone);
 
@@ -77,6 +81,178 @@ export class NwsMapHelper {
     };
   }
 
+  private static readonly CHANCE_OF_PRECIP_SEARCH_TEXT = 'Chance of precipitation is';
+
+  private static isTimeBeforeEndOfDay(time: Dayjs, timeZone: string) {
+    return time.isBefore(dayjs().tz(timeZone).endOf('day'));
+  }
+
+  private static getWindDeg(dir?: WindDirection | DetailedWindDirection | null) {
+    if (dir === WindDirection.N) return 0;
+    else if (dir === DetailedWindDirection.NNE) return 22.5;
+    else if (dir === WindDirection.NE) return 45;
+    else if (dir === DetailedWindDirection.ENE) return 67.5;
+    else if (dir === WindDirection.E) return 90;
+    else if (dir === DetailedWindDirection.ESE) return 112.5;
+    else if (dir === WindDirection.SE) return 135;
+    else if (dir === DetailedWindDirection.SSE) return 157.5;
+    else if (dir === WindDirection.S) return 180;
+    else if (dir === DetailedWindDirection.SSW) return 202.5;
+    else if (dir === WindDirection.SW) return 225;
+    else if (dir === DetailedWindDirection.WSW) return 247.5;
+    else if (dir === WindDirection.W) return 270;
+    else if (dir === DetailedWindDirection.WNW) return 292.5;
+    else if (dir === WindDirection.NW) return 315;
+    else if (dir === DetailedWindDirection.NNW) return 337.5;
+
+    return null;
+  }
+
+  private static getWind(period: SummaryForecastPeriod, reqQuery: ReqQuery): Wind {
+    let wind: Wind = {
+      speed: null,
+      gustSpeed: null,
+      directionDeg: this.getWindDeg(period.windDirection)
+    };
+
+    const speedAsValue = period.windSpeed as QuantitativeValue;
+    const speedAsMinMax = period.windSpeed as QuantitativeMinMaxValue;
+    if (speedAsValue?.value != null) {
+      wind.speed = NumberHelper.convertNws(speedAsValue, UnitType.wind, reqQuery);
+    } else if (speedAsMinMax?.maxValue != null) {
+      wind.speed = NumberHelper.convertNwsRawValueAndUnitCode(
+        speedAsMinMax.maxValue,
+        speedAsMinMax.unitCode,
+        UnitType.wind,
+        reqQuery
+      );
+    }
+
+    const gustSpeedAsValue = period.windGust as QuantitativeValue;
+    const gustSpeedAsMinMax = period.windGust as QuantitativeMinMaxValue;
+    if (gustSpeedAsValue?.value != null) {
+      wind.gustSpeed = NumberHelper.convertNws(gustSpeedAsValue, UnitType.wind, reqQuery);
+    } else if (gustSpeedAsMinMax?.maxValue != null) {
+      wind.gustSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
+        gustSpeedAsMinMax.maxValue,
+        gustSpeedAsMinMax.unitCode,
+        UnitType.wind,
+        reqQuery
+      );
+    }
+
+    return wind;
+  }
+
+  private static getChanceOfPrecip(period: SummaryForecastPeriod) {
+    if (period.detailedForecast) {
+      const dfSplitOnSearchText = period.detailedForecast.split(
+        new RegExp(` *${this.CHANCE_OF_PRECIP_SEARCH_TEXT} *`, 'i')
+      );
+      if (dfSplitOnSearchText.length === 2) {
+        const chanceOfPrecipStr = dfSplitOnSearchText[1].split('%')[0];
+        const chanceOfPrecipNum = Number(chanceOfPrecipStr);
+        if (chanceOfPrecipStr.length > 0 && chanceOfPrecipNum != null && !isNaN(chanceOfPrecipNum)) {
+          return chanceOfPrecipNum;
+        }
+      } else if (dfSplitOnSearchText.length < 2) {
+        return 0;
+      }
+    }
+
+    return null;
+  }
+
+  private static getSummaryPeriodForecast(
+    period: SummaryForecastPeriod,
+    timeZone: string,
+    reqQuery: ReqQuery
+  ): NwsPeriodForecast {
+    const start = dayjs(period.startTime).tz(timeZone);
+    return {
+      start: start.unix(),
+      startIsoTz: this.getIsoTzString(start),
+      condition: period.shortForecast,
+      temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
+      feelsLike: null, // TODO
+      dewPoint: null, // TODO
+      humidity: null, // TODO
+      wind: this.getWind(period, reqQuery),
+      chanceOfPrecip: this.getChanceOfPrecip(period),
+      precipAmount: null // TODO
+    };
+  }
+
+  private static getValueAtTime(valueLayer: GridpointQuantitativeValueLayer, time: Dayjs) {
+    for (let i = 0; i < valueLayer.values.length; i++) {
+      const [valueEffectiveStartStr, valueEffectiveDurationStr] = valueLayer.values[i].validTime.split('/');
+      const valueEffectiveStart = dayjs(valueEffectiveStartStr);
+      const valueEffectiveEnd = valueEffectiveStart.add(dayjs.duration(valueEffectiveDurationStr));
+      if (!time.isBefore(valueEffectiveStart) && time.isBefore(valueEffectiveEnd)) {
+        return valueLayer.values[i].value;
+      }
+    }
+    return null;
+  }
+
+  private static getHourlyForecastsFor(
+    forecastGridData: ForecastGridData | undefined,
+    startTime: Dayjs,
+    endTime: Dayjs,
+    reqQuery: ReqQuery
+  ): NwsPeriodForecast[] {
+    const hourlyForecasts: NwsPeriodForecast[] = [];
+    for (let time = startTime; forecastGridData != null && time.isBefore(endTime); time = time.add(1, 'hour')) {
+      hourlyForecasts.push({
+        start: time.unix(),
+        startIsoTz: this.getIsoTzString(time),
+        condition: null, // TODO
+        temperature: NumberHelper.convertNwsHourly(
+          this.getValueAtTime(forecastGridData.temperature, time),
+          forecastGridData.temperature?.uom,
+          UnitType.temp,
+          reqQuery
+        ),
+        feelsLike: NumberHelper.convertNwsHourly(
+          this.getValueAtTime(forecastGridData.apparentTemperature, time),
+          forecastGridData.apparentTemperature?.uom,
+          UnitType.temp,
+          reqQuery
+        ),
+        dewPoint: NumberHelper.convertNwsHourly(
+          this.getValueAtTime(forecastGridData.dewpoint, time),
+          forecastGridData.dewpoint?.uom,
+          UnitType.temp,
+          reqQuery
+        ),
+        humidity: NumberHelper.round(this.getValueAtTime(forecastGridData.relativeHumidity, time)),
+        wind: {
+          speed: NumberHelper.convertNwsHourly(
+            this.getValueAtTime(forecastGridData.windSpeed, time),
+            forecastGridData.windSpeed?.uom,
+            UnitType.wind,
+            reqQuery
+          ),
+          gustSpeed: NumberHelper.convertNwsHourly(
+            this.getValueAtTime(forecastGridData.windGust, time),
+            forecastGridData.windGust?.uom,
+            UnitType.wind,
+            reqQuery
+          ),
+          directionDeg: this.getValueAtTime(forecastGridData.windDirection, time)
+        },
+        chanceOfPrecip: NumberHelper.round(this.getValueAtTime(forecastGridData.probabilityOfPrecipitation, time)),
+        precipAmount: NumberHelper.convertNwsHourly(
+          this.getValueAtTime(forecastGridData.quantitativePrecipitation, time),
+          forecastGridData.quantitativePrecipitation?.uom,
+          UnitType.precipitation,
+          reqQuery
+        )
+      });
+    }
+    return hourlyForecasts;
+  }
+
   static mapForecastsToNwsForecast(
     summaryForecastCacheEntry: CacheEntry<SummaryForecastResponse | null>,
     forecastGridDataCacheEntry: CacheEntry<ForecastGridDataResponse | null>,
@@ -86,109 +262,15 @@ export class NwsMapHelper {
     const summaryForecast = summaryForecastCacheEntry.item?.properties;
     const forecastGridData = forecastGridDataCacheEntry.item?.properties;
 
-    const isTimeBeforeEndOfDay = (time: Dayjs) => time.isBefore(dayjs().tz(timeZone).endOf('day'));
-
-    const mapWindDirToDeg = (dir?: WindDirection | DetailedWindDirection | null) => {
-      if (dir === WindDirection.N) return 0;
-      else if (dir === DetailedWindDirection.NNE) return 22.5;
-      else if (dir === WindDirection.NE) return 45;
-      else if (dir === DetailedWindDirection.ENE) return 67.5;
-      else if (dir === WindDirection.E) return 90;
-      else if (dir === DetailedWindDirection.ESE) return 112.5;
-      else if (dir === WindDirection.SE) return 135;
-      else if (dir === DetailedWindDirection.SSE) return 157.5;
-      else if (dir === WindDirection.S) return 180;
-      else if (dir === DetailedWindDirection.SSW) return 202.5;
-      else if (dir === WindDirection.SW) return 225;
-      else if (dir === DetailedWindDirection.WSW) return 247.5;
-      else if (dir === WindDirection.W) return 270;
-      else if (dir === DetailedWindDirection.WNW) return 292.5;
-      else if (dir === WindDirection.NW) return 315;
-      else if (dir === DetailedWindDirection.NNW) return 337.5;
-
-      return null;
-    };
-
-    const getWind = (period: SummaryForecastPeriod): Wind => {
-      let wind: Wind = {
-        speed: null,
-        gustSpeed: null,
-        directionDeg: mapWindDirToDeg(period.windDirection)
-      };
-
-      const speedAsValue = period.windSpeed as QuantitativeValue;
-      const speedAsMinMax = period.windSpeed as QuantitativeMinMaxValue;
-      if (speedAsValue?.value != null) {
-        wind.speed = NumberHelper.convertNws(speedAsValue, UnitType.wind, reqQuery);
-      } else if (speedAsMinMax?.maxValue != null) {
-        wind.speed = NumberHelper.convertNwsRawValueAndUnitCode(
-          speedAsMinMax.maxValue,
-          speedAsMinMax.unitCode,
-          UnitType.wind,
-          reqQuery
-        );
-      }
-
-      const gustSpeedAsValue = period.windGust as QuantitativeValue;
-      const gustSpeedAsMinMax = period.windGust as QuantitativeMinMaxValue;
-      if (gustSpeedAsValue?.value != null) {
-        wind.gustSpeed = NumberHelper.convertNws(gustSpeedAsValue, UnitType.wind, reqQuery);
-      } else if (gustSpeedAsMinMax?.maxValue != null) {
-        wind.gustSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
-          gustSpeedAsMinMax.maxValue,
-          gustSpeedAsMinMax.unitCode,
-          UnitType.wind,
-          reqQuery
-        );
-      }
-
-      return wind;
-    };
-
-    const CHANCE_OF_PRECIP_SEARCH_TEXT = 'Chance of precipitation is';
-    const getChanceOfPrecip = (period: SummaryForecastPeriod) => {
-      if (period.detailedForecast) {
-        const dfSplitOnSearchText = period.detailedForecast.split(
-          new RegExp(` *${CHANCE_OF_PRECIP_SEARCH_TEXT} *`, 'i')
-        );
-        if (dfSplitOnSearchText.length === 2) {
-          const chanceOfPrecipStr = dfSplitOnSearchText[1].split('%')[0];
-          const chanceOfPrecipNum = Number(chanceOfPrecipStr);
-          if (chanceOfPrecipStr.length > 0 && chanceOfPrecipNum != null && !isNaN(chanceOfPrecipNum)) {
-            return chanceOfPrecipNum;
-          }
-        } else if (dfSplitOnSearchText.length < 2) {
-          return 0;
-        }
-      }
-
-      return null;
-    };
-
-    const getSummaryPeriodForecast = (period: SummaryForecastPeriod): NwsPeriodForecast => {
-      const start = dayjs(period.startTime).tz(timeZone);
-      return {
-        start: start.unix(),
-        startIsoTz: this.getIsoTzString(start),
-        condition: period.shortForecast,
-        temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
-        feelsLike: null, // TODO
-        dewPoint: null, // TODO
-        humidity: null, // TODO
-        wind: getWind(period),
-        chanceOfPrecip: getChanceOfPrecip(period),
-        precipAmount: null // TODO
-      };
-    };
-
     let periods: NwsPeriod[] = [];
     for (let i = 0; i < (summaryForecast?.periods ?? []).length; ) {
+      const endTime = dayjs(summaryForecast!.periods[i].endTime).tz(timeZone);
       let startTime = dayjs(summaryForecast!.periods[i].startTime).tz(timeZone);
       let dayName = dayjs.weekdays()[startTime.day()];
-      if (isTimeBeforeEndOfDay(startTime)) {
+      if (this.isTimeBeforeEndOfDay(startTime, timeZone)) {
         if (summaryForecast!.periods[i].isDaytime) {
           dayName = 'Today';
-        } else if (isTimeBeforeEndOfDay(dayjs(summaryForecast!.periods[i].endTime).tz(timeZone))) {
+        } else if (this.isTimeBeforeEndOfDay(endTime, timeZone)) {
           startTime = startTime.startOf('day').subtract(1, 'second'); // yesterday at 23:59:59
           dayName = 'Overnight';
         } else {
@@ -198,17 +280,22 @@ export class NwsMapHelper {
       const shortDateName = startTime.format('MMM D');
 
       const dayForecast = summaryForecast!.periods[i].isDaytime
-        ? getSummaryPeriodForecast(summaryForecast!.periods[i])
+        ? this.getSummaryPeriodForecast(summaryForecast!.periods[i], timeZone, reqQuery)
         : null;
-      const nightForecast =
-        i + 1 < summaryForecast!.periods.length ? getSummaryPeriodForecast(summaryForecast!.periods[i + 1]) : null;
+
+      let endOfPeriodTime = endTime;
+      let nightForecast: NwsPeriodForecast | null = null;
+      if (i + 1 < summaryForecast!.periods.length) {
+        nightForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i + 1], timeZone, reqQuery);
+        endOfPeriodTime = dayjs(summaryForecast!.periods[i + 1].endTime).tz(timeZone);
+      }
 
       periods.push({
         dayName,
         shortDateName,
         dayForecast,
         nightForecast,
-        hourlyForecasts: [] // TODO
+        hourlyForecasts: this.getHourlyForecastsFor(forecastGridData, startTime, endOfPeriodTime, reqQuery)
       });
 
       i += summaryForecast!.periods[i].isDaytime ? 2 : 1;
@@ -223,23 +310,26 @@ export class NwsMapHelper {
     };
   }
 
-  static mapAlertsToNwsAlerts(response: AlertsResponse, timeZone: string): NwsAlerts {
-    const getDayjsFormatTemplate = (includeDay: boolean, time: Dayjs) =>
-      `${includeDay ? 'ddd ' : ''}h${time.minute() > 0 ? ':mm' : ''}a`;
+  private static getDayjsFormatTemplate(includeDay: boolean, time: Dayjs) {
+    return `${includeDay ? 'ddd ' : ''}h${time.minute() > 0 ? ':mm' : ''}a`;
+  }
 
-    const getFormatted = (includeDay: boolean, time: Dayjs) => ({
-      label: time.format(getDayjsFormatTemplate(includeDay, time)),
+  private static getFormatted(includeDay: boolean, time: Dayjs) {
+    return {
+      label: time.format(this.getDayjsFormatTemplate(includeDay, time)),
       shortTz: time.format('z')
-    });
-
-    const mapToNumericSeverity = (severity: AlertSeverity) => {
-      if (severity === AlertSeverity.EXTREME) return 4;
-      else if (severity === AlertSeverity.SEVERE) return 3;
-      else if (severity === AlertSeverity.MODERATE) return 2;
-      else if (severity === AlertSeverity.MINOR) return 1;
-      return 0;
     };
+  }
 
+  private static getNumericSeverity(severity: AlertSeverity) {
+    if (severity === AlertSeverity.EXTREME) return 4;
+    else if (severity === AlertSeverity.SEVERE) return 3;
+    else if (severity === AlertSeverity.MODERATE) return 2;
+    else if (severity === AlertSeverity.MINOR) return 1;
+    return 0;
+  }
+
+  static mapAlertsToNwsAlerts(response: AlertsResponse, timeZone: string): NwsAlerts {
     const now = dayjs().tz(timeZone);
     const alerts = response.features
       .filter(
@@ -276,12 +366,12 @@ export class NwsMapHelper {
 
         const onsetDayjs = dayjs(alert.properties.onset ?? alert.properties.effective).tz(timeZone);
         const onsetIncludeDay = !onsetDayjs.isSame(now, 'day');
-        const onsetFormatted = getFormatted(onsetIncludeDay, onsetDayjs);
+        const onsetFormatted = this.getFormatted(onsetIncludeDay, onsetDayjs);
 
         const endsDayjs = dayjs(alert.properties.ends ?? alert.properties.expires).tz(timeZone);
         const endsIncludeDay =
           !endsDayjs.isSame(now, 'day') && !(endsDayjs.isSame(onsetDayjs, 'day') && onsetDayjs.isAfter(now));
-        const endsFormatted = getFormatted(endsIncludeDay, endsDayjs);
+        const endsFormatted = this.getFormatted(endsIncludeDay, endsDayjs);
 
         return {
           onset: onsetDayjs.unix(),
@@ -299,7 +389,7 @@ export class NwsMapHelper {
           instruction
         };
       })
-      .sort((alert1, alert2) => mapToNumericSeverity(alert2.severity) - mapToNumericSeverity(alert1.severity));
+      .sort((alert1, alert2) => this.getNumericSeverity(alert2.severity) - this.getNumericSeverity(alert1.severity));
 
     return {
       readTime: response.updated ? dayjs(response.updated).unix() : 0,

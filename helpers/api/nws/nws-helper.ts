@@ -28,7 +28,12 @@ export class NwsHelper {
     return fetch(url, { headers: { ...(headers ?? {}), 'User-Agent': this.userAgent } });
   }
 
-  private static async getItemOnMissWithRetry<ResponseItem>(itemLabel: string, url: string, headers?: HeadersInit) {
+  private static async getItemOnMissWithRetry<ResponseItem>(
+    itemLabel: string,
+    isResponseOk: (jsonResponse: any) => boolean,
+    url: string,
+    headers?: HeadersInit
+  ) {
     const logger = LoggerHelper.getLogger(`${this.CLASS_NAME}.${itemLabel}`);
     for (let attemptNum = 1; ; attemptNum++) {
       let status: number | undefined;
@@ -37,7 +42,7 @@ export class NwsHelper {
         const response = await this.fetch(url, headers);
         status = response.status;
         jsonResponse = await response.json();
-        if (status === 200 && jsonResponse?.properties?.periods?.length) {
+        if (status === 200 && isResponseOk(jsonResponse)) {
           if (attemptNum > 1) {
             logger.info(`Attempt #${attemptNum} for ${url} SUCCEEDED`);
           }
@@ -109,9 +114,14 @@ export class NwsHelper {
 
   private static readonly summaryForecast = new Cached<SummaryForecastResponse | null, string>(
     async (summaryForecastUrl: string) =>
-      this.getItemOnMissWithRetry('summaryForecast', summaryForecastUrl, {
-        'Feature-Flags': 'forecast_temperature_qv,forecast_wind_speed_qv'
-      }),
+      this.getItemOnMissWithRetry(
+        'summaryForecast',
+        jsonResponse => jsonResponse?.properties?.periods?.length,
+        summaryForecastUrl,
+        {
+          'Feature-Flags': 'forecast_temperature_qv,forecast_wind_speed_qv'
+        }
+      ),
     async (_: string, newItem: SummaryForecastResponse | null) => {
       if (newItem?.properties?.updateTime) {
         const lastReading = dayjs(newItem.properties.updateTime);
@@ -129,7 +139,12 @@ export class NwsHelper {
   }
 
   private static readonly forecastGridData = new Cached<ForecastGridDataResponse | null, string>(
-    async (forecastGridDataUrl: string) => this.getItemOnMissWithRetry('forecastGridData', forecastGridDataUrl),
+    async (forecastGridDataUrl: string) =>
+      this.getItemOnMissWithRetry(
+        'forecastGridData',
+        jsonResponse => jsonResponse?.properties?.updateTime,
+        forecastGridDataUrl
+      ),
     async (_: string, newItem: ForecastGridDataResponse | null) => {
       if (newItem?.properties?.updateTime) {
         // TODO - come up with actual logic for calculating numerical forecast expiration
