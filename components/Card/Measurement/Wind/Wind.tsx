@@ -17,7 +17,7 @@ const getWindDirection = (deg: number) => {
   return '';
 };
 
-export default function Wind({ wind }: { wind?: WindModel }) {
+export default function Wind({ wind, includeGustSpeed }: { wind: WindModel | undefined; includeGustSpeed: boolean }) {
   return (
     <Measurement
       value={
@@ -26,7 +26,7 @@ export default function Wind({ wind }: { wind?: WindModel }) {
           {wind?.directionDeg != null ? ` ${getWindDirection(wind.directionDeg)}` : ''}
         </>
       }
-      secondaryValue={`${roundOrEmDash(wind?.gustSpeed)} mph gusts`}
+      secondaryValue={includeGustSpeed ? `${roundOrEmDash(wind?.gustSpeed)} mph gusts` : undefined}
       label="Wind"
       icon={<WindIcon directionDeg={wind?.directionDeg}></WindIcon>}
     ></Measurement>

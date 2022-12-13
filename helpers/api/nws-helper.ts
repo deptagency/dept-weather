@@ -12,10 +12,11 @@ import {
   NwsAlert,
   NwsAlerts,
   NwsForecast,
-  NwsForecastPeriod,
   NwsObservations,
+  NwsPeriod,
+  NwsPeriodForecast,
   ReqQuery,
-  WindForecast
+  Wind
 } from 'models/api';
 import { MinimalQueriedCity } from 'models/cities';
 import {
@@ -48,6 +49,10 @@ export class NwsHelper {
   private static readonly CLASS_NAME = 'NwsHelper';
   private static readonly BASE_URL = 'https://api.weather.gov/';
   private static readonly userAgent = process.env.USER_AGENT!;
+
+  static getIsoTzString(time: Dayjs) {
+    return time.format('YYYY-MM-DDTHH:mm:ssZ');
+  }
 
   private static async wait(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -181,101 +186,106 @@ export class NwsHelper {
     },
     LoggerHelper.getLogger(`${this.CLASS_NAME}.forecast`)
   );
-  static async getForecast(minQueriedCity: MinimalQueriedCity) {
-    const points = await this.getPoints(CoordinatesHelper.cityToStr(minQueriedCity));
+  static async getForecast(points: CacheEntry<PointsResponse>) {
     const forecastUrl = points.item.properties.forecast;
     return this.forecast.get(forecastUrl, forecastUrl);
   }
 
-  static mapForecastToNwsForecast(cacheEntry: CacheEntry<ForecastResponse>, reqQuery: ReqQuery): NwsForecast {
+  static mapForecastToNwsForecast(
+    cacheEntry: CacheEntry<ForecastResponse>,
+    timeZone: string,
+    reqQuery: ReqQuery
+  ): NwsForecast {
     const forecast = cacheEntry.item?.properties;
 
-    const getWind = (period: ForecastPeriod): WindForecast => {
-      let wind: WindForecast = {
+    const isTimeBeforeEndOfDay = (time: Dayjs) => time.isBefore(dayjs().tz(timeZone).endOf('day'));
+
+    const getWind = (period: ForecastPeriod): Wind => {
+      let wind: Wind = {
         speed: null,
-        minSpeed: null,
-        maxSpeed: null,
         gustSpeed: null,
-        minGustSpeed: null,
-        maxGustSpeed: null,
-        direction: period.windDirection
+        directionDeg: null // TODO
       };
 
-      const speedAsMinMax = period.windSpeed as QuantitativeMinMaxValue;
       const speedAsValue = period.windSpeed as QuantitativeValue;
-      if (speedAsMinMax?.minValue != null && speedAsMinMax?.maxValue != null) {
-        wind.minSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
-          speedAsMinMax.minValue,
-          speedAsMinMax.unitCode,
-          UnitType.wind,
-          reqQuery
-        );
-        wind.maxSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
+      const speedAsMinMax = period.windSpeed as QuantitativeMinMaxValue;
+      if (speedAsValue?.value != null) {
+        wind.speed = NumberHelper.convertNws(speedAsValue, UnitType.wind, reqQuery);
+      } else if (speedAsMinMax?.maxValue != null) {
+        wind.speed = NumberHelper.convertNwsRawValueAndUnitCode(
           speedAsMinMax.maxValue,
           speedAsMinMax.unitCode,
           UnitType.wind,
           reqQuery
         );
-      } else if (speedAsValue?.value != null) {
-        wind.speed = NumberHelper.convertNws(speedAsValue, UnitType.wind, reqQuery);
       }
 
-      const gustSpeedAsMinMax = period.windGust as QuantitativeMinMaxValue;
       const gustSpeedAsValue = period.windGust as QuantitativeValue;
-      if (gustSpeedAsMinMax?.minValue != null && gustSpeedAsMinMax?.maxValue != null) {
-        wind.minGustSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
-          gustSpeedAsMinMax.minValue,
-          gustSpeedAsMinMax.unitCode,
-          UnitType.wind,
-          reqQuery
-        );
-        wind.maxGustSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
+      const gustSpeedAsMinMax = period.windGust as QuantitativeMinMaxValue;
+      if (gustSpeedAsValue?.value != null) {
+        wind.gustSpeed = NumberHelper.convertNws(gustSpeedAsValue, UnitType.wind, reqQuery);
+      } else if (gustSpeedAsMinMax?.maxValue != null) {
+        wind.gustSpeed = NumberHelper.convertNwsRawValueAndUnitCode(
           gustSpeedAsMinMax.maxValue,
           gustSpeedAsMinMax.unitCode,
           UnitType.wind,
           reqQuery
         );
-      } else if (gustSpeedAsValue?.value != null) {
-        wind.gustSpeed = NumberHelper.convertNws(gustSpeedAsValue, UnitType.wind, reqQuery);
       }
 
       return wind;
     };
 
-    const isTimeBeforeEndOfDay = (time: Dayjs) => time.isBefore(dayjs().endOf('day'));
+    const getSummaryPeriodForecast = (period: ForecastPeriod): NwsPeriodForecast => {
+      const start = dayjs(period.startTime).tz(timeZone);
+      return {
+        start: start.unix(),
+        startIsoTz: this.getIsoTzString(start),
+        condition: period.shortForecast,
+        temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
+        feelsLike: null, // TODO
+        dewPoint: null, // TODO
+        humidity: null, // TODO
+        wind: getWind(period),
+        chanceOfPrecip: null, // TODO
+        precipAmount: null // TODO
+      };
+    };
 
-    const forecasts =
-      forecast?.periods?.map((period): NwsForecastPeriod => {
-        let start = dayjs(period.startTime);
-        let dayName = dayjs.weekdays()[start.day()];
-        if (isTimeBeforeEndOfDay(start)) {
-          if (period.isDaytime) {
-            dayName = 'Today';
-          } else if (isTimeBeforeEndOfDay(dayjs(period.endTime))) {
-            start = start.startOf('day').subtract(1, 'second'); // yesterday at 23:59:59
-            dayName = 'Overnight';
-          } else {
-            dayName = 'Tonight';
-          }
+    let periods: NwsPeriod[] = [];
+    for (let i = 0; i < forecast?.periods?.length; ) {
+      let startTime = dayjs(forecast.periods[i].startTime).tz(timeZone);
+      let dayName = dayjs.weekdays()[startTime.day()];
+      if (isTimeBeforeEndOfDay(startTime)) {
+        if (forecast.periods[i].isDaytime) {
+          dayName = 'Today';
+        } else if (isTimeBeforeEndOfDay(dayjs(forecast.periods[i].endTime).tz(timeZone))) {
+          startTime = startTime.startOf('day').subtract(1, 'second'); // yesterday at 23:59:59
+          dayName = 'Overnight';
+        } else {
+          dayName = 'Tonight';
         }
+      }
+      const shortDateName = startTime.format('MMM D');
 
-        return {
-          dayName,
-          shortDateName: start.format('MMM D'),
-          periodStart: start.unix(),
-          periodEnd: dayjs(period.endTime).unix(),
-          isDaytime: period.isDaytime,
-          temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
-          wind: getWind(period),
-          shortForecast: period.shortForecast,
-          detailedForecast: period.detailedForecast
-        };
-      }) ?? [];
+      const dayForecast = forecast.periods[i].isDaytime ? getSummaryPeriodForecast(forecast.periods[i]) : null;
+      const nightForecast = i + 1 < forecast.periods.length ? getSummaryPeriodForecast(forecast.periods[i + 1]) : null;
+
+      periods.push({
+        dayName,
+        shortDateName,
+        dayForecast,
+        nightForecast,
+        hourlyForecasts: [] // TODO
+      });
+
+      i += forecast.periods[i].isDaytime ? 2 : 1;
+    }
 
     return {
       readTime: forecast?.updateTime ? dayjs(forecast.updateTime).unix() : 0,
       validUntil: cacheEntry.validUntil,
-      forecasts
+      periods
     };
   }
 
@@ -298,8 +308,6 @@ export class NwsHelper {
       label: time.format(getDayjsFormatTemplate(includeDay, time)),
       shortTz: time.format('z')
     });
-
-    const getIsoTzString = (time: Dayjs) => time.format('YYYY-MM-DDTHH:mm:ssZ');
 
     const mapToNumericSeverity = (severity: AlertSeverity) => {
       if (severity === AlertSeverity.EXTREME) return 4;
@@ -354,11 +362,11 @@ export class NwsHelper {
 
         return {
           onset: onsetDayjs.unix(),
-          onsetIsoTz: getIsoTzString(onsetDayjs),
+          onsetIsoTz: this.getIsoTzString(onsetDayjs),
           onsetLabel: onsetFormatted.label,
           onsetShortTz: onsetFormatted.shortTz,
           ends: endsDayjs.unix(),
-          endsIsoTz: getIsoTzString(endsDayjs),
+          endsIsoTz: this.getIsoTzString(endsDayjs),
           endsLabel: endsFormatted.label,
           endsShortTz: endsFormatted.shortTz,
           severity: alert.properties.severity,

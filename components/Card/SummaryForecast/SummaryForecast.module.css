@@ -1,25 +1,25 @@
-.forecast-period {
+.summary-forecast {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
 
-.forecast-period__overview {
+.summary-forecast__overview {
   margin: 0rem 1rem 0rem 0.25rem;
   min-width: 12rem;
 }
 
 @media screen and (max-width: 880px) {
-  .forecast-period__overview {
+  .summary-forecast__overview {
     width: 100%;
   }
 }
 
-.forecast-period__overview__label {
+.summary-forecast__overview__label {
   margin: 1rem 0rem 0.5rem;
 }
 
-.forecast-period__measurements {
+.summary-forecast__measurements {
   display: flex;
   flex: 1 1;
   flex-wrap: wrap;

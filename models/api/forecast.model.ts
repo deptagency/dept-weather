@@ -8,25 +8,26 @@ export interface Forecast extends QueriedCityInfo {
 }
 
 export interface NwsForecast extends BaseData {
-  forecasts: Array<NwsForecastPeriod>;
+  periods: NwsPeriod[];
 }
 
-export interface NwsForecastPeriod {
-  dayName: string | null;
-  shortDateName: string | null;
-  periodStart: number | null;
-  periodEnd: number | null;
-  isDaytime: boolean | null;
+export interface NwsPeriod {
+  dayName: string;
+  shortDateName: string;
+  dayForecast: NwsPeriodForecast | null;
+  nightForecast: NwsPeriodForecast | null;
+  hourlyForecasts: NwsPeriodForecast[];
+}
+
+export interface NwsPeriodForecast {
+  start: number;
+  startIsoTz: string;
+  condition: string | null;
   temperature: number | null;
-  wind: WindForecast;
-  shortForecast: string | null;
-  detailedForecast: string | null;
-}
-
-export interface WindForecast extends Omit<Wind, 'directionDeg'> {
-  minSpeed: number | null;
-  maxSpeed: number | null;
-  minGustSpeed: number | null;
-  maxGustSpeed: number | null;
-  direction: WindDirection | DetailedWindDirection | null;
+  feelsLike: number | null;
+  dewPoint: number | null;
+  humidity: number | null;
+  wind: Wind;
+  chanceOfPrecip: number | null;
+  precipAmount: number | null;
 }

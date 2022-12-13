@@ -8,7 +8,7 @@ import {
   Forecast,
   getPath,
   NwsAlert,
-  NwsForecastPeriod,
+  NwsPeriod,
   Observations,
   QueryParams,
   Response
@@ -71,33 +71,19 @@ const AlertCards = ({ alerts }: { alerts: NwsAlert[] }) => (
 const ForecastCards = ({
   isLoading,
   latestReadTime,
-  forecasts
+  periods
 }: {
   isLoading?: boolean;
   latestReadTime?: number;
-  forecasts: Array<NwsForecastPeriod>;
+  periods: NwsPeriod[];
 }) => {
-  const cards = [];
-
-  let i = 0;
-  if (forecasts.length && !forecasts[0].isDaytime) {
-    cards.push(
-      <ForecastCard nightForecast={forecasts[0]} isLoading={isLoading} latestReadTime={latestReadTime} key={i++} />
-    );
-  }
-
-  for (; i < forecasts.length; i += 2) {
-    cards.push(
-      <ForecastCard
-        dayForecast={forecasts[i]}
-        nightForecast={i + 1 < forecasts.length ? forecasts[i + 1] : undefined}
-        isLoading={isLoading}
-        latestReadTime={latestReadTime}
-        key={i}
-      />
-    );
-  }
-  return <>{cards}</>;
+  return (
+    <>
+      {periods.map((period, idx) => (
+        <ForecastCard period={period} isLoading={isLoading} latestReadTime={latestReadTime} key={idx} />
+      ))}
+    </>
+  );
 };
 
 export default function Main({ queryParams, children }: { queryParams: QueryParams; children?: ReactNode }) {
@@ -106,31 +92,22 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
   const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
 
-  const [placeholderForecasts, setPlaceholderForecasts] = useState<NwsForecastPeriod[]>([]);
+  const [placeholderPeriods, setPlaceholderPeriods] = useState<NwsPeriod[]>([]);
 
   useEffect(() => {
-    const placeholderForecasts: NwsForecastPeriod[] = Array(14);
-
+    const _placeholderPeriods: NwsPeriod[] = Array(7);
     let date = new Date(new Date().setHours(0, 0, 0, 0));
-    for (let i = 0; i < placeholderForecasts.length; i += 2) {
-      placeholderForecasts[i] = {
-        isDaytime: true,
-        dayName: date.toLocaleString('default', { weekday: 'long' }),
-        shortDateName: date.toLocaleString('default', { month: 'short', day: 'numeric' })
-      } as NwsForecastPeriod;
-      placeholderForecasts[i + 1] = {
-        ...placeholderForecasts[i],
-        isDaytime: false
-      } as NwsForecastPeriod;
-
-      if (i === 0) {
-        placeholderForecasts[i].dayName = 'Today';
-        placeholderForecasts[i + 1].dayName = 'Tonight';
-      }
+    for (let i = 0; i < _placeholderPeriods.length; i++) {
+      _placeholderPeriods[i] = {
+        dayName: i === 0 ? 'Today' : date.toLocaleString('default', { weekday: 'long' }),
+        shortDateName: date.toLocaleString('default', { month: 'short', day: 'numeric' }),
+        dayForecast: null,
+        nightForecast: null,
+        hourlyForecasts: []
+      };
       date.setDate(date.getDate() + 1);
     }
-
-    setPlaceholderForecasts(placeholderForecasts);
+    setPlaceholderPeriods(_placeholderPeriods);
   }, []);
 
   return (
@@ -150,7 +127,7 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
           <ForecastCards
             isLoading={forecastIsLoading}
             latestReadTime={forecast?.latestReadTime ? forecast!.latestReadTime! : undefined}
-            forecasts={forecast?.data?.nws?.forecasts?.length ? forecast!.data!.nws!.forecasts! : placeholderForecasts}
+            periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
           ></ForecastCards>
         </>
       )}

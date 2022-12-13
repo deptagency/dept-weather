@@ -3,16 +3,19 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { CitiesReqQueryHelper, LoggerHelper, NwsHelper } from 'helpers/api';
 import { DataSource } from 'models';
 import { APIRoute, Forecast, getPath, Response } from 'models/api';
+import { CoordinatesHelper } from 'helpers';
 
-const LOGGER_LABEL = getPath(APIRoute.CURRENT);
+const LOGGER_LABEL = getPath(APIRoute.FORECAST);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(req.query);
-    const forecast = await NwsHelper.getForecast(minimalQueriedCity);
+    const points = await NwsHelper.getPoints(CoordinatesHelper.cityToStr(minimalQueriedCity));
+    const timeZone = points.item.properties.timeZone;
+    const forecast = await NwsHelper.getForecast(points);
 
     const data: Forecast = {
-      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapForecastToNwsForecast(forecast, req.query),
+      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsHelper.mapForecastToNwsForecast(forecast, timeZone, req.query),
       [DataSource.QUERIED_CITY]: queriedCity
     };
 

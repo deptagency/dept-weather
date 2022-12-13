@@ -38,7 +38,7 @@ export default function ObservationsCard({
           ></Condition>
         </div>
         <div className={styles['card-contents__measurements']}>
-          <Wind wind={observations?.wl?.wind ?? observations?.nws?.wind}></Wind>
+          <Wind wind={observations?.wl?.wind ?? observations?.nws?.wind} includeGustSpeed={true}></Wind>
           <UVIndex epaData={observations?.epa}></UVIndex>
           <AirQuality airnowData={observations?.airnow}></AirQuality>
           <Humidity humidity={observations?.wl?.humidity ?? observations?.nws?.humidity}></Humidity>

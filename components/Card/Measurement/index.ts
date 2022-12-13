@@ -6,4 +6,3 @@ export { default as PrecipitationForecast } from './Precipitation/PrecipitationF
 export { default as Pressure } from './Pressure/Pressure';
 export { default as UVIndex } from './UVIndex/UVIndex';
 export { default as Wind } from './Wind/Wind';
-export { default as WindForecast } from './Wind/WindForecast';
