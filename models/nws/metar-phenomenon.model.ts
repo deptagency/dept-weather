@@ -1,18 +1,18 @@
 export interface MetarPhenomenon {
   description?: string;
-  intensity?: Intensity;
-  modifier?: Modifier;
-  weather: Weather;
+  intensity?: MetarIntensity;
+  modifier?: MetarModifier;
+  weather: MetarWeather;
   rawString: string;
   inVicinity?: boolean;
 }
 
-export enum Intensity {
+export enum MetarIntensity {
   LIGHT = 'light',
   HEAVY = 'heavy'
 }
 
-export enum Modifier {
+export enum MetarModifier {
   PATCHES = 'patches',
   BLOWING = 'blowing',
   LOW_DRIFTING = 'low_drifting',
@@ -22,7 +22,7 @@ export enum Modifier {
   SHOWERS = 'showers'
 }
 
-export enum Weather {
+export enum MetarWeather {
   FOG_MIST = 'fog_mist',
   DUST_STORM = 'dust_storm',
   DUST = 'dust',

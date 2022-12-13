@@ -2,22 +2,22 @@ import { DetailedWindDirection, WindDirection } from 'models';
 import { Geometry } from './geometry.model';
 import { QuantitativeMinMaxValue, QuantitativeValue } from './quantitative-value.model';
 
-export interface ForecastResponse {
+export interface SummaryForecastResponse {
   geometry: Geometry;
-  properties: Forecast;
+  properties: SummaryForecast;
 }
 
-export interface Forecast {
+export interface SummaryForecast {
   units: string;
   forecastGenerator: string;
   generatedAt: string;
   updateTime: string;
   validTimes: string;
   elevation: QuantitativeValue;
-  periods: ForecastPeriod[];
+  periods: SummaryForecastPeriod[];
 }
 
-export interface ForecastPeriod {
+export interface SummaryForecastPeriod {
   number: number;
   name: string;
   startTime: string;

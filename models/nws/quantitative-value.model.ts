@@ -8,3 +8,13 @@ export interface QuantitativeMinMaxValue {
   maxValue: number | null;
   unitCode: string;
 }
+
+export interface GridpointQuantitativeValueLayer {
+  uom?: string;
+  values: GridpointQuantitativeValue[];
+}
+
+export interface GridpointQuantitativeValue {
+  value: number | null;
+  validTime: string;
+}

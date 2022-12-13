@@ -22,8 +22,8 @@ import { MinimalQueriedCity } from 'models/cities';
 import {
   AlertSeverity,
   AlertsResponse,
-  ForecastPeriod,
-  ForecastResponse,
+  SummaryForecastPeriod,
+  SummaryForecastResponse,
   NwsUnits,
   ObservationResponse,
   PointsResponse,
@@ -142,7 +142,7 @@ export class NwsHelper {
     };
   }
 
-  private static readonly forecast = new Cached<ForecastResponse, string>(
+  private static readonly forecast = new Cached<SummaryForecastResponse, string>(
     async (forecastUrl: string) => {
       const forecastLogger = LoggerHelper.getLogger(`${this.CLASS_NAME}.forecast`);
       for (let attemptNum = 1; ; attemptNum++) {
@@ -158,7 +158,7 @@ export class NwsHelper {
             if (attemptNum > 1) {
               forecastLogger.info(`Attempt #${attemptNum} for ${forecastUrl} SUCCEEDED`);
             }
-            return jsonResponse as ForecastResponse;
+            return jsonResponse as SummaryForecastResponse;
           }
         } catch {}
 
@@ -176,7 +176,7 @@ export class NwsHelper {
         await this.wait(numSecondsToWait * 1_000);
       }
       forecastLogger.error(`All attempts for ${forecastUrl} FAILED; returning null`);
-      return null as unknown as ForecastResponse;
+      return null as unknown as SummaryForecastResponse;
     },
     async (_: string, newItem: any) => {
       const lastReading = dayjs(newItem.properties.updateTime);
@@ -192,7 +192,7 @@ export class NwsHelper {
   }
 
   static mapForecastToNwsForecast(
-    cacheEntry: CacheEntry<ForecastResponse>,
+    cacheEntry: CacheEntry<SummaryForecastResponse>,
     timeZone: string,
     reqQuery: ReqQuery
   ): NwsForecast {
@@ -200,7 +200,7 @@ export class NwsHelper {
 
     const isTimeBeforeEndOfDay = (time: Dayjs) => time.isBefore(dayjs().tz(timeZone).endOf('day'));
 
-    const getWind = (period: ForecastPeriod): Wind => {
+    const getWind = (period: SummaryForecastPeriod): Wind => {
       let wind: Wind = {
         speed: null,
         gustSpeed: null,
@@ -236,7 +236,7 @@ export class NwsHelper {
       return wind;
     };
 
-    const getSummaryPeriodForecast = (period: ForecastPeriod): NwsPeriodForecast => {
+    const getSummaryPeriodForecast = (period: SummaryForecastPeriod): NwsPeriodForecast => {
       const start = dayjs(period.startTime).tz(timeZone);
       return {
         start: start.unix(),
