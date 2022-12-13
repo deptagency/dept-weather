@@ -1,4 +1,4 @@
-import { DataSource, DetailedWindDirection, WindDirection } from 'models';
+import { DataSource } from 'models';
 import { Wind } from './observations.model';
 import { QueriedCityInfo } from './queried-location-info.model';
 import { BaseData } from './response.model';

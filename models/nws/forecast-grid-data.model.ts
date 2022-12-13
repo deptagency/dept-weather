@@ -1,5 +1,4 @@
 import { Geometry } from './geometry.model';
-import { MetarIntensity } from './metar-phenomenon.model';
 import {
   GridpointQuantitativeValueLayer,
   QuantitativeMinMaxValue,
@@ -43,14 +42,18 @@ export interface ForecastGridData {
 }
 
 export interface Weather {
-  values: WeatherValue[];
+  values: WeatherValueLayer[];
+}
+
+export interface WeatherValueLayer {
+  validTime: string;
+  value: WeatherValue[];
 }
 
 export interface WeatherValue {
-  validTime: string;
   coverage: WeatherCoverage | null;
   weather: WeatherType | null;
-  intensity: MetarIntensity | null;
+  intensity: WeatherIntensity | null;
   visibility: QuantitativeValue | QuantitativeMinMaxValue;
   attributes: WeatherAttribute[];
 }
@@ -98,6 +101,13 @@ export enum WeatherType {
   THUNDERSTORMS = 'thunderstorms',
   VOLCANIC_ASH = 'volcanic_ash',
   WATER_SPOUTS = 'water_spouts'
+}
+
+export enum WeatherIntensity {
+  VERY_LIGHT = 'very_light',
+  LIGHT = 'light',
+  MODERATE = 'moderate',
+  HEAVY = 'heavy'
 }
 
 export enum WeatherAttribute {

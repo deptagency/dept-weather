@@ -28,7 +28,9 @@ import {
   QuantitativeMinMaxValue,
   QuantitativeValue,
   SummaryForecastPeriod,
-  SummaryForecastResponse
+  SummaryForecastResponse,
+  Weather,
+  WeatherIntensity
 } from 'models/nws';
 import { CacheEntry } from '../cached';
 import { FeelsHelper } from '../feels-helper';
@@ -192,6 +194,52 @@ export class NwsMapHelper {
     return null;
   }
 
+  private static getWeatherAtTime(weather: Weather, time: Dayjs) {
+    for (let i = 0; i < weather.values.length; i++) {
+      const [valueEffectiveStartStr, valueEffectiveDurationStr] = weather.values[i].validTime.split('/');
+      const valueEffectiveStart = dayjs(valueEffectiveStartStr);
+      const valueEffectiveEnd = valueEffectiveStart.add(dayjs.duration(valueEffectiveDurationStr));
+      if (!time.isBefore(valueEffectiveStart) && time.isBefore(valueEffectiveEnd)) {
+        return weather.values[i];
+      }
+    }
+    return null;
+  }
+
+  private static getCondition(forecastGridData: ForecastGridData, time: Dayjs, isDaytime: boolean) {
+    let condition: string | null = null;
+    const skyCover = this.getValueAtTime(forecastGridData.skyCover, time);
+    if (skyCover != null) {
+      if (skyCover < 5.5) condition = isDaytime ? 'Sunny' : 'Clear';
+      else if (skyCover < 25.5) condition = isDaytime ? 'Sunny' : 'Mostly Clear';
+      else if (skyCover < 50.5) condition = isDaytime ? 'Mostly Sunny' : 'Partly Cloudy';
+      else if (skyCover < 69.5) condition = isDaytime ? 'Partly Sunny' : 'Mostly Cloudy';
+      else if (skyCover < 87.5) condition = isDaytime ? 'Mostly Cloudy' : 'Considerable Cloudiness';
+      else condition = isDaytime ? 'Cloudy' : 'Overcast';
+    }
+
+    const weatherVal = this.getWeatherAtTime(forecastGridData.weather, time);
+    if (weatherVal?.value[0].weather != null) {
+      let intensity = '';
+      if (weatherVal.value[0].intensity === WeatherIntensity.HEAVY) {
+        intensity = 'Heavy ';
+      } else if (
+        weatherVal.value[0].intensity === WeatherIntensity.LIGHT ||
+        weatherVal.value[0].intensity === WeatherIntensity.VERY_LIGHT
+      ) {
+        intensity = 'Light ';
+      }
+
+      const formattedWeather = weatherVal.value[0].weather
+        .split('_')
+        .map(word => `${word[0].toUpperCase()}${word.substring(1)}`)
+        .join(' ');
+
+      condition = `${intensity}${formattedWeather}`;
+    }
+    return condition;
+  }
+
   private static getHourlyForecastsFor(
     forecastGridData: ForecastGridData | undefined,
     startTime: Dayjs,
@@ -204,7 +252,7 @@ export class NwsMapHelper {
       hourlyForecasts.push({
         start: time.unix(),
         startIsoTz: this.getIsoTzString(time),
-        condition: null, // TODO
+        condition: this.getCondition(forecastGridData, time, isDaytime),
         temperature: NumberHelper.convertNwsHourly(
           this.getValueAtTime(forecastGridData.temperature, time),
           forecastGridData.temperature?.uom,
