@@ -112,6 +112,19 @@ export class NwsHelper {
     return this.current.get(stationId, stationId);
   }
 
+  private static async forecastCalculateExpiration(
+    _: string,
+    newItem: SummaryForecastResponse | ForecastGridDataResponse | null
+  ) {
+    if (newItem?.properties?.updateTime) {
+      const lastReading = dayjs(newItem.properties.updateTime);
+      const oneHourFromLastReading = lastReading.add(1, 'hour').unix();
+      const fifteenMinsFromNow = dayjs().add(15, 'minutes').unix();
+      return Math.max(oneHourFromLastReading, fifteenMinsFromNow);
+    }
+    return 0;
+  }
+
   private static readonly summaryForecast = new Cached<SummaryForecastResponse | null, string>(
     async (summaryForecastUrl: string) =>
       this.getItemOnMissWithRetry(
@@ -122,15 +135,7 @@ export class NwsHelper {
           'Feature-Flags': 'forecast_temperature_qv,forecast_wind_speed_qv'
         }
       ),
-    async (_: string, newItem: SummaryForecastResponse | null) => {
-      if (newItem?.properties?.updateTime) {
-        const lastReading = dayjs(newItem.properties.updateTime);
-        const oneHourFromLastReading = lastReading.add(1, 'hour').unix();
-        const fifteenMinsFromNow = dayjs().add(15, 'minutes').unix();
-        return Math.max(oneHourFromLastReading, fifteenMinsFromNow);
-      }
-      return 0;
-    },
+    this.forecastCalculateExpiration,
     LoggerHelper.getLogger(`${this.CLASS_NAME}.summaryForecast`)
   );
   static async getSummaryForecast(points: CacheEntry<PointsResponse>) {
@@ -145,13 +150,7 @@ export class NwsHelper {
         jsonResponse => jsonResponse?.properties?.updateTime,
         forecastGridDataUrl
       ),
-    async (_: string, newItem: ForecastGridDataResponse | null) => {
-      if (newItem?.properties?.updateTime) {
-        // TODO - come up with actual logic for calculating numerical forecast expiration
-        return dayjs().add(5, 'minute').unix();
-      }
-      return 0;
-    },
+    this.forecastCalculateExpiration,
     LoggerHelper.getLogger(`${this.CLASS_NAME}.forecastGridData`)
   );
   static async getForecastGridData(points: CacheEntry<PointsResponse>) {
