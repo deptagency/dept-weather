@@ -81,18 +81,6 @@ export class NumberHelper {
       : null;
   }
 
-  static convertNwsHourly(
-    value: number | null,
-    unitCode: string | null | undefined,
-    unitType: UnitType,
-    reqQuery: ReqQuery,
-    roundN: number | null = 1
-  ) {
-    return value != null && unitCode != null
-      ? this.convertNwsRawValueAndUnitCode(value, unitCode, unitType, reqQuery, roundN)
-      : null;
-  }
-
   static getUnitMapping(unitType: UnitType, from: Unit, reqQuery: ReqQuery): UnitMapping {
     const reqToUnit = reqQuery[`${unitType}Unit`];
     return {

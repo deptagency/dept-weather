@@ -21,16 +21,17 @@ import {
   AlertSeverity,
   AlertsResponse,
   ForecastGridData,
+  ForecastGridDataDatapoints,
   ForecastGridDataResponse,
-  GridpointQuantitativeValueLayer,
+  GridpointQuantitativeValue,
   NwsUnits,
   ObservationResponse,
   QuantitativeMinMaxValue,
   QuantitativeValue,
   SummaryForecastPeriod,
   SummaryForecastResponse,
-  Weather,
-  WeatherIntensity
+  WeatherIntensity,
+  WeatherValueLayer
 } from 'models/nws';
 import { CacheEntry } from '../cached';
 import { FeelsHelper } from '../feels-helper';
@@ -39,6 +40,8 @@ dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 dayjs.extend(localeData);
 dayjs.extend(timezone);
+
+type HourlyForecastsMetadata = { unitsOfMeasure: (string | undefined)[]; dpRefIdxsByTime: Record<number, number[]> };
 
 const NWS_ALERTS_SYSTEM_CODE_REGEX = /^[A-Z]{3}$/;
 const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
@@ -85,6 +88,27 @@ export class NwsMapHelper {
   }
 
   private static readonly CHANCE_OF_PRECIP_SEARCH_TEXT = 'Chance of precipitation is';
+
+  private static get NWS_HOURLY_DATAPOINT_KEYS() {
+    const NWS_HOURLY_DATAPOINT_KEYS_ARR: Partial<keyof ForecastGridDataDatapoints>[] = [
+      'temperature',
+      'dewpoint',
+      'relativeHumidity',
+      'apparentTemperature',
+      'skyCover',
+      'windDirection',
+      'windSpeed',
+      'windGust',
+      'weather',
+      'probabilityOfPrecipitation',
+      'quantitativePrecipitation'
+    ];
+
+    const entries: Partial<Record<keyof ForecastGridDataDatapoints, number>> = {};
+    NWS_HOURLY_DATAPOINT_KEYS_ARR.forEach((key, idx) => (entries[key] = idx));
+
+    return entries;
+  }
 
   private static isTimeBeforeEndOfDay(time: Dayjs, timeZone: string) {
     return time.isBefore(dayjs().tz(timeZone).endOf('day'));
@@ -182,33 +206,42 @@ export class NwsMapHelper {
     };
   }
 
-  private static getValueAtTime(valueLayer: GridpointQuantitativeValueLayer, time: Dayjs) {
-    for (let i = 0; i < valueLayer.values.length; i++) {
-      const [valueEffectiveStartStr, valueEffectiveDurationStr] = valueLayer.values[i].validTime.split('/');
-      const valueEffectiveStart = dayjs(valueEffectiveStartStr);
-      const valueEffectiveEnd = valueEffectiveStart.add(dayjs.duration(valueEffectiveDurationStr));
-      if (!time.isBefore(valueEffectiveStart) && time.isBefore(valueEffectiveEnd)) {
-        return valueLayer.values[i].value;
+  private static getHourlyForecastsMetadata(
+    forecastGridData: ForecastGridData | undefined
+  ): HourlyForecastsMetadata | undefined {
+    if (forecastGridData == null) return undefined;
+
+    const datapointKeysEntries = Object.entries(this.NWS_HOURLY_DATAPOINT_KEYS) as [
+      keyof ForecastGridDataDatapoints,
+      number
+    ][];
+    const unitsOfMeasure: Array<string | undefined> = Array(datapointKeysEntries.length);
+    const dpRefIdxsByTime: Record<number, number[]> = {};
+
+    for (const [key, keyIdx] of datapointKeysEntries) {
+      const valueLayer = forecastGridData[key];
+      unitsOfMeasure[keyIdx] = 'uom' in valueLayer ? valueLayer.uom : undefined;
+
+      for (let valueIdx = 0; valueIdx < valueLayer.values.length; valueIdx++) {
+        const [effectiveStartStr, effectiveDurationStr] = valueLayer.values[valueIdx].validTime.split('/');
+        const effectiveStart = dayjs(effectiveStartStr);
+        const effectiveEnd = effectiveStart.add(dayjs.duration(effectiveDurationStr));
+        for (let time = effectiveStart; time.isBefore(effectiveEnd); time = time.add(1, 'hour')) {
+          if (dpRefIdxsByTime[time.unix()] == null) dpRefIdxsByTime[time.unix()] = Array(datapointKeysEntries.length);
+          dpRefIdxsByTime[time.unix()][keyIdx] = valueIdx;
+        }
       }
     }
-    return null;
+
+    return { unitsOfMeasure, dpRefIdxsByTime };
   }
 
-  private static getWeatherAtTime(weather: Weather, time: Dayjs) {
-    for (let i = 0; i < weather.values.length; i++) {
-      const [valueEffectiveStartStr, valueEffectiveDurationStr] = weather.values[i].validTime.split('/');
-      const valueEffectiveStart = dayjs(valueEffectiveStartStr);
-      const valueEffectiveEnd = valueEffectiveStart.add(dayjs.duration(valueEffectiveDurationStr));
-      if (!time.isBefore(valueEffectiveStart) && time.isBefore(valueEffectiveEnd)) {
-        return weather.values[i];
-      }
-    }
-    return null;
-  }
-
-  private static getCondition(forecastGridData: ForecastGridData, time: Dayjs, isDaytime: boolean) {
+  private static getCondition(
+    skyCover: number | null,
+    weatherValueLayer: WeatherValueLayer | null,
+    isDaytime: boolean
+  ) {
     let condition: string | null = null;
-    const skyCover = this.getValueAtTime(forecastGridData.skyCover, time);
     if (skyCover != null) {
       if (skyCover < 5.5) condition = isDaytime ? 'Sunny' : 'Clear';
       else if (skyCover < 25.5) condition = isDaytime ? 'Sunny' : 'Mostly Clear';
@@ -218,19 +251,18 @@ export class NwsMapHelper {
       else condition = isDaytime ? 'Cloudy' : 'Overcast';
     }
 
-    const weatherVal = this.getWeatherAtTime(forecastGridData.weather, time);
-    if (weatherVal?.value[0].weather != null) {
+    if (weatherValueLayer?.value[0].weather != null) {
       let intensity = '';
-      if (weatherVal.value[0].intensity === WeatherIntensity.HEAVY) {
+      if (weatherValueLayer.value[0].intensity === WeatherIntensity.HEAVY) {
         intensity = 'Heavy ';
       } else if (
-        weatherVal.value[0].intensity === WeatherIntensity.LIGHT ||
-        weatherVal.value[0].intensity === WeatherIntensity.VERY_LIGHT
+        weatherValueLayer.value[0].intensity === WeatherIntensity.LIGHT ||
+        weatherValueLayer.value[0].intensity === WeatherIntensity.VERY_LIGHT
       ) {
         intensity = 'Light ';
       }
 
-      const formattedWeather = weatherVal.value[0].weather
+      const formattedWeather = weatherValueLayer.value[0].weather
         .split('_')
         .map(word => `${word[0].toUpperCase()}${word.substring(1)}`)
         .join(' ');
@@ -242,60 +274,58 @@ export class NwsMapHelper {
 
   private static getHourlyForecastsFor(
     forecastGridData: ForecastGridData | undefined,
+    hourlyForecastsMetadata: HourlyForecastsMetadata | undefined,
     startTime: Dayjs,
     endTime: Dayjs,
     isDaytime: boolean,
     reqQuery: ReqQuery
   ): NwsHourlyPeriodForecast[] {
     const hourlyForecasts: NwsHourlyPeriodForecast[] = [];
-    for (let time = startTime; forecastGridData != null && time.isBefore(endTime); time = time.add(1, 'hour')) {
-      hourlyForecasts.push({
-        start: time.unix(),
-        startIsoTz: this.getIsoTzString(time),
-        condition: this.getCondition(forecastGridData, time, isDaytime),
-        temperature: NumberHelper.convertNwsHourly(
-          this.getValueAtTime(forecastGridData.temperature, time),
-          forecastGridData.temperature?.uom,
-          UnitType.temp,
-          reqQuery
-        ),
-        feelsLike: NumberHelper.convertNwsHourly(
-          this.getValueAtTime(forecastGridData.apparentTemperature, time),
-          forecastGridData.apparentTemperature?.uom,
-          UnitType.temp,
-          reqQuery
-        ),
-        dewPoint: NumberHelper.convertNwsHourly(
-          this.getValueAtTime(forecastGridData.dewpoint, time),
-          forecastGridData.dewpoint?.uom,
-          UnitType.temp,
-          reqQuery
-        ),
-        humidity: NumberHelper.round(this.getValueAtTime(forecastGridData.relativeHumidity, time)),
-        wind: {
-          speed: NumberHelper.convertNwsHourly(
-            this.getValueAtTime(forecastGridData.windSpeed, time),
-            forecastGridData.windSpeed?.uom,
-            UnitType.wind,
-            reqQuery
-          ),
-          gustSpeed: NumberHelper.convertNwsHourly(
-            this.getValueAtTime(forecastGridData.windGust, time),
-            forecastGridData.windGust?.uom,
-            UnitType.wind,
-            reqQuery
-          ),
-          directionDeg: this.getValueAtTime(forecastGridData.windDirection, time)
-        },
-        chanceOfPrecip: NumberHelper.round(this.getValueAtTime(forecastGridData.probabilityOfPrecipitation, time)),
-        precipAmount: NumberHelper.convertNwsHourly(
-          this.getValueAtTime(forecastGridData.quantitativePrecipitation, time),
-          forecastGridData.quantitativePrecipitation?.uom,
-          UnitType.precipitation,
-          reqQuery
-        )
+
+    if (forecastGridData != null && hourlyForecastsMetadata != null) {
+      const uomFor = (key: keyof ForecastGridDataDatapoints) =>
+        hourlyForecastsMetadata.unitsOfMeasure[datapointKeys[key]!];
+      const valueLayerFor = <T>(key: keyof ForecastGridDataDatapoints, refIdxs: number[]) =>
+        (forecastGridData[key].values[refIdxs[datapointKeys[key]!]] ?? null) as T | null;
+      const valueFor = (key: keyof ForecastGridDataDatapoints, refIdxs: number[]) => {
+        const valueLayer = valueLayerFor<GridpointQuantitativeValue>(key, refIdxs);
+        return valueLayer?.value ?? null;
+      };
+      const qvFor = (key: keyof ForecastGridDataDatapoints, refIdxs: number[]): QuantitativeValue => ({
+        value: valueFor(key, refIdxs),
+        unitCode: uomFor(key)!
       });
+
+      const datapointKeys = this.NWS_HOURLY_DATAPOINT_KEYS;
+      const datapointKeysEntries = Object.entries(datapointKeys) as [keyof ForecastGridDataDatapoints, number][];
+
+      for (let time = startTime; time.isBefore(endTime); time = time.add(1, 'hour')) {
+        const startUnix = time.unix();
+        const refIdxs = hourlyForecastsMetadata.dpRefIdxsByTime[startUnix] ?? Array(datapointKeysEntries.length);
+
+        hourlyForecasts.push({
+          start: startUnix,
+          startIsoTz: this.getIsoTzString(time),
+          condition: this.getCondition(valueFor('skyCover', refIdxs), valueLayerFor('weather', refIdxs), isDaytime),
+          temperature: NumberHelper.convertNws(qvFor('temperature', refIdxs), UnitType.temp, reqQuery),
+          feelsLike: NumberHelper.convertNws(qvFor('apparentTemperature', refIdxs), UnitType.temp, reqQuery),
+          dewPoint: NumberHelper.convertNws(qvFor('dewpoint', refIdxs), UnitType.temp, reqQuery),
+          humidity: NumberHelper.round(valueFor('relativeHumidity', refIdxs)),
+          wind: {
+            speed: NumberHelper.convertNws(qvFor('windSpeed', refIdxs), UnitType.wind, reqQuery),
+            gustSpeed: NumberHelper.convertNws(qvFor('windGust', refIdxs), UnitType.wind, reqQuery),
+            directionDeg: valueFor('windDirection', refIdxs)
+          },
+          chanceOfPrecip: NumberHelper.round(valueFor('probabilityOfPrecipitation', refIdxs)),
+          precipAmount: NumberHelper.convertNws(
+            qvFor('quantitativePrecipitation', refIdxs),
+            UnitType.precipitation,
+            reqQuery
+          )
+        });
+      }
     }
+
     return hourlyForecasts;
   }
 
@@ -307,6 +337,7 @@ export class NwsMapHelper {
   ): NwsForecast {
     const summaryForecast = summaryForecastCacheEntry.item?.properties;
     const forecastGridData = forecastGridDataCacheEntry.item?.properties;
+    const hourlyForecastsMetadata = this.getHourlyForecastsMetadata(forecastGridData);
 
     let periods: NwsPeriod[] = [];
     for (let i = 0; i < (summaryForecast?.periods ?? []).length; ) {
@@ -329,7 +360,14 @@ export class NwsMapHelper {
       let dayHourlyForecasts: NwsHourlyPeriodForecast[] = [];
       if (summaryForecast!.periods[i].isDaytime) {
         dayForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i], timeZone, reqQuery);
-        dayHourlyForecasts = this.getHourlyForecastsFor(forecastGridData, startTime, endTime, true, reqQuery);
+        dayHourlyForecasts = this.getHourlyForecastsFor(
+          forecastGridData,
+          hourlyForecastsMetadata,
+          startTime,
+          endTime,
+          true,
+          reqQuery
+        );
       }
 
       let nightForecast: NwsPeriodForecast | null = null;
@@ -338,6 +376,7 @@ export class NwsMapHelper {
         nightForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i + 1], timeZone, reqQuery);
         nightHourlyForecasts = this.getHourlyForecastsFor(
           forecastGridData,
+          hourlyForecastsMetadata,
           dayjs(summaryForecast!.periods[i + 1].startTime).tz(timeZone),
           dayjs(summaryForecast!.periods[i + 1].endTime).tz(timeZone),
           false,

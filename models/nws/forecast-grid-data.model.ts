@@ -10,15 +10,7 @@ export interface ForecastGridDataResponse {
   properties: ForecastGridData;
 }
 
-export interface ForecastGridData {
-  updateTime: string;
-  validTimes: string;
-  elevation: QuantitativeValue;
-  forecastOffice: string;
-  gridId: string;
-  gridX: string;
-  gridY: string;
-
+export interface ForecastGridDataDatapoints {
   temperature: GridpointQuantitativeValueLayer;
   dewpoint: GridpointQuantitativeValueLayer;
   maxTemperature: GridpointQuantitativeValueLayer;
@@ -39,6 +31,16 @@ export interface ForecastGridData {
   snowfallAmount: GridpointQuantitativeValueLayer;
   visibility: GridpointQuantitativeValueLayer;
   pressure: GridpointQuantitativeValueLayer;
+}
+
+export interface ForecastGridData extends ForecastGridDataDatapoints {
+  updateTime: string;
+  validTimes: string;
+  elevation: QuantitativeValue;
+  forecastOffice: string;
+  gridId: string;
+  gridX: string;
+  gridY: string;
 }
 
 export interface Weather {
