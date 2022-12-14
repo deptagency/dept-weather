@@ -37,7 +37,7 @@ const TimeLabel = ({ alert }: { alert: NwsAlert }) => {
   );
 };
 
-export default function AlertCard({ alert }: { alert: NwsAlert }) {
+export default function AlertCard({ alert, _key }: { alert: NwsAlert; _key: string }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const [alertIcon, setAlertIcon] = useState<ReactNode>(<></>);
@@ -51,6 +51,9 @@ export default function AlertCard({ alert }: { alert: NwsAlert }) {
     setAlertIcon(newAlertIconType({ useInverseFill: true }));
   }, [alert.severity]);
 
+  const [animatedContentsWrapperId, setAnimatedContentsWrapperId] = useState<string>(ANIMATED_CONTENTS_WRAPPER_ID);
+  useEffect(() => setAnimatedContentsWrapperId(`${ANIMATED_CONTENTS_WRAPPER_ID}-${_key}`), [_key]);
+
   return (
     <article className={baseStyles.card}>
       <button
@@ -62,7 +65,7 @@ export default function AlertCard({ alert }: { alert: NwsAlert }) {
           setIsExpanded(!isExpanded);
         }}
         aria-expanded={isExpanded}
-        aria-controls={ANIMATED_CONTENTS_WRAPPER_ID}
+        aria-controls={animatedContentsWrapperId}
       >
         <div className={styles['alert-card-accordian__alert-icon']}>{alertIcon}</div>
         <div className={`${styles['alert-card-accordian__header']}`}>
@@ -71,7 +74,7 @@ export default function AlertCard({ alert }: { alert: NwsAlert }) {
         </div>
         <ArrowIcon useInverseFill={true} animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>
       </button>
-      <AnimateHeight id={ANIMATED_CONTENTS_WRAPPER_ID} duration={300} height={isExpanded ? 'auto' : 0}>
+      <AnimateHeight id={animatedContentsWrapperId} duration={300} height={isExpanded ? 'auto' : 0}>
         <div className={styles['alert-card-accordian__content']}>
           {alert.description.map((descItem, idx) => (
             <Fragment key={idx}>

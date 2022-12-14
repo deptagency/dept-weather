@@ -60,28 +60,34 @@ const useForecast = (
   };
 };
 
-const AlertCards = ({ alerts }: { alerts: NwsAlert[] }) => (
+const AlertCards = ({ alerts, lid }: { alerts: NwsAlert[]; lid: string }) => (
   <>
-    {alerts.map((alert, i) => (
-      <AlertCard key={i} alert={alert}></AlertCard>
-    ))}
+    {alerts.map((alert, i) => {
+      const key = `${lid}-${i}`;
+      return <AlertCard key={key} _key={key} alert={alert}></AlertCard>;
+    })}
   </>
 );
 
 const ForecastCards = ({
   isLoading,
   latestReadTime,
-  periods
+  periods,
+  lid
 }: {
   isLoading?: boolean;
   latestReadTime?: number;
   periods: NwsPeriod[];
+  lid: string;
 }) => {
   return (
     <>
-      {periods.map((period, idx) => (
-        <ForecastCard period={period} isLoading={isLoading} latestReadTime={latestReadTime} key={idx} />
-      ))}
+      {periods.map((period, idx) => {
+        const key = `${lid}-${idx}`;
+        return (
+          <ForecastCard period={period} isLoading={isLoading} latestReadTime={latestReadTime} key={key} _key={key} />
+        );
+      })}
     </>
   );
 };
@@ -91,6 +97,9 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
   const { alerts, alertsIsError } = useAlerts(queryParams);
   const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);
   const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
+
+  const [lid, setLid] = useState<string>('');
+  useEffect(() => setLid(String(queryParams?.id ?? '')), [queryParams]);
 
   const [placeholderPeriods, setPlaceholderPeriods] = useState<NwsPeriod[]>([]);
 
@@ -119,7 +128,7 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
         <OfflineError></OfflineError>
       ) : (
         <>
-          <AlertCards alerts={alerts?.data.nws?.alerts ?? []}></AlertCards>
+          <AlertCards alerts={alerts?.data.nws?.alerts ?? []} lid={lid}></AlertCards>
           <ObservationsCard
             isLoading={observationsIsLoading}
             latestReadTime={observations?.latestReadTime ? observations!.latestReadTime! : undefined}
@@ -129,6 +138,7 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
             isLoading={forecastIsLoading}
             latestReadTime={forecast?.latestReadTime ? forecast!.latestReadTime! : undefined}
             periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
+            lid={lid}
           ></ForecastCards>
         </>
       )}

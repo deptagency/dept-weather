@@ -1,18 +1,19 @@
 import { NwsPeriod } from 'models/api';
 import CardHeader from './CardHeader/CardHeader';
-import HourlyForecast from './HourlyForecast/HourlyForecast';
-import SummaryForecast from './SummaryForecast/SummaryForecast';
+import Forecast from './Forecast/Forecast';
 import ForecastTemps from './ForecastTemps/ForecastTemps';
 import styles from './Card.module.css';
 
 export default function ForecastCard({
   isLoading,
   latestReadTime,
-  period
+  period,
+  _key
 }: {
   isLoading?: boolean;
   latestReadTime?: number;
   period: NwsPeriod;
+  _key: string;
 }) {
   return (
     <article className={styles.card}>
@@ -31,14 +32,18 @@ export default function ForecastCard({
           ></ForecastTemps>
         </div>
         <div className={styles['card-contents__forecasts']}>
-          <SummaryForecast isDaytime={true} forecast={period.dayForecast}></SummaryForecast>
-          {(period.dayHourlyForecasts ?? []).map((forecast, i) => (
-            <HourlyForecast key={i} isDaytime={true} forecast={forecast}></HourlyForecast>
-          ))}
-          <SummaryForecast isDaytime={false} forecast={period.nightForecast}></SummaryForecast>
-          {(period.nightHourlyForecasts ?? []).map((forecast, i) => (
-            <HourlyForecast key={i} isDaytime={false} forecast={forecast}></HourlyForecast>
-          ))}
+          <Forecast
+            isDaytime={true}
+            summaryForecast={period.dayForecast}
+            hourlyForecasts={period.dayHourlyForecasts}
+            _key={_key}
+          ></Forecast>
+          <Forecast
+            isDaytime={false}
+            summaryForecast={period.nightForecast}
+            hourlyForecasts={period.nightHourlyForecasts}
+            _key={_key}
+          ></Forecast>
         </div>
       </div>
     </article>

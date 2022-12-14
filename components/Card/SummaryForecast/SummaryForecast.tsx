@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { ArrowIcon } from 'components/Icons';
 import { NwsPeriodForecast } from 'models/api';
 import Condition from '../Condition/Condition';
 import { PrecipitationForecast, Wind } from '../Measurement';
@@ -22,10 +23,14 @@ const simplifyCondition = (conditionIn: string | null | undefined) => {
 
 export default function SummaryForecast({
   forecast,
-  isDaytime
+  isDaytime,
+  isExpanded,
+  setIsExpanded
 }: {
   forecast: NwsPeriodForecast | null | undefined;
   isDaytime: boolean;
+  isExpanded: boolean;
+  setIsExpanded: Dispatch<SetStateAction<boolean>>;
 }) {
   const [condition, setCondition] = useState<string>('');
   useEffect(() => setCondition(simplifyCondition(forecast?.condition)), [forecast?.condition]);
@@ -36,9 +41,11 @@ export default function SummaryForecast({
   return (
     <div className={styles['summary-forecast']}>
       <div className={styles['summary-forecast__overview']}>
-        <h4 className={styles['summary-forecast__overview__label']} aria-label={periodLabel}>
-          {periodLabel.toUpperCase()}
-        </h4>{' '}
+        <div className={styles['summary-forecast__overview__label']} onClick={_ => setIsExpanded(!isExpanded)}>
+          <h4 aria-label={periodLabel}>{periodLabel.toUpperCase()}</h4>
+          <ArrowIcon animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>
+        </div>
+
         <Condition condition={condition} size="small" isNight={!isDaytime}></Condition>
       </div>
       <div className={styles['summary-forecast__measurements']}>
