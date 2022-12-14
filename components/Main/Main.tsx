@@ -102,8 +102,9 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
         dayName: i === 0 ? 'Today' : date.toLocaleString('default', { weekday: 'long' }),
         shortDateName: date.toLocaleString('default', { month: 'short', day: 'numeric' }),
         dayForecast: null,
+        dayHourlyForecasts: [],
         nightForecast: null,
-        hourlyForecasts: []
+        nightHourlyForecasts: []
       };
       date.setDate(date.getDate() + 1);
     }
