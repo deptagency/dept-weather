@@ -15,8 +15,9 @@ export interface NwsPeriod {
   dayName: string;
   shortDateName: string;
   dayForecast: NwsPeriodForecast | null;
+  dayHourlyForecasts: NwsHourlyPeriodForecast[];
   nightForecast: NwsPeriodForecast | null;
-  hourlyForecasts: NwsHourlyPeriodForecast[];
+  nightHourlyForecasts: NwsHourlyPeriodForecast[];
 }
 
 export interface NwsPeriodForecast {
@@ -29,6 +30,7 @@ export interface NwsPeriodForecast {
 }
 
 export interface NwsHourlyPeriodForecast extends NwsPeriodForecast {
+  startLabel: string;
   feelsLike: number | null;
   dewPoint: number | null;
   humidity: number | null;

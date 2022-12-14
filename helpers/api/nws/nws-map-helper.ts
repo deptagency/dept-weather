@@ -306,6 +306,7 @@ export class NwsMapHelper {
         hourlyForecasts.push({
           start: startUnix,
           startIsoTz: this.getIsoTzString(time),
+          startLabel: time.format(`h${time.minute() > 0 ? ':mm' : ''} A`),
           condition: this.getCondition(valueFor('skyCover', refIdxs), valueLayerFor('weather', refIdxs), isDaytime),
           temperature: NumberHelper.convertNws(qvFor('temperature', refIdxs), UnitType.temp, reqQuery),
           feelsLike: NumberHelper.convertNws(qvFor('apparentTemperature', refIdxs), UnitType.temp, reqQuery),
@@ -388,8 +389,9 @@ export class NwsMapHelper {
         dayName,
         shortDateName,
         dayForecast,
+        dayHourlyForecasts,
         nightForecast,
-        hourlyForecasts: [...dayHourlyForecasts, ...nightHourlyForecasts]
+        nightHourlyForecasts
       });
 
       i += summaryForecast!.periods[i].isDaytime ? 2 : 1;

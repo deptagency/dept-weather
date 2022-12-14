@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { DefaultIconMapping, DefaultIcons, IconCondition } from 'models';
 import styles from './Condition.module.css';
 
-type ConditionSize = 'small' | 'large';
+type ConditionSize = 'large' | 'small' | 'x-small';
 
 const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
   const conditionUpped = condition.toUpperCase();
@@ -43,7 +43,7 @@ const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
 const WeatherIcon = (condition: string, size: ConditionSize, isNight?: boolean) => {
   const iconSrc = getWeatherIconSrc(condition, isNight);
   return iconSrc ? (
-    <div className={`${styles.condition__icon}  ${size === 'small' ? styles['condition__icon--small'] : ''}`}>
+    <div className={styles.condition__icon}>
       <Image src={iconSrc} className={styles.condition__icon__image} fill sizes="2rem" alt=""></Image>
     </div>
   ) : (
@@ -62,9 +62,9 @@ export default function Condition({
   isNight?: boolean;
 }) {
   return (
-    <div className={styles.condition}>
+    <div className={`${styles.condition} ${size !== 'large' ? styles[`condition--${size}`] : ''}`}>
       {condition ? WeatherIcon(condition, size, isNight) : <></>}
-      <p className={`${styles.condition__label} ${size === 'small' ? styles['condition__label--small'] : ''}`}>
+      <p className={styles.condition__label}>
         {condition ? (condition.length > MAXIMUM_CONDITION_TEXT_LENGTH ? condition.split(' and ')[0] : condition) : '–'}
       </p>
     </div>
