@@ -7,9 +7,15 @@ export enum ThermometerLevel {
 }
 
 // Source (adaptation of): Dept Icon Kit/SVG/34-Weather/06-Temperatures/temperature-thermometer-high.svg
-export default function ThermometerIcon({ level }: { level: ThermometerLevel }) {
+export default function ThermometerIcon({ level, ariaLabel }: { level: ThermometerLevel; ariaLabel?: string }) {
   return (
-    <svg className={styles.icon} aria-hidden="true" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      className={styles.icon}
+      aria-hidden={ariaLabel ? undefined : true}
+      aria-label={ariaLabel}
+      viewBox="0 0 16 16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       {level === ThermometerLevel.LOW ? (
         <path d="M8.01001 13.9973C7.18268 13.9973 6.51001 13.3247 6.51001 12.4973C6.51001 11.8573 6.92001 11.292 7.51001 11.0833V9.99733C7.51001 9.72133 7.73401 9.49733 8.01001 9.49733C8.28601 9.49733 8.51001 9.72133 8.51001 9.99733V11.0833C9.10001 11.292 9.51001 11.8573 9.51001 12.4973C9.51001 13.3247 8.83668 13.9973 8.01001 13.9973ZM8.01001 11.9973C7.73401 11.9973 7.51001 12.2213 7.51001 12.4973C7.51001 12.7733 7.73401 12.9973 8.01001 12.9973C8.28601 12.9973 8.51001 12.7733 8.51001 12.4973C8.51001 12.2213 8.28534 11.9973 8.01001 11.9973Z" />
       ) : (

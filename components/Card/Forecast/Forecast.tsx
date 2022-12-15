@@ -28,9 +28,9 @@ export default function Forecast({
               <div></div>
               <div></div>
               <div></div>
-              <ThermometerIcon level={ThermometerLevel.MEDIUM}></ThermometerIcon>
-              <PrecipitationIcon innerDropHeightPercent={0}></PrecipitationIcon>
-              <WindIcon directionDeg={undefined}></WindIcon>
+              <ThermometerIcon level={ThermometerLevel.MEDIUM} ariaLabel="Temperature"></ThermometerIcon>
+              <PrecipitationIcon innerDropHeightPercent={0} ariaLabel="Chance of Precipitation"></PrecipitationIcon>
+              <WindIcon directionDeg={undefined} ariaLabel="Wind"></WindIcon>
               {hourlyForecasts.map((hourlyForecast, i) => (
                 <HourlyForecast key={i} forecast={hourlyForecast} isDaytime={isDaytime}></HourlyForecast>
               ))}

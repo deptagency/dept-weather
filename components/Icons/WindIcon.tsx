@@ -2,10 +2,22 @@ import styles from './Icon.module.css';
 import windIconStyles from './WindIcon.module.css';
 
 // Source (adaptation of): Dept Icon Kit/SVG/34-Weather/09-Wind/wind-north.svg
-export default function WindIcon({ directionDeg }: { directionDeg: number | null | undefined }) {
+export default function WindIcon({
+  directionDeg,
+  ariaLabel
+}: {
+  directionDeg: number | null | undefined;
+  ariaLabel?: string;
+}) {
   const rotateDeg = directionDeg != null ? (directionDeg < 180 ? directionDeg + 180 : directionDeg - 180) : 0;
   return (
-    <svg className={styles.icon} aria-hidden="true" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      className={styles.icon}
+      aria-hidden={ariaLabel ? undefined : true}
+      aria-label={ariaLabel}
+      viewBox="0 0 16 16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         className={windIconStyles['icon__wind-arrow']}
         style={{ transform: `rotate(${rotateDeg}deg)` }}
