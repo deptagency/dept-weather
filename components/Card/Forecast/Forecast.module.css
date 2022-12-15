@@ -1,6 +1,6 @@
 .forecast__hourly-forecasts {
   display: grid;
-  grid-template-columns: repeat(2, min-content) repeat(4, auto);
+  grid-template-columns: repeat(2, min-content) minmax(5.75rem, auto) repeat(3, auto);
   row-gap: 0.5rem;
   margin: 0.5rem 0rem 1rem 0.25rem;
 }

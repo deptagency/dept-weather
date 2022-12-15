@@ -226,7 +226,8 @@ export class NwsMapHelper {
       else if (skyCover < 25.5) condition = isDaytime ? 'Sunny' : 'Mostly Clear';
       else if (skyCover < 50.5) condition = isDaytime ? 'Mostly Sunny' : 'Partly Cloudy';
       else if (skyCover < 69.5) condition = isDaytime ? 'Partly Sunny' : 'Mostly Cloudy';
-      else if (skyCover < 87.5) condition = isDaytime ? 'Mostly Cloudy' : 'Considerable Cloudiness';
+      // NWS uses 'Considerable Cloudiness' during the night, but this is pretty long; just use 'Mostly Cloudy'
+      else if (skyCover < 87.5) condition = 'Mostly Cloudy';
       else condition = isDaytime ? 'Cloudy' : 'Overcast';
     }
 
