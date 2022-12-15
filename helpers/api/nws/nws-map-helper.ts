@@ -384,9 +384,9 @@ export class NwsMapHelper {
         dayName,
         shortDateName,
         dayForecast,
-        dayHourlyForecasts: [],
+        dayHourlyForecasts,
         nightForecast,
-        nightHourlyForecasts: []
+        nightHourlyForecasts
       });
     }
 
