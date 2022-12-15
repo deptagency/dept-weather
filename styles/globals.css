@@ -3,6 +3,8 @@
   --black: #000;
   --onyx: #121212;
   --indigo: #5115f7;
+
+  --foreground-color-inverse: var(--white);
 }
 
 html,

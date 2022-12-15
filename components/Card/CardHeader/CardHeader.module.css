@@ -11,19 +11,17 @@
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
 
-  color: var(--white);
-}
-
-.card-header--indigo {
-  background-color: var(--indigo);
-}
-
-.card-header--onyx {
-  background-color: var(--onyx);
+  color: var(--foreground-color-inverse);
+  background-color: var(--card-background-color);
 }
 
 .card-header > * {
   margin: 0rem;
+}
+
+.card-header *::selection {
+  background-color: var(--foreground-color-inverse);
+  color: var(--card-background-color);
 }
 
 .card-header__title {

@@ -1,3 +1,4 @@
+import { Color } from 'models';
 import { Observations, SunTimesObservations } from 'models/api';
 import CardHeader from './CardHeader/CardHeader';
 import Condition from './Condition/Condition';
@@ -27,7 +28,12 @@ export default function ObservationsCard({
 }) {
   return (
     <article className={styles.card}>
-      <CardHeader isLoading={isLoading} lastUpdatedTime={latestReadTime} label="Now" useIndigo={true}></CardHeader>
+      <CardHeader
+        isLoading={isLoading}
+        lastUpdatedTime={latestReadTime}
+        label="Now"
+        backgroundColor={Color.INDIGO}
+      ></CardHeader>
       <div className={styles['card-contents']}>
         <div className={styles['card-contents__overview']}>
           <CurrentTemp observations={observations?.wl ?? observations?.nws}></CurrentTemp>

@@ -12,26 +12,21 @@ export default function Forecast({
   summaryForecast,
   hourlyForecasts,
   isDaytime,
+  isExpanded,
   _key
 }: {
   summaryForecast: NwsPeriodForecast | null | undefined;
   hourlyForecasts: NwsHourlyPeriodForecast[] | null | undefined;
   isDaytime: boolean;
+  isExpanded: boolean;
   _key: string;
 }) {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
-
   const [animatedContentsWrapperId, setAnimatedContentsWrapperId] = useState<string>(ANIMATED_CONTENTS_WRAPPER_ID);
   useEffect(() => setAnimatedContentsWrapperId(`${ANIMATED_CONTENTS_WRAPPER_ID}-${_key}`), [_key]);
 
   return (
     <>
-      <SummaryForecast
-        forecast={summaryForecast}
-        isDaytime={isDaytime}
-        isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
-      ></SummaryForecast>
+      <SummaryForecast forecast={summaryForecast} isDaytime={isDaytime}></SummaryForecast>
       <AnimateHeight id={animatedContentsWrapperId} duration={300} height={isExpanded ? 'auto' : 0}>
         {hourlyForecasts?.length ? (
           <>

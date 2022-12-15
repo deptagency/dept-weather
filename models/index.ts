@@ -1,3 +1,4 @@
+export * from './color.enum';
 export * from './data-source.enum';
 export * from './detailed-wind-direction.enum';
 export * from './icons.model';

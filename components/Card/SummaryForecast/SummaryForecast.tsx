@@ -23,14 +23,10 @@ const simplifyCondition = (conditionIn: string | null | undefined) => {
 
 export default function SummaryForecast({
   forecast,
-  isDaytime,
-  isExpanded,
-  setIsExpanded
+  isDaytime
 }: {
   forecast: NwsPeriodForecast | null | undefined;
   isDaytime: boolean;
-  isExpanded: boolean;
-  setIsExpanded: Dispatch<SetStateAction<boolean>>;
 }) {
   const [condition, setCondition] = useState<string>('');
   useEffect(() => setCondition(simplifyCondition(forecast?.condition)), [forecast?.condition]);
@@ -41,10 +37,9 @@ export default function SummaryForecast({
   return (
     <div className={styles['summary-forecast']}>
       <div className={styles['summary-forecast__overview']}>
-        <div className={styles['summary-forecast__overview__label']} onClick={_ => setIsExpanded(!isExpanded)}>
-          <h4 aria-label={periodLabel}>{periodLabel.toUpperCase()}</h4>
-          <ArrowIcon animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>
-        </div>
+        <h4 className={styles['summary-forecast__overview__label']} aria-label={periodLabel}>
+          {periodLabel.toUpperCase()}
+        </h4>
 
         <Condition condition={condition} size="small" isNight={!isDaytime}></Condition>
       </div>

@@ -1,4 +1,5 @@
 import { getTimeAgoFormatter } from 'helpers';
+import { Color } from 'models';
 import TimeAgo from 'react-timeago';
 import styles from './CardHeader.module.css';
 
@@ -7,17 +8,18 @@ export default function CardHeader({
   lastUpdatedTime,
   label,
   secondaryLabel,
-  useIndigo
+  backgroundColor
 }: {
   isLoading?: boolean;
   lastUpdatedTime?: number;
   label: string;
   secondaryLabel?: string;
-  useIndigo?: boolean;
+  backgroundColor: Color;
 }) {
   return (
     <header
-      className={`${styles['card-header']} ${useIndigo ? styles['card-header--indigo'] : styles['card-header--onyx']}`}
+      className={styles['card-header']}
+      style={{ '--card-background-color': `var(--${backgroundColor})` } as React.CSSProperties}
     >
       <h2 className={styles['card-header__title']} aria-label={`${label}${secondaryLabel ? ` ${secondaryLabel}` : ''}`}>
         {label}
