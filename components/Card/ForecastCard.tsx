@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Color } from 'models';
 import { NwsPeriod } from 'models/api';
-import CardHeader from './CardHeader/CardHeader';
+import StandardCardHeader from './CardHeader/StandardCardHeader';
 import Forecast from './Forecast/Forecast';
 import ForecastTemps from './ForecastTemps/ForecastTemps';
 import styles from './Card.module.css';
@@ -27,7 +27,7 @@ export default function ForecastCard({
 
   return (
     <article className={styles.card}>
-      <CardHeader
+      <StandardCardHeader
         isLoading={isLoading}
         lastUpdatedTime={latestReadTime}
         label={period.dayName}
@@ -36,7 +36,7 @@ export default function ForecastCard({
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
         ariaControls={animatedContentsWrapperId}
-      ></CardHeader>
+      ></StandardCardHeader>
       <div className={styles['card-contents']}>
         <div className={`${styles['card-contents__overview']} ${styles['card-contents__overview--forecast']}`}>
           <ForecastTemps

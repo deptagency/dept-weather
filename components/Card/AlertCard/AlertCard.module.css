@@ -1,102 +1,24 @@
-.alert-card-accordian {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: nowrap;
-
-  gap: 0.5rem;
-  padding: 1rem;
-
-  width: 100%;
-  min-height: 3.5rem;
-  border-radius: 0.25rem;
-  transition-property: border-radius;
-}
-
-/* Offset the outline when focused for improved visibility */
-.alert-card-accordian:focus {
-  outline-offset: 0.25rem;
-}
-
-.alert-card-accordian--extreme {
-  background-color: var(--alert-purple);
-}
-.alert-card-accordian--severe {
-  background-color: var(--alert-red);
-}
-.alert-card-accordian--moderate {
-  background-color: var(--alert-orange);
-}
-.alert-card-accordian--minor,
-.alert-card-accordian--unknown {
-  background-color: var(--alert-teal);
-}
-
-.alert-card-accordian--expanded {
-  border-bottom-left-radius: 0rem;
-  border-bottom-right-radius: 0rem;
-}
-
-.alert-card-accordian__alert-icon {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.alert-card-accordian > svg {
-  display: block;
-  flex-shrink: 0;
-  height: 1rem;
-  width: 1rem;
-}
-
-.alert-card-accordian__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  flex-grow: 1;
-
-  gap: 0.5rem;
-
-  text-align: left;
-  color: var(--white);
-}
-
-.alert-card-accordian__header > * {
-  margin: 0rem;
-}
-
-.alert-card-accordian__header__title {
-  text-transform: uppercase;
-  margin-bottom: -0.25rem;
-}
-
-.alert-card-accordian__header__expiration {
-  font-weight: 300;
-}
-
-.alert-card-accordian__content {
+.alert-card-content {
   padding: 1rem;
 }
 
-.alert-card-accordian__content > :first-child {
+.alert-card-content > :first-child {
   margin-top: 0rem;
 }
 
-.alert-card-accordian__content > :last-child {
+.alert-card-content > :last-child {
   margin-bottom: 0rem;
 }
 
-.alert-card-accordian__content__description-heading {
+.alert-card-content__description-heading {
   text-transform: uppercase;
   margin: 0rem 0rem 0.5rem;
 }
 
-.alert-card-accordian__content__description-body {
+.alert-card-content__description-body {
   margin: 0rem 0rem 1.5rem 0.5rem;
 }
 
-.alert-card-accordian__content__instructions {
+.alert-card-content__instructions {
   font-weight: 700;
 }

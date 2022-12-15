@@ -1,71 +1,21 @@
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import { ArrowIcon } from 'components/Icons';
-import { getTimeAgoFormatter } from 'helpers';
 import { Color } from 'models';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import TimeAgo from 'react-timeago';
 import styles from './CardHeader.module.css';
 
-const CardHeaderContents = ({
-  isLoading,
-  lastUpdatedTime,
-  label,
-  secondaryLabel
-}: {
-  isLoading?: boolean;
-  lastUpdatedTime?: number;
-  label: string;
-  secondaryLabel?: string;
-}) => (
-  <div className={styles['card-header__contents']}>
-    <h2
-      className={styles['card-header__contents__title']}
-      aria-label={`${label}${secondaryLabel ? ` ${secondaryLabel}` : ''}`}
-    >
-      {label}
-      {secondaryLabel != null ? (
-        <>
-          {' '}
-          <span>{secondaryLabel}</span>
-        </>
-      ) : (
-        <></>
-      )}
-    </h2>
-    <p className={styles['card-header__contents__last-updated']}>
-      {isLoading ? (
-        <>Updating...</>
-      ) : lastUpdatedTime ? (
-        <>
-          Updated{' '}
-          {
-            <TimeAgo
-              date={lastUpdatedTime * 1_000}
-              formatter={getTimeAgoFormatter({ exclude: 'future', useJustNow: true })}
-            />
-          }
-        </>
-      ) : (
-        <>Update failed</>
-      )}
-    </p>
-  </div>
-);
-
 export default function CardHeader({
-  isLoading,
-  lastUpdatedTime,
-  label,
-  secondaryLabel,
+  preContents,
+  contents,
   backgroundColor,
+  roundBottomCornersWhenCollapsed,
   isExpanded,
   setIsExpanded,
   ariaControls
 }: {
-  isLoading?: boolean;
-  lastUpdatedTime?: number;
-  label: string;
-  secondaryLabel?: string;
+  preContents?: ReactNode;
+  contents: ReactNode;
   backgroundColor: Color;
+  roundBottomCornersWhenCollapsed?: boolean;
   isExpanded?: boolean;
   setIsExpanded?: Dispatch<SetStateAction<boolean>>;
   ariaControls?: string;
@@ -76,23 +26,11 @@ export default function CardHeader({
     [isExpanded, setIsExpanded, ariaControls]
   );
 
-  const [contents, setContents] = useState(<></>);
-  useEffect(
-    () =>
-      setContents(
-        <CardHeaderContents
-          isLoading={isLoading}
-          lastUpdatedTime={lastUpdatedTime}
-          label={label}
-          secondaryLabel={secondaryLabel}
-        ></CardHeaderContents>
-      ),
-    [isLoading, lastUpdatedTime, label, secondaryLabel, canExpand, isExpanded]
-  );
-
   return canExpand ? (
     <button
-      className={`${styles['card-header']} animated`}
+      className={`${styles['card-header']} ${
+        roundBottomCornersWhenCollapsed ? styles['card-header--rounded-bottom-corners'] : ''
+      } ${isExpanded ? styles['card-header--expanded'] : ''} animated`}
       style={{ '--card-background-color': `var(--${backgroundColor})` } as React.CSSProperties}
       onClick={e => {
         e.preventDefault();
@@ -101,6 +39,7 @@ export default function CardHeader({
       aria-expanded={isExpanded!}
       aria-controls={ariaControls!}
     >
+      {preContents}
       {contents}
       {<ArrowIcon useInverseFill={true} animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>}
     </button>
@@ -109,6 +48,7 @@ export default function CardHeader({
       className={styles['card-header']}
       style={{ '--card-background-color': `var(--${backgroundColor})` } as React.CSSProperties}
     >
+      {preContents}
       {contents}
     </header>
   );

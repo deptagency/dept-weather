@@ -1,6 +1,6 @@
 import { Color } from 'models';
 import { Observations, SunTimesObservations } from 'models/api';
-import CardHeader from './CardHeader/CardHeader';
+import StandardCardHeader from './CardHeader/StandardCardHeader';
 import Condition from './Condition/Condition';
 import CurrentTemp from './CurrentTemp/CurrentTemp';
 import { AirQuality, Humidity, Precipitation, Pressure, UVIndex, Wind } from './Measurement';
@@ -28,12 +28,12 @@ export default function ObservationsCard({
 }) {
   return (
     <article className={styles.card}>
-      <CardHeader
+      <StandardCardHeader
         isLoading={isLoading}
         lastUpdatedTime={latestReadTime}
         label="Now"
         backgroundColor={Color.INDIGO}
-      ></CardHeader>
+      ></StandardCardHeader>
       <div className={styles['card-contents']}>
         <div className={styles['card-contents__overview']}>
           <CurrentTemp observations={observations?.wl ?? observations?.nws}></CurrentTemp>

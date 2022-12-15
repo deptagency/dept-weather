@@ -9,11 +9,23 @@
 
   width: 100%;
   min-height: 3.5rem;
-  border-top-left-radius: 0.25rem;
-  border-top-right-radius: 0.25rem;
+
+  --corner-radius: 0.25rem;
+  border-top-left-radius: var(--corner-radius);
+  border-top-right-radius: var(--corner-radius);
 
   color: var(--foreground-color-inverse);
   background-color: var(--card-background-color);
+}
+
+.card-header--rounded-bottom-corners {
+  border-bottom-left-radius: var(--corner-radius);
+  border-bottom-right-radius: var(--corner-radius);
+}
+
+.card-header--expanded {
+  border-bottom-left-radius: 0rem;
+  border-bottom-right-radius: 0rem;
 }
 
 /* Offset the outline when focused for improved visibility */
@@ -21,11 +33,16 @@
   outline-offset: 0.25rem;
 }
 
-.card-header > svg {
+.card-header svg {
   display: block;
   flex-shrink: 0;
   height: 1rem;
   width: 1rem;
+}
+
+.card-header__pre-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .card-header__contents {
@@ -59,6 +76,6 @@
   font-weight: 400;
 }
 
-.card-header__contents__last-updated {
+.card-header__contents__label {
   font-weight: 300;
 }
