@@ -13,5 +13,6 @@
 }
 
 .forecast__hourly-forecasts p {
+  overflow: hidden;
   margin-left: 0.25rem;
 }
