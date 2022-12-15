@@ -20,6 +20,7 @@ import {
 import {
   AlertSeverity,
   AlertsResponse,
+  AlertStatus,
   ForecastGridData,
   ForecastGridDataDatapoints,
   ForecastGridDataResponse,
@@ -383,9 +384,9 @@ export class NwsMapHelper {
         dayName,
         shortDateName,
         dayForecast,
-        dayHourlyForecasts,
+        dayHourlyForecasts: [],
         nightForecast,
-        nightHourlyForecasts
+        nightHourlyForecasts: []
       });
     }
 
@@ -422,6 +423,7 @@ export class NwsMapHelper {
     const alerts = response.features
       .filter(
         alert =>
+          alert.properties.status === AlertStatus.ACTUAL &&
           (alert.properties.ends ? dayjs(alert.properties.ends).isAfter(now) : true) &&
           dayjs(alert.properties.expires).isAfter(now)
       )

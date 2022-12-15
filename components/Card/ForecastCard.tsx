@@ -33,6 +33,7 @@ export default function ForecastCard({
         label={period.dayName}
         secondaryLabel={period.shortDateName}
         backgroundColor={Color.ONYX}
+        disabledExpand={isLoading || (!period.dayHourlyForecasts?.length && !period.nightHourlyForecasts?.length)}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
         ariaControls={animatedContentsWrapperId}

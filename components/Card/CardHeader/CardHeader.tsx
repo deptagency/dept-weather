@@ -10,7 +10,8 @@ export default function CardHeader({
   roundBottomCornersWhenCollapsed,
   isExpanded,
   setIsExpanded,
-  ariaControls
+  ariaControls,
+  disabledExpand
 }: {
   preContents?: ReactNode;
   contents: ReactNode;
@@ -19,6 +20,7 @@ export default function CardHeader({
   isExpanded?: boolean;
   setIsExpanded?: Dispatch<SetStateAction<boolean>>;
   ariaControls?: string;
+  disabledExpand?: boolean;
 }) {
   const [canExpand, setCanExpand] = useState<boolean>(false);
   useEffect(
@@ -38,10 +40,13 @@ export default function CardHeader({
       }}
       aria-expanded={isExpanded!}
       aria-controls={ariaControls!}
+      disabled={disabledExpand ? disabledExpand : undefined}
     >
       {preContents}
       {contents}
-      {<ArrowIcon useInverseFill={true} animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>}
+      {disabledExpand ? undefined : (
+        <ArrowIcon useInverseFill={true} animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>
+      )}
     </button>
   ) : (
     <header

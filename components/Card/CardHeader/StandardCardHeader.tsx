@@ -11,7 +11,8 @@ export default function StandardCardHeader({
   backgroundColor,
   isExpanded,
   setIsExpanded,
-  ariaControls
+  ariaControls,
+  disabledExpand
 }: {
   isLoading?: boolean;
   lastUpdatedTime?: number;
@@ -21,6 +22,7 @@ export default function StandardCardHeader({
   isExpanded?: boolean;
   setIsExpanded?: Dispatch<SetStateAction<boolean>>;
   ariaControls?: string;
+  disabledExpand?: boolean;
 }) {
   const [contents, setContents] = useState(<></>);
   useEffect(
@@ -43,6 +45,7 @@ export default function StandardCardHeader({
       isExpanded={isExpanded}
       setIsExpanded={setIsExpanded}
       ariaControls={ariaControls}
+      disabledExpand={disabledExpand}
     ></CardHeader>
   );
 }
