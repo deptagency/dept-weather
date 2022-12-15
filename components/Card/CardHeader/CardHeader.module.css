@@ -2,11 +2,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 
   gap: 0.5rem;
   padding: 1rem;
 
+  width: 100%;
   min-height: 3.5rem;
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
@@ -15,25 +16,49 @@
   background-color: var(--card-background-color);
 }
 
-.card-header > * {
+/* Offset the outline when focused for improved visibility */
+.card-header:focus {
+  outline-offset: 0.25rem;
+}
+
+.card-header > svg {
+  display: block;
+  flex-shrink: 0;
+  height: 1rem;
+  width: 1rem;
+}
+
+.card-header__contents {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-grow: 1;
+
+  gap: 0.5rem;
+
+  text-align: left;
+}
+
+.card-header__contents > * {
   margin: 0rem;
 }
 
-.card-header *::selection {
+.card-header__contents *::selection {
   background-color: var(--foreground-color-inverse);
   color: var(--card-background-color);
 }
 
-.card-header__title {
+.card-header__contents__title {
   text-transform: uppercase;
   margin-bottom: -0.25rem;
 }
 
-.card-header__title span {
+.card-header__contents__title span {
   font-size: 1rem;
   font-weight: 400;
 }
 
-.card-header__last-updated {
+.card-header__contents__last-updated {
   font-weight: 300;
 }
