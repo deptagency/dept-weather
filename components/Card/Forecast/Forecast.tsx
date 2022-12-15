@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import { HumidityIcon, PrecipitationIcon, WindIcon } from 'components/Icons';
+import { PrecipitationIcon, ThermometerIcon, ThermometerLevel, WindIcon } from 'components/Icons';
 import { NwsHourlyPeriodForecast, NwsPeriodForecast } from 'models/api';
 import HourlyForecast from '../HourlyForecast/HourlyForecast';
 import SummaryForecast from '../SummaryForecast/SummaryForecast';
@@ -38,10 +38,9 @@ export default function Forecast({
             <div className={styles['forecast__hourly-forecasts']}>
               <div></div>
               <div></div>
-              {/* TODO - add Temperature icon */}
               <div></div>
+              <ThermometerIcon level={ThermometerLevel.MEDIUM}></ThermometerIcon>
               <PrecipitationIcon innerDropHeightPercent={0}></PrecipitationIcon>
-              <HumidityIcon></HumidityIcon>
               <WindIcon directionDeg={undefined}></WindIcon>
               {hourlyForecasts.map((hourlyForecast, i) => (
                 <HourlyForecast key={i} forecast={hourlyForecast} isDaytime={isDaytime}></HourlyForecast>

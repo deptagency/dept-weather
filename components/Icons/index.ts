@@ -12,6 +12,8 @@ export { default as PrecipitationIcon } from './PrecipitationIcon';
 export { default as PressureIcon } from './PressureIcon';
 export * from './PressureIcon';
 export { default as RecentIcon } from './RecentIcon';
+export { default as ThermometerIcon } from './ThermometerIcon';
+export * from './ThermometerIcon';
 export { default as UVIndexIcon } from './UVIndexIcon';
 export { default as WiFiOffIcon } from './WiFiOffIcon';
 export { default as WindIcon } from './WindIcon';

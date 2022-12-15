@@ -5,3 +5,4 @@ export * from './coordinates-helper';
 export * from './number-helper';
 export * from './search-query-helper';
 export * from './timeago-formatter';
+export * from './wind-helper';

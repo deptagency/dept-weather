@@ -3,8 +3,8 @@ import advancedFormat from 'dayjs/plugin/advancedFormat';
 import duration from 'dayjs/plugin/duration';
 import localeData from 'dayjs/plugin/localeData';
 import timezone from 'dayjs/plugin/timezone';
-import { NumberHelper } from 'helpers';
-import { DetailedWindDirection, Unit, UnitType, WindDirection } from 'models';
+import { NumberHelper, WindHelper } from 'helpers';
+import { Unit, UnitType, WindDirection } from 'models';
 import {
   DescriptionItem,
   NwsAlert,
@@ -114,32 +114,11 @@ export class NwsMapHelper {
     return time.isBefore(dayjs().tz(timeZone).endOf('day'));
   }
 
-  private static getWindDeg(dir?: WindDirection | DetailedWindDirection | null) {
-    if (dir === WindDirection.N) return 0;
-    else if (dir === DetailedWindDirection.NNE) return 22.5;
-    else if (dir === WindDirection.NE) return 45;
-    else if (dir === DetailedWindDirection.ENE) return 67.5;
-    else if (dir === WindDirection.E) return 90;
-    else if (dir === DetailedWindDirection.ESE) return 112.5;
-    else if (dir === WindDirection.SE) return 135;
-    else if (dir === DetailedWindDirection.SSE) return 157.5;
-    else if (dir === WindDirection.S) return 180;
-    else if (dir === DetailedWindDirection.SSW) return 202.5;
-    else if (dir === WindDirection.SW) return 225;
-    else if (dir === DetailedWindDirection.WSW) return 247.5;
-    else if (dir === WindDirection.W) return 270;
-    else if (dir === DetailedWindDirection.WNW) return 292.5;
-    else if (dir === WindDirection.NW) return 315;
-    else if (dir === DetailedWindDirection.NNW) return 337.5;
-
-    return null;
-  }
-
   private static getWind(period: SummaryForecastPeriod, reqQuery: ReqQuery): Wind {
     let wind: Wind = {
       speed: null,
       gustSpeed: null,
-      directionDeg: this.getWindDeg(period.windDirection)
+      directionDeg: WindHelper.dirToDeg(period.windDirection)
     };
 
     const speedAsValue = period.windSpeed as QuantitativeValue;
