@@ -349,7 +349,6 @@ export class NwsMapHelper {
         if (summaryForecast!.periods[i].isDaytime) {
           dayName = 'Today';
         } else if (this.isTimeBeforeEndOfDay(endTime, timeZone)) {
-          startTime = startTime.startOf('day').subtract(1, 'second'); // yesterday at 23:59:59
           dayName = 'Overnight';
         } else {
           dayName = 'Tonight';
@@ -359,6 +358,10 @@ export class NwsMapHelper {
 
       let dayForecast: NwsPeriodForecast | null = null;
       let dayHourlyForecasts: NwsHourlyPeriodForecast[] = [];
+
+      let nightForecast: NwsPeriodForecast | null = null;
+      let nightHourlyForecasts: NwsHourlyPeriodForecast[] = [];
+
       if (summaryForecast!.periods[i].isDaytime) {
         dayForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i], timeZone, reqQuery);
         dayHourlyForecasts = this.getHourlyForecastsFor(
@@ -369,20 +372,31 @@ export class NwsMapHelper {
           true,
           reqQuery
         );
-      }
 
-      let nightForecast: NwsPeriodForecast | null = null;
-      let nightHourlyForecasts: NwsHourlyPeriodForecast[] = [];
-      if (i + 1 < summaryForecast!.periods.length) {
-        nightForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i + 1], timeZone, reqQuery);
+        if (i + 1 < summaryForecast!.periods.length) {
+          nightForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i + 1], timeZone, reqQuery);
+          nightHourlyForecasts = this.getHourlyForecastsFor(
+            forecastGridData,
+            hourlyForecastsMetadata,
+            dayjs(summaryForecast!.periods[i + 1].startTime).tz(timeZone),
+            dayjs(summaryForecast!.periods[i + 1].endTime).tz(timeZone),
+            false,
+            reqQuery
+          );
+        }
+
+        i += 2;
+      } else {
+        nightForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i], timeZone, reqQuery);
         nightHourlyForecasts = this.getHourlyForecastsFor(
           forecastGridData,
           hourlyForecastsMetadata,
-          dayjs(summaryForecast!.periods[i + 1].startTime).tz(timeZone),
-          dayjs(summaryForecast!.periods[i + 1].endTime).tz(timeZone),
-          false,
+          startTime,
+          endTime,
+          true,
           reqQuery
         );
+        i += 1;
       }
 
       periods.push({
@@ -393,8 +407,6 @@ export class NwsMapHelper {
         nightForecast,
         nightHourlyForecasts
       });
-
-      i += summaryForecast!.periods[i].isDaytime ? 2 : 1;
     }
 
     const summaryForecastReadTime = summaryForecast?.updateTime ? dayjs(summaryForecast.updateTime).unix() : 0;
