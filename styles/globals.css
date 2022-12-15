@@ -4,6 +4,11 @@
   --onyx: #121212;
   --indigo: #5115f7;
 
+  --alert-purple: #480082;
+  --alert-red: #a00a00;
+  --alert-orange: #af5f00;
+  --alert-teal: #006161;
+
   --foreground-color-inverse: var(--white);
 }
 

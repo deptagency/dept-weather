@@ -19,17 +19,17 @@
 }
 
 .alert-card-accordian--extreme {
-  background-color: #480082;
+  background-color: var(--alert-purple);
 }
 .alert-card-accordian--severe {
-  background-color: #a00a00;
+  background-color: var(--alert-red);
 }
 .alert-card-accordian--moderate {
-  background-color: #af5f00;
+  background-color: var(--alert-orange);
 }
 .alert-card-accordian--minor,
 .alert-card-accordian--unknown {
-  background-color: #006161;
+  background-color: var(--alert-teal);
 }
 
 .alert-card-accordian--expanded {
