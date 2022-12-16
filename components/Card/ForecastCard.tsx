@@ -20,10 +20,14 @@ export default function ForecastCard({
   _key: string;
 }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [animatedContentsWrapperId, setAnimatedContentsWrapperId] = useState<string>(
-    ANIMATED_HOURLY_FORECASTS_WRAPPER_ID
-  );
-  useEffect(() => setAnimatedContentsWrapperId(`${ANIMATED_HOURLY_FORECASTS_WRAPPER_ID}-${_key}`), [_key]);
+  const [animatedContentsWrapperIds, setAnimatedContentsWrapperIds] = useState<string[]>([
+    `${ANIMATED_HOURLY_FORECASTS_WRAPPER_ID}-day`,
+    `${ANIMATED_HOURLY_FORECASTS_WRAPPER_ID}-night`
+  ]);
+  useEffect(() => {
+    const baseId = `${ANIMATED_HOURLY_FORECASTS_WRAPPER_ID}-${_key}`;
+    setAnimatedContentsWrapperIds([`${baseId}-day`, `${baseId}-night`]);
+  }, [_key]);
 
   return (
     <article className={styles.card}>
@@ -36,7 +40,7 @@ export default function ForecastCard({
         disabledExpand={isLoading || (!period.dayHourlyForecasts?.length && !period.nightHourlyForecasts?.length)}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
-        ariaControls={animatedContentsWrapperId}
+        ariaControls={animatedContentsWrapperIds.join(',')}
       ></StandardCardHeader>
       <div className={styles['card-contents']}>
         <div className={`${styles['card-contents__overview']} ${styles['card-contents__overview--forecast']}`}>
@@ -51,14 +55,14 @@ export default function ForecastCard({
             isExpanded={isExpanded}
             summaryForecast={period.dayForecast}
             hourlyForecasts={period.dayHourlyForecasts}
-            animatedContentsWrapperId={animatedContentsWrapperId}
+            animatedContentsWrapperId={animatedContentsWrapperIds[0]}
           ></Forecast>
           <Forecast
             isDaytime={false}
             isExpanded={isExpanded}
             summaryForecast={period.nightForecast}
             hourlyForecasts={period.nightHourlyForecasts}
-            animatedContentsWrapperId={animatedContentsWrapperId}
+            animatedContentsWrapperId={animatedContentsWrapperIds[1]}
           ></Forecast>
         </div>
       </div>
