@@ -280,31 +280,34 @@ export class NwsMapHelper {
       const datapointKeys = this.NWS_HOURLY_DATAPOINT_KEYS;
       const datapointKeysEntries = Object.entries(datapointKeys) as [keyof ForecastGridDataDatapoints, number][];
 
+      const oneHourAgo = dayjs().subtract(1, 'hour');
       for (let time = startTime; time.isBefore(endTime); time = time.add(1, 'hour')) {
-        const startUnix = time.unix();
-        const refIdxs = hourlyForecastsMetadata.dpRefIdxsByTime[startUnix] ?? Array(datapointKeysEntries.length);
+        if (time.isAfter(oneHourAgo)) {
+          const startUnix = time.unix();
+          const refIdxs = hourlyForecastsMetadata.dpRefIdxsByTime[startUnix] ?? Array(datapointKeysEntries.length);
 
-        hourlyForecasts.push({
-          start: startUnix,
-          startIsoTz: this.getIsoTzString(time),
-          startLabel: time.format(`h${time.minute() > 0 ? ':mm' : ''} A`),
-          condition: this.getCondition(valueFor('skyCover', refIdxs), valueLayerFor('weather', refIdxs), isDaytime),
-          temperature: NumberHelper.convertNws(qvFor('temperature', refIdxs), UnitType.temp, reqQuery),
-          feelsLike: NumberHelper.convertNws(qvFor('apparentTemperature', refIdxs), UnitType.temp, reqQuery),
-          dewPoint: NumberHelper.convertNws(qvFor('dewpoint', refIdxs), UnitType.temp, reqQuery),
-          humidity: NumberHelper.round(valueFor('relativeHumidity', refIdxs)),
-          wind: {
-            speed: NumberHelper.convertNws(qvFor('windSpeed', refIdxs), UnitType.wind, reqQuery),
-            gustSpeed: NumberHelper.convertNws(qvFor('windGust', refIdxs), UnitType.wind, reqQuery),
-            directionDeg: valueFor('windDirection', refIdxs)
-          },
-          chanceOfPrecip: NumberHelper.round(valueFor('probabilityOfPrecipitation', refIdxs)),
-          precipAmount: NumberHelper.convertNws(
-            qvFor('quantitativePrecipitation', refIdxs),
-            UnitType.precipitation,
-            reqQuery
-          )
-        });
+          hourlyForecasts.push({
+            start: startUnix,
+            startIsoTz: this.getIsoTzString(time),
+            startLabel: time.format(`h${time.minute() > 0 ? ':mm' : ''} A`),
+            condition: this.getCondition(valueFor('skyCover', refIdxs), valueLayerFor('weather', refIdxs), isDaytime),
+            temperature: NumberHelper.convertNws(qvFor('temperature', refIdxs), UnitType.temp, reqQuery),
+            feelsLike: NumberHelper.convertNws(qvFor('apparentTemperature', refIdxs), UnitType.temp, reqQuery),
+            dewPoint: NumberHelper.convertNws(qvFor('dewpoint', refIdxs), UnitType.temp, reqQuery),
+            humidity: NumberHelper.round(valueFor('relativeHumidity', refIdxs)),
+            wind: {
+              speed: NumberHelper.convertNws(qvFor('windSpeed', refIdxs), UnitType.wind, reqQuery),
+              gustSpeed: NumberHelper.convertNws(qvFor('windGust', refIdxs), UnitType.wind, reqQuery),
+              directionDeg: valueFor('windDirection', refIdxs)
+            },
+            chanceOfPrecip: NumberHelper.round(valueFor('probabilityOfPrecipitation', refIdxs)),
+            precipAmount: NumberHelper.convertNws(
+              qvFor('quantitativePrecipitation', refIdxs),
+              UnitType.precipitation,
+              reqQuery
+            )
+          });
+        }
       }
     }
 
@@ -374,7 +377,7 @@ export class NwsMapHelper {
           hourlyForecastsMetadata,
           startTime,
           endTime,
-          true,
+          false,
           reqQuery
         );
         i += 1;
@@ -392,9 +395,14 @@ export class NwsMapHelper {
 
     const summaryForecastReadTime = summaryForecast?.updateTime ? dayjs(summaryForecast.updateTime).unix() : 0;
     const forecastGridDataReadTime = forecastGridData?.updateTime ? dayjs(forecastGridData.updateTime).unix() : 0;
+    const nextHourAtOneMin = dayjs().add(1, 'hour').startOf('hour').add(1, 'minute').unix();
     return {
       readTime: Math.max(summaryForecastReadTime, forecastGridDataReadTime),
-      validUntil: Math.min(summaryForecastCacheEntry.validUntil, forecastGridDataCacheEntry.validUntil),
+      validUntil: Math.min(
+        summaryForecastCacheEntry.validUntil,
+        forecastGridDataCacheEntry.validUntil,
+        nextHourAtOneMin
+      ),
       periods
     };
   }
