@@ -3,7 +3,7 @@ import { CITY_SEARCH_DEBOUNCE_MS, CURRENT_LOCATION } from 'constants/client';
 import { API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import { LocateIcon, RecentIcon } from 'components/Icons';
 import { SearchQueryHelper } from 'helpers';
-import { useDebounce } from 'hooks';
+import { useDebounce, useShouldContinueRendering } from 'hooks';
 import { APIRoute, getPath } from 'models/api';
 import { CitiesGIDCache, SearchResultCity } from 'models/cities';
 import homeStyles from 'styles/Home.module.css';
@@ -114,6 +114,8 @@ export default function SearchOverlay({
     }
   }, [debouncedSearchQuery, sortRecentsToFront, setResults, setHighlightedIndexDistance]);
 
+  const shouldContinueRendering = useShouldContinueRendering(showSearchOverlay);
+
   return (
     <div
       className={`animated ${styles['search-overlay']} ${
@@ -125,41 +127,45 @@ export default function SearchOverlay({
         }
       }}
     >
-      <div className={`${styles['search-overlay__inner']} ${homeStyles['container__content--no-padding']}`}>
-        <ul id="SearchResultsList" className={styles['search-overlay__results-list']} role="listbox">
-          {results.map((result, idx) => {
-            const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(result);
-            const isCurrentLocation = result?.geonameid === CURRENT_LOCATION.geonameid;
-            const resultIdxInRecent = recentCities.findIndex(recentCity => recentCity.geonameid === result.geonameid);
-            const isRecent = resultIdxInRecent !== -1;
-            const isRecentAndIsListed = isRecent && resultIdxInRecent < CITY_SEARCH_RESULT_LIMIT;
-            return (
-              <li
-                id={`SearchResult${idx}`}
-                key={cityAndStateCode}
-                className={`${styles['search-overlay__result']} ${
-                  isCurrentLocation && !isRecentAndIsListed
-                    ? styles['search-overlay__result--non-recent-current-location']
-                    : ''
-                } ${idx === highlightedIndex ? styles['search-overlay__result--highlighted'] : ''}`}
-                role="option"
-                aria-selected={idx === highlightedIndex}
-                onFocus={() => setHighlightedIndexDistance(idx)}
-                onTouchStart={() => setHighlightedIndexDistance(idx)}
-                onMouseEnter={() => setHighlightedIndexDistance(idx)}
-                onClick={e => {
-                  e.preventDefault();
-                  setSelectedCity(results[highlightedIndex]);
-                  setShowSearchOverlay(false);
-                }}
-              >
-                <span>{cityAndStateCode}</span>
-                {isCurrentLocation ? <LocateIcon></LocateIcon> : <RecentIcon isHidden={!isRecent}></RecentIcon>}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      {showSearchOverlay || shouldContinueRendering ? (
+        <div className={`${styles['search-overlay__inner']} ${homeStyles['container__content--no-padding']}`}>
+          <ul id="SearchResultsList" className={styles['search-overlay__results-list']} role="listbox">
+            {results.map((result, idx) => {
+              const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(result);
+              const isCurrentLocation = result?.geonameid === CURRENT_LOCATION.geonameid;
+              const resultIdxInRecent = recentCities.findIndex(recentCity => recentCity.geonameid === result.geonameid);
+              const isRecent = resultIdxInRecent !== -1;
+              const isRecentAndIsListed = isRecent && resultIdxInRecent < CITY_SEARCH_RESULT_LIMIT;
+              return (
+                <li
+                  id={`SearchResult${idx}`}
+                  key={cityAndStateCode}
+                  className={`${styles['search-overlay__result']} ${
+                    isCurrentLocation && !isRecentAndIsListed
+                      ? styles['search-overlay__result--non-recent-current-location']
+                      : ''
+                  } ${idx === highlightedIndex ? styles['search-overlay__result--highlighted'] : ''}`}
+                  role="option"
+                  aria-selected={idx === highlightedIndex}
+                  onFocus={() => setHighlightedIndexDistance(idx)}
+                  onTouchStart={() => setHighlightedIndexDistance(idx)}
+                  onMouseEnter={() => setHighlightedIndexDistance(idx)}
+                  onClick={e => {
+                    e.preventDefault();
+                    setSelectedCity(results[highlightedIndex]);
+                    setShowSearchOverlay(false);
+                  }}
+                >
+                  <span>{cityAndStateCode}</span>
+                  {isCurrentLocation ? <LocateIcon></LocateIcon> : <RecentIcon isHidden={!isRecent}></RecentIcon>}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
