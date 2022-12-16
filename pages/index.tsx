@@ -8,7 +8,7 @@ import {
   CURRENT_LOCATION,
   GID_CACHE_FILENAME,
   LOCAL_STORAGE_RECENT_CITIES_KEY,
-  SEARCH_PANEL_ANIMATION_DURATION
+  UI_ANIMATION_DURATION
 } from 'constants/client';
 import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY } from 'constants/shared';
 import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
@@ -84,7 +84,7 @@ export default function Home() {
           setRecentCities(newRecentCities);
         } else {
           // Wait for search panel close animation before adding to recents list to avoid showing recent icon before loading city
-          setTimeout(() => setRecentCities(newRecentCities), SEARCH_PANEL_ANIMATION_DURATION);
+          setTimeout(() => setRecentCities(newRecentCities), UI_ANIMATION_DURATION);
         }
       }
     }

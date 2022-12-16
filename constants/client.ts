@@ -6,7 +6,7 @@ export const APP_URL = 'https://dept-weather.vercel.app';
 export const APP_THEME_COLOR = '#ffffff';
 export const APP_MASK_ICON_COLOR = '#000000';
 export const GID_CACHE_FILENAME = 'cities-top10000-gid-cache.json';
-export const SEARCH_PANEL_ANIMATION_DURATION = 300;
+export const UI_ANIMATION_DURATION = 300;
 export const GEOPOSITION_PERMISSION_DENIED_ERROR_CODE = 1;
 
 export const CURRENT_LOCATION: SearchResultCity = {
