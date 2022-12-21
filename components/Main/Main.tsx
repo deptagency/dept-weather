@@ -120,6 +120,25 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
     setPlaceholderPeriods(_placeholderPeriods);
   }, []);
 
+  const [observationsLatestReadTime, setObservationsLatestReadTime] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    let newObservationsLatestReadTime: number | undefined;
+
+    if (observations != null) {
+      let readTimes: number[] = [];
+      if (observations.data.wl?.readTime) readTimes.push(observations.data.wl.readTime);
+      if (observations.data.nws?.readTime) readTimes.push(observations.data.nws.readTime);
+
+      if (readTimes.length) {
+        newObservationsLatestReadTime = Math.max(...readTimes);
+      } else if (observations.latestReadTime) {
+        newObservationsLatestReadTime = observations.latestReadTime;
+      }
+    }
+
+    setObservationsLatestReadTime(newObservationsLatestReadTime);
+  }, [observations]);
+
   return (
     <main className={homeStyles.container__content}>
       {children != null ? (
@@ -131,7 +150,7 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
           <AlertCards alerts={alerts?.data.nws?.alerts ?? []} lid={lid}></AlertCards>
           <ObservationsCard
             isLoading={observationsIsLoading}
-            latestReadTime={observations?.latestReadTime ? observations!.latestReadTime! : undefined}
+            latestReadTime={observationsLatestReadTime}
             observations={observations?.data}
           ></ObservationsCard>
           <ForecastCards
