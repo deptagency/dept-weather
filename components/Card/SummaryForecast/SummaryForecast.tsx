@@ -1,5 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { ArrowIcon } from 'components/Icons';
+import { useEffect, useState } from 'react';
 import { NwsPeriodForecast } from 'models/api';
 import Condition from '../Condition/Condition';
 import { PrecipitationForecast, Wind } from '../Measurement';
