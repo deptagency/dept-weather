@@ -1,7 +1,7 @@
 {
   "name": "DEPT\u00ae Weather",
   "short_name": "Weather",
-  "description": "The DEPT\u00ae Weather app provides up-to-date weather information and forecasts for locations across the U.S.",
+  "description": "The DEPT\u00ae Weather app provides up-to-date weather observations, daily & hourly forecasts, and alerts for locations across the U.S.",
   "categories": ["weather"],
   "icons": [
     {
