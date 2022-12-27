@@ -70,10 +70,9 @@ export class SearchQueryHelper {
       separatedQuery.length > 1 &&
       this.US_STATE_FULL_NAMES.includes((fullStateName = separatedQuery[lastIdx].trim().toUpperCase()))
     ) {
-      separatedQuery[lastIdx] = separatedQuery[lastIdx].replace(
-        new RegExp(fullStateName, 'i'),
-        this.US_STATE_CODES[fullStateName]
-      );
+      separatedQuery[lastIdx] = separatedQuery[lastIdx]
+        .replace(new RegExp(fullStateName, 'i'), this.US_STATE_CODES[fullStateName])
+        .toLowerCase();
       return separatedQuery.join(splitOn);
     }
   }
