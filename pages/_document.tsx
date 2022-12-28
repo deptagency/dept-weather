@@ -71,6 +71,8 @@ export default function Document() {
         <meta name="twitter:text:title" content={APP_TITLE} />
         <meta name="twitter:description" content={APP_DESCRIPTION} />
         <meta name="twitter:site" content="@DeptAgency" />
+        <meta name="twitter:image" content={`${APP_URL}/icons/icon-512.png`} />
+        <meta name="twitter:image:alt" content={`${APP_TITLE} App Icon`} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content={APP_TITLE} />
         <meta property="og:title" content={APP_TITLE} />
