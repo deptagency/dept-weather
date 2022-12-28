@@ -59,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (process.env.NODE_ENV !== 'development') {
       res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${maxAge}`);
     }
-    res.status(200).json(response);
+    res.status(response.latestReadTime ? 200 : 502).json(response);
   } catch (err) {
     LoggerHelper.getLogger(LOGGER_LABEL).error(err);
     const errorResponse: Response<null> = {
