@@ -20,42 +20,42 @@ const fetcher = (key: string) => fetch(key).then(res => res.json());
 const useAlerts = (
   queryParams: QueryParams
 ): { alerts?: Response<Alerts>; alertsIsLoading: boolean; alertsIsError: boolean } => {
-  const { data, error } = useSWR<Response<Alerts>>(
+  const { data, error, isLoading, isValidating } = useSWR<Response<Alerts>>(
     queryParams != null ? getPath(APIRoute.ALERTS, queryParams) : null,
     fetcher
   );
 
   return {
     alerts: data,
-    alertsIsLoading: !error && !data,
+    alertsIsLoading: isLoading || isValidating,
     alertsIsError: error
   };
 };
 const useObservations = (
   queryParams: QueryParams
 ): { observations?: Response<Observations>; observationsIsLoading: boolean; observationsIsError: boolean } => {
-  const { data, error } = useSWR<Response<Observations>>(
+  const { data, error, isLoading, isValidating } = useSWR<Response<Observations>>(
     queryParams != null ? getPath(APIRoute.CURRENT, queryParams) : null,
     fetcher
   );
 
   return {
     observations: data,
-    observationsIsLoading: !error && !data,
+    observationsIsLoading: isLoading || isValidating,
     observationsIsError: error
   };
 };
 const useForecast = (
   queryParams: QueryParams
 ): { forecast?: Response<Forecast>; forecastIsLoading: boolean; forecastIsError: boolean } => {
-  const { data, error } = useSWR<Response<Forecast>>(
+  const { data, error, isLoading, isValidating } = useSWR<Response<Forecast>>(
     queryParams != null ? getPath(APIRoute.FORECAST, queryParams) : null,
     fetcher
   );
 
   return {
     forecast: data,
-    forecastIsLoading: !error && !data,
+    forecastIsLoading: isLoading || isValidating,
     forecastIsError: error
   };
 };
