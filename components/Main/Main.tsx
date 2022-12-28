@@ -126,8 +126,8 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
 
     if (observations != null) {
       let readTimes: number[] = [];
-      if (observations.data.wl?.readTime) readTimes.push(observations.data.wl.readTime);
-      if (observations.data.nws?.readTime) readTimes.push(observations.data.nws.readTime);
+      if (observations.data?.wl?.readTime) readTimes.push(observations.data.wl.readTime);
+      if (observations.data?.nws?.readTime) readTimes.push(observations.data.nws.readTime);
 
       if (readTimes.length) {
         newObservationsLatestReadTime = Math.max(...readTimes);
@@ -147,7 +147,7 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
         <OfflineError></OfflineError>
       ) : (
         <>
-          <AlertCards alerts={alerts?.data.nws?.alerts ?? []} lid={lid}></AlertCards>
+          <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} lid={lid}></AlertCards>
           <ObservationsCard
             isLoading={observationsIsLoading}
             latestReadTime={observationsLatestReadTime}
