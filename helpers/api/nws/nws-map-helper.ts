@@ -397,7 +397,7 @@ export class NwsMapHelper {
     const forecastGridDataReadTime = forecastGridData?.updateTime ? dayjs(forecastGridData.updateTime).unix() : 0;
     const nextHourAtOneMin = dayjs().add(1, 'hour').startOf('hour').add(1, 'minute').unix();
     return {
-      readTime: Math.max(summaryForecastReadTime, forecastGridDataReadTime),
+      readTime: periods.length ? Math.max(summaryForecastReadTime, forecastGridDataReadTime) : 0,
       validUntil: Math.min(
         summaryForecastCacheEntry.validUntil,
         forecastGridDataCacheEntry.validUntil,
