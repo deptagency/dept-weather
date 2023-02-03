@@ -23,7 +23,9 @@ export class FeelsHelper {
     const feelsUnitsReqQuery = this.getFeelsUnitReqQuery();
 
     // Convert wind speed to meters per hour, and then to meters per second
-    const metersPerHourSpeed = NumberHelper.convertNws(nwsCurrent?.windSpeed, UnitType.wind, feelsUnitsReqQuery, 0);
+    const metersPerHourSpeed =
+      NumberHelper.convertNws(nwsCurrent?.windSpeed, UnitType.wind, feelsUnitsReqQuery, 0) ??
+      NumberHelper.convertNws(nwsCurrent?.windGust, UnitType.wind, feelsUnitsReqQuery, 0);
     const speed = metersPerHourSpeed != null ? metersPerHourSpeed / (60 * 60) : null;
 
     const feelsOpts = {
