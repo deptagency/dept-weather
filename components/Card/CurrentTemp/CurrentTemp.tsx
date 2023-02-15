@@ -11,7 +11,7 @@ export default function CurrentTemp({ observations }: { observations?: WeatherOb
 
   useEffect(() => {
     const newTemp = floorOrEmDash(observations?.temperature);
-    const newFractionalTemp = observations?.temperature != null ? (observations.temperature * 10) % 10 : '';
+    const newFractionalTemp = observations?.temperature != null ? Math.abs((observations.temperature * 10) % 10) : '';
     let newTempAriaLabel = String(newTemp);
     if (newFractionalTemp) {
       newTempAriaLabel += `.${newFractionalTemp}`;
