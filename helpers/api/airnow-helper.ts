@@ -66,11 +66,13 @@ export class AirNowHelper {
     return {
       readTime: this.getLatestReadTime(cacheEntry.item),
       validUntil: cacheEntry.validUntil,
-      observations: cacheEntry.item.observations.map(observation => ({
-        pollutant: observation.ParameterName,
-        aqi: observation.AQI,
-        aqiLevelName: observation.Category.Name
-      }))
+      observations: cacheEntry.item.observations
+        .map(observation => ({
+          pollutant: observation.ParameterName,
+          aqi: observation.AQI,
+          aqiLevelName: observation.Category.Name
+        }))
+        .sort((a, b) => b.aqi - a.aqi)
     };
   }
 }
