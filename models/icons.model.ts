@@ -98,7 +98,7 @@ export const DefaultIcons: Record<IconCondition, DefaultIconMapping> = {
   [IconCondition.MIST]: DefaultSetIcon.RAIN,
   [IconCondition.OVERCAST]: DefaultSetIcon.CLOUDY_MOSTLY,
   [IconCondition.RAIN]: DefaultSetIcon.RAIN,
-  [IconCondition.RAIN_HEAVY]: DefaultSetIcon.RAIN,
+  [IconCondition.RAIN_HEAVY]: DefaultSetIcon.RAIN_HEAVY,
   [IconCondition.RAIN_LIGHT]: DefaultSetIcon.RAIN,
   [IconCondition.RAIN_SHOWERS]: DefaultSetIcon.RAIN,
   [IconCondition.RAIN_SHOWERS_HEAVY]: DefaultSetIcon.RAIN,

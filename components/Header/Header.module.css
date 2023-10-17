@@ -13,12 +13,14 @@
 
   padding-top: 1rem;
   padding-bottom: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 @media screen and (max-width: 576px) {
   .header {
     padding-top: 0rem;
     padding-bottom: 0.25rem;
+    padding-right: 0rem;
   }
 }
 
@@ -55,7 +57,7 @@
 }
 
 .header__location__arrow {
-  padding: 0.75rem 0rem 0.75rem 0.75rem;
+  padding: 0.75rem 0.5rem;
 }
 
 .header__location__arrow svg {
@@ -65,7 +67,7 @@
 }
 
 .header__location__input {
-  padding: 0.5rem 0rem;
+  padding: 0.5rem 0.25rem 0.5rem 0rem;
   width: 100%;
   text-align: right;
   border: none;
