@@ -30,19 +30,26 @@
 }
 
 .header__branding {
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  column-gap: 0.25rem;
+  flex-wrap: wrap;
   margin: 0rem;
-  padding: 0rem 0rem;
+
+  min-height: 2rem;
+
+  flex-shrink: 0;
 }
 
 .header__branding svg {
   width: 73px;
   height: 20px;
-  margin-right: 0.25rem;
 }
 
 .header__branding__text {
-  vertical-align: middle;
+  display: block;
+  margin-top: 2px;
+  height: 1.5rem;
 }
 
 .header__location {
@@ -79,6 +86,8 @@
 
 @media screen and (max-width: 460px) {
   .header__branding {
+    min-height: 4rem;
+
     flex-basis: 0%;
     flex-shrink: 1;
   }
