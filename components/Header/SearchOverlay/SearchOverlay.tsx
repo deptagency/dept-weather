@@ -71,8 +71,9 @@ export default function SearchOverlay({
         abortSearchCallAndUse(cachedResults);
         return;
       }
-      // Else if query is empty string, use recentCities
-    } else if (formattedQuery === '') {
+    }
+    // Else if query is empty string, use recentCities
+    else if (formattedQuery === '') {
       const slicedRecentCities = recentCities.slice(0, CITY_SEARCH_RESULT_LIMIT);
       abortSearchCallAndUse(
         slicedRecentCities.find(recentCity => recentCity?.geonameid === CURRENT_LOCATION.geonameid) ||
@@ -83,8 +84,23 @@ export default function SearchOverlay({
       return;
     }
 
-    // Set searchQuery so a /city-search API call can be debounced
-    setSearchQuery(formattedQuery);
+    const getCachedResponseElseDebounce = async () => {
+      try {
+        const cachedResponse = await caches.match(
+          getPath(APIRoute.CITY_SEARCH, { [API_SEARCH_QUERY_KEY]: formattedQuery })
+        );
+        if (cachedResponse) {
+          // API call was previously made & cached, use the cached response
+          const cachedResJSON = await cachedResponse.json();
+          abortSearchCallAndUse(cachedResJSON.data);
+          return;
+        }
+      } catch {}
+
+      // Debounce a new /city-search API call
+      setSearchQuery(formattedQuery);
+    };
+    getCachedResponseElseDebounce();
   }, [rawSearchQuery, recentCities, citiesGIDCache, sortRecentsToFront, setResults, setHighlightedIndexDistance]);
 
   useEffect(() => {
