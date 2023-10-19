@@ -78,7 +78,7 @@ export default function Document() {
         <meta property="og:title" content={APP_TITLE} />
         <meta property="og:description" content={APP_DESCRIPTION} />
         <meta property="og:url" content={APP_URL} />
-        <meta property="og:image" content={`${APP_URL}/icons/apple-touch-icon.png`} />
+        <meta property="og:image" content={`${APP_URL}/icons/apple-touch-icon-180.png`} />
 
         {APPLE_SPLASH_SIZES.map((splashSize, i) => (
           <AppleSplash key={i} {...splashSize}></AppleSplash>
