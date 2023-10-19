@@ -151,8 +151,9 @@ export class NwsMapHelper {
     return wind;
   }
 
-  private static getChanceOfPrecip(period: SummaryForecastPeriod) {
+  private static getChanceOfPrecip(period: SummaryForecastPeriod, hourlyPeriodForecasts: NwsHourlyPeriodForecast[]) {
     if (period.detailedForecast) {
+      // Search for chance of precip in text summary
       const dfSplitOnSearchText = period.detailedForecast.split(
         new RegExp(` *${this.CHANCE_OF_PRECIP_SEARCH_TEXT} *`, 'i')
       );
@@ -162,9 +163,16 @@ export class NwsMapHelper {
         if (chanceOfPrecipStr.length > 0 && chanceOfPrecipNum != null && !isNaN(chanceOfPrecipNum)) {
           return chanceOfPrecipNum;
         }
-      } else if (dfSplitOnSearchText.length < 2) {
-        return 0;
       }
+    }
+
+    // Map the chance of precips from the hourlyPeriodForecasts
+    const hourlyPeriodChanceOfPrecips = hourlyPeriodForecasts
+      .map(hourForecast => hourForecast.chanceOfPrecip)
+      .filter(chanceOfPrecip => chanceOfPrecip != null);
+    if (hourlyPeriodChanceOfPrecips.length) {
+      // Fallback to max non-null hourly chance of precip
+      return Math.max(...(hourlyPeriodChanceOfPrecips as number[]));
     }
 
     return null;
@@ -172,6 +180,7 @@ export class NwsMapHelper {
 
   private static getSummaryPeriodForecast(
     period: SummaryForecastPeriod,
+    hourlyPeriodForecasts: NwsHourlyPeriodForecast[],
     timeZone: string,
     reqQuery: ReqQuery
   ): NwsPeriodForecast {
@@ -182,7 +191,7 @@ export class NwsMapHelper {
       condition: period.shortForecast,
       temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
       wind: this.getWind(period, reqQuery),
-      chanceOfPrecip: this.getChanceOfPrecip(period)
+      chanceOfPrecip: this.getChanceOfPrecip(period, hourlyPeriodForecasts)
     };
   }
 
@@ -347,7 +356,6 @@ export class NwsMapHelper {
       let nightHourlyForecasts: NwsHourlyPeriodForecast[] = [];
 
       if (summaryForecast!.periods[i].isDaytime) {
-        dayForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i], timeZone, reqQuery);
         dayHourlyForecasts = this.getHourlyForecastsFor(
           forecastGridData,
           hourlyForecastsMetadata,
@@ -356,9 +364,14 @@ export class NwsMapHelper {
           true,
           reqQuery
         );
+        dayForecast = this.getSummaryPeriodForecast(
+          summaryForecast!.periods[i],
+          dayHourlyForecasts,
+          timeZone,
+          reqQuery
+        );
 
         if (i + 1 < summaryForecast!.periods.length) {
-          nightForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i + 1], timeZone, reqQuery);
           nightHourlyForecasts = this.getHourlyForecastsFor(
             forecastGridData,
             hourlyForecastsMetadata,
@@ -367,17 +380,28 @@ export class NwsMapHelper {
             false,
             reqQuery
           );
+          nightForecast = this.getSummaryPeriodForecast(
+            summaryForecast!.periods[i + 1],
+            nightHourlyForecasts,
+            timeZone,
+            reqQuery
+          );
         }
 
         i += 2;
       } else {
-        nightForecast = this.getSummaryPeriodForecast(summaryForecast!.periods[i], timeZone, reqQuery);
         nightHourlyForecasts = this.getHourlyForecastsFor(
           forecastGridData,
           hourlyForecastsMetadata,
           startTime,
           endTime,
           false,
+          reqQuery
+        );
+        nightForecast = this.getSummaryPeriodForecast(
+          summaryForecast!.periods[i],
+          nightHourlyForecasts,
+          timeZone,
           reqQuery
         );
         i += 1;

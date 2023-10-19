@@ -1,5 +1,5 @@
 import { PrecipitationIcon } from 'components/Icons';
-import { roundOrEmDash } from 'utils';
+import { roundTensOrEmDash } from 'utils';
 import Measurement from '../Measurement';
 
 export default function PrecipitationForecast({
@@ -11,7 +11,7 @@ export default function PrecipitationForecast({
     <Measurement
       value={
         <>
-          {roundOrEmDash(chanceOfPrecipitation)} <span>%</span>
+          {roundTensOrEmDash(chanceOfPrecipitation)} <span>%</span>
         </>
       }
       label="Chance of Precip"
