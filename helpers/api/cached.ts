@@ -75,7 +75,7 @@ export class Cached<Item, Opts> {
   async get(key: string, opts: Opts): Promise<CacheEntry<Item>> {
     let cacheEntry = this.nodeCache.get(key) as CacheEntry<Item> | undefined;
     if (cacheEntry == null) {
-      this.logger?.debug(`Cache MISS for "${key}"`);
+      this.logger?.info(`Cache MISS for "${key}"`);
 
       const item = await this.getItemOnMiss(opts);
       let validUntil = 0;
@@ -95,7 +95,7 @@ export class Cached<Item, Opts> {
         this.logger?.warn(`${expiresLogPrefix} has NOT been cached`);
       }
     } else {
-      this.logger?.debug(`Cache HIT for "${key}"`);
+      this.logger?.info(`Cache HIT for "${key}"`);
     }
 
     return cacheEntry!;
