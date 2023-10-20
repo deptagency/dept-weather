@@ -4,7 +4,7 @@ import duration from 'dayjs/plugin/duration';
 import localeData from 'dayjs/plugin/localeData';
 import timezone from 'dayjs/plugin/timezone';
 import { NumberHelper, WindHelper } from 'helpers';
-import { Unit, UnitType, WindDirection } from 'models';
+import { Unit, UnitType } from 'models';
 import {
   DescriptionItem,
   NwsAlert,
@@ -335,8 +335,8 @@ export class NwsMapHelper {
 
     let periods: NwsPeriod[] = [];
     for (let i = 0; i < (summaryForecast?.periods ?? []).length; ) {
+      const startTime = dayjs(summaryForecast!.periods[i].startTime).tz(timeZone);
       const endTime = dayjs(summaryForecast!.periods[i].endTime).tz(timeZone);
-      let startTime = dayjs(summaryForecast!.periods[i].startTime).tz(timeZone);
       let dayName = dayjs.weekdays()[startTime.day()];
       if (this.isTimeBeforeEndOfDay(startTime, timeZone)) {
         if (summaryForecast!.periods[i].isDaytime) {
