@@ -18,7 +18,11 @@ const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(req.query);
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(
+      req.query,
+      getFormattedDuration
+    );
     const promises: Array<Promise<CacheEntry<any>>> = [
       NwsHelper.getCurrent(minimalQueriedCity),
       AirNowHelper.getCurrent(minimalQueriedCity),

@@ -71,7 +71,7 @@ export class CitiesReqQueryHelper {
     return cities;
   }
 
-  static async parseQueriedCity(reqQuery: ReqQuery) {
+  static async parseQueriedCity(reqQuery: ReqQuery, getFormattedDuration: () => string) {
     const warnings: string[] = [];
     const getReturnValFor = (queriedCity: City | ClosestCity) => {
       const coordinatesNumArr = CoordinatesHelper.adjustPrecision(CoordinatesHelper.cityToNumArr(queriedCity));
@@ -81,7 +81,11 @@ export class CitiesReqQueryHelper {
         timeZone: queriedCity.timeZone
       };
       LoggerHelper.getLogger(`${this.CLASS_NAME}.parseQueriedCity()`).verbose(
-        `Using "${SearchQueryHelper.getCityAndStateCode(queriedCity)}" / ${queriedCity.geonameid}`
+        `Took ${getFormattedDuration()} for ${
+          reqQuery[API_GEONAMEID_KEY]
+            ? `${API_GEONAMEID_KEY}="${reqQuery[API_GEONAMEID_KEY]}"`
+            : `${API_COORDINATES_KEY}="${reqQuery[API_COORDINATES_KEY]}"`
+        } – using "${SearchQueryHelper.getCityAndStateCode(queriedCity)}" / ${queriedCity.geonameid}`
       );
       return {
         queriedCity,
