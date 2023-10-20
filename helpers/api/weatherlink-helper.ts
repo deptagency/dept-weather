@@ -7,7 +7,7 @@ import { Unit, UnitType } from 'models';
 import { MinimalQueriedCity } from 'models/cities';
 import { ReqQuery, WlObservations } from 'models/api';
 import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from 'models/weatherlink';
-import { Cached, CacheEntry } from './cached';
+import { Cachable, CachableEntry } from './cachable';
 import { LoggerHelper } from './logger-helper';
 
 export class WeatherlinkHelper {
@@ -33,7 +33,7 @@ export class WeatherlinkHelper {
     return distanceToAQ < 5;
   }
 
-  private static readonly current = new Cached<CurrentConditions, undefined>(
+  private static readonly current = new Cachable<CurrentConditions, undefined>(
     async () => this.wl.getCurrent({ stationId: (await this.getMainStation()).station_id }),
     async (_: string, newItem: CurrentConditions) => {
       const lastReading = newItem.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0]?.ts ?? 0;
@@ -46,7 +46,7 @@ export class WeatherlinkHelper {
     return this.current.get(AQ_COORDINATES_STR, undefined);
   }
 
-  static mapCurrentToWlObservations(cacheEntry: CacheEntry<CurrentConditions>, reqQuery: ReqQuery): WlObservations {
+  static mapCurrentToWlObservations(cacheEntry: CachableEntry<CurrentConditions>, reqQuery: ReqQuery): WlObservations {
     const wlMain = cacheEntry.item.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)!
       .data[0] as MainSensorData;
     const wlBarometer = cacheEntry.item.sensors.find(sensor => sensor.sensor_type === SensorType.BAROMETER)!

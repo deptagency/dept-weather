@@ -15,7 +15,7 @@ import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
 import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCity, ScoredCity } from 'models/cities';
 import { Unit } from 'models';
-import { Cached } from './cached';
+import { Cachable } from './cachable';
 import { LoggerHelper } from './logger-helper';
 
 export class CitiesHelper {
@@ -146,7 +146,7 @@ export class CitiesHelper {
     }
   }
 
-  private static readonly closestCity = new Cached<ClosestCity | undefined, number[]>(
+  private static readonly closestCity = new Cachable<ClosestCity | undefined, number[]>(
     async (coordinatesNumArr: number[]) => {
       const cities = await this.citiesPromise;
       let distanceToClosestCity = Number.MAX_SAFE_INTEGER;

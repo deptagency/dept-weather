@@ -8,7 +8,7 @@ import { CoordinatesHelper } from 'helpers';
 import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api';
 import { MinimalQueriedCity } from 'models/cities';
 import { UVHourlyForecast, UVHourlyForecastItem } from 'models/epa';
-import { Cached, CacheEntry } from './cached';
+import { Cachable, CachableEntry } from './cachable';
 import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(customParseFormat);
@@ -40,7 +40,7 @@ export class EpaHelper {
     return 0;
   }
 
-  private static readonly hourly = new Cached<UVHourlyForecastWithTz, MinimalQueriedCity>(
+  private static readonly hourly = new Cachable<UVHourlyForecastWithTz, MinimalQueriedCity>(
     async (minQueriedCity: MinimalQueriedCity) => {
       const coordinatesNumArr = CoordinatesHelper.cityToNumArr(minQueriedCity);
       const closestZipArr = await geo2zip(coordinatesNumArr);
@@ -65,7 +65,7 @@ export class EpaHelper {
     return this.hourly.get(CoordinatesHelper.cityToStr(minQueriedCity), minQueriedCity);
   }
 
-  static mapHourlyToEpaHourlyForecast(cacheEntry: CacheEntry<UVHourlyForecastWithTz>): EpaHourlyForecast {
+  static mapHourlyToEpaHourlyForecast(cacheEntry: CachableEntry<UVHourlyForecastWithTz>): EpaHourlyForecast {
     const hourlyForecastIn = cacheEntry.item.uvHourlyForecast ?? [];
     const hourlyForecast = (hourlyForecastIn instanceof Array ? hourlyForecastIn : []).map(
       (forecastItem: UVHourlyForecastItem): EpaHourlyForecastItem => ({

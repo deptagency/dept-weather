@@ -7,7 +7,7 @@ import { CoordinatesHelper } from 'helpers';
 import { SunTimesObservations } from 'models/api';
 import { MinimalQueriedCity } from 'models/cities';
 import { SunriseSunset } from 'models/sunrise-sunset';
-import { Cached, CacheEntry } from './cached';
+import { Cachable, CachableEntry } from './cachable';
 import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(customParseFormat);
@@ -31,7 +31,7 @@ export class SunTimesHelper {
     }
   }
 
-  private static readonly times = new Cached<SunriseSunsetWithTz, MinimalQueriedCity>(
+  private static readonly times = new Cachable<SunriseSunsetWithTz, MinimalQueriedCity>(
     async (minQueriedCity: MinimalQueriedCity) => {
       const currentLocalTime = dayjs().tz(minQueriedCity.timeZone);
 
@@ -68,7 +68,7 @@ export class SunTimesHelper {
     return this.times.get(CoordinatesHelper.cityToStr(minQueriedCity), minQueriedCity);
   }
 
-  static mapTimesToSunTimesObservations(cacheEntry: CacheEntry<SunriseSunsetWithTz>): SunTimesObservations {
+  static mapTimesToSunTimesObservations(cacheEntry: CachableEntry<SunriseSunsetWithTz>): SunTimesObservations {
     return {
       ...cacheEntry.item.sunriseSunset,
       readTime: dayjs().tz(cacheEntry.item.timeZone).startOf('day').unix(),

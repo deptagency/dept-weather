@@ -8,7 +8,7 @@ import { CoordinatesHelper } from 'helpers';
 import { CurrentObservations } from 'models/airnow';
 import { AirNowObservations } from 'models/api';
 import { MinimalQueriedCity } from 'models/cities';
-import { Cached, CacheEntry } from './cached';
+import { Cachable, CachableEntry } from './cachable';
 import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(customParseFormat);
@@ -42,7 +42,7 @@ export class AirNowHelper {
     return Math.max(0, ...readTimes);
   }
 
-  private static readonly current = new Cached<CurrentObservationsWithTz, MinimalQueriedCity>(
+  private static readonly current = new Cachable<CurrentObservationsWithTz, MinimalQueriedCity>(
     async (minQueriedCity: MinimalQueriedCity) => {
       const currentObservations = (await (
         await fetch(this.getRequestUrlFor(minQueriedCity), { headers: { 'User-Agent': this.userAgent } })
@@ -62,7 +62,7 @@ export class AirNowHelper {
     return this.current.get(CoordinatesHelper.cityToStr(minQueriedCity), minQueriedCity);
   }
 
-  static mapCurrentToAirNowObservations(cacheEntry: CacheEntry<CurrentObservationsWithTz>): AirNowObservations {
+  static mapCurrentToAirNowObservations(cacheEntry: CachableEntry<CurrentObservationsWithTz>): AirNowObservations {
     return {
       readTime: this.getLatestReadTime(cacheEntry.item),
       validUntil: cacheEntry.validUntil,

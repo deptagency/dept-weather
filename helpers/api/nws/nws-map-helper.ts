@@ -34,7 +34,7 @@ import {
   WeatherIntensity,
   WeatherValueLayer
 } from 'models/nws';
-import { CacheEntry } from '../cached';
+import { CachableEntry } from '../cachable';
 import { FeelsHelper } from '../feels-helper';
 
 dayjs.extend(advancedFormat);
@@ -53,7 +53,10 @@ export class NwsMapHelper {
     return time.format('YYYY-MM-DDTHH:mm:ssZ');
   }
 
-  static mapCurrentToNwsObservations(cacheEntry: CacheEntry<ObservationResponse>, reqQuery: ReqQuery): NwsObservations {
+  static mapCurrentToNwsObservations(
+    cacheEntry: CachableEntry<ObservationResponse>,
+    reqQuery: ReqQuery
+  ): NwsObservations {
     const nwsCurrent = cacheEntry.item?.properties;
     const pressureUnitMapping = nwsCurrent?.seaLevelPressure?.unitCode
       ? NumberHelper.getUnitMapping(UnitType.pressure, NwsUnits[nwsCurrent.seaLevelPressure.unitCode], reqQuery)
@@ -324,8 +327,8 @@ export class NwsMapHelper {
   }
 
   static mapForecastsToNwsForecast(
-    summaryForecastCacheEntry: CacheEntry<SummaryForecastResponse | null>,
-    forecastGridDataCacheEntry: CacheEntry<ForecastGridDataResponse | null>,
+    summaryForecastCacheEntry: CachableEntry<SummaryForecastResponse | null>,
+    forecastGridDataCacheEntry: CachableEntry<ForecastGridDataResponse | null>,
     timeZone: string,
     reqQuery: ReqQuery
   ): NwsForecast {

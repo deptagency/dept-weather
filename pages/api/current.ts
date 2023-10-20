@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
   AirNowHelper,
-  CacheEntry,
+  CachableEntry,
   CitiesReqQueryHelper,
   EpaHelper,
   LoggerHelper,
@@ -19,7 +19,7 @@ const LOGGER_LABEL = getPath(APIRoute.CURRENT);
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(req.query);
-    const promises: Array<Promise<CacheEntry<any>>> = [
+    const promises: Array<Promise<CachableEntry<any>>> = [
       NwsHelper.getCurrent(minimalQueriedCity),
       AirNowHelper.getCurrent(minimalQueriedCity),
       EpaHelper.getHourly(minimalQueriedCity),

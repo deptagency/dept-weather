@@ -12,7 +12,7 @@ import {
   StationsResponse,
   SummaryForecastResponse
 } from 'models/nws';
-import { Cached, CacheEntry } from '../cached';
+import { Cachable, CachableEntry } from '../cachable';
 import { LoggerHelper } from '../logger-helper';
 
 export class NwsHelper {
@@ -67,7 +67,7 @@ export class NwsHelper {
     return null as unknown as ResponseItem;
   }
 
-  private static readonly points = new Cached<PointsResponse, string>(
+  private static readonly points = new Cachable<PointsResponse, string>(
     async (coordinatesStr: string) =>
       (await this.fetch(`${this.BASE_URL}points/${coordinatesStr}`)).json() as Promise<PointsResponse>,
     async (_: string, __: PointsResponse) => dayjs().add(1, 'week').unix(),
@@ -77,7 +77,7 @@ export class NwsHelper {
     return this.points.get(coordinatesStr, coordinatesStr);
   }
 
-  private static readonly stations = new Cached<StationsResponse, string>(
+  private static readonly stations = new Cachable<StationsResponse, string>(
     async (stationsUrl: string) => (await this.fetch(stationsUrl)).json() as Promise<StationsResponse>,
     async (_: string, __: StationsResponse) => dayjs().add(1, 'week').unix(),
     LoggerHelper.getLogger(`${this.CLASS_NAME}.stations`)
@@ -93,7 +93,7 @@ export class NwsHelper {
     return stations.item?.features?.length ? stations.item.features[0] : null;
   }
 
-  private static readonly current = new Cached<ObservationResponse, string>(
+  private static readonly current = new Cachable<ObservationResponse, string>(
     async (stationId: string) =>
       (
         await this.fetch(`${this.BASE_URL}stations/${stationId}/observations/latest`)
@@ -125,7 +125,7 @@ export class NwsHelper {
     return 0;
   }
 
-  private static readonly summaryForecast = new Cached<SummaryForecastResponse | null, string>(
+  private static readonly summaryForecast = new Cachable<SummaryForecastResponse | null, string>(
     async (summaryForecastUrl: string) =>
       this.getItemOnMissWithRetry(
         'summaryForecast',
@@ -138,12 +138,12 @@ export class NwsHelper {
     this.forecastCalculateExpiration,
     LoggerHelper.getLogger(`${this.CLASS_NAME}.summaryForecast`)
   );
-  static async getSummaryForecast(points: CacheEntry<PointsResponse>) {
+  static async getSummaryForecast(points: CachableEntry<PointsResponse>) {
     const summaryForecastUrl = points.item.properties.forecast;
     return this.summaryForecast.get(summaryForecastUrl, summaryForecastUrl);
   }
 
-  private static readonly forecastGridData = new Cached<ForecastGridDataResponse | null, string>(
+  private static readonly forecastGridData = new Cachable<ForecastGridDataResponse | null, string>(
     async (forecastGridDataUrl: string) =>
       this.getItemOnMissWithRetry(
         'forecastGridData',
@@ -153,7 +153,7 @@ export class NwsHelper {
     this.forecastCalculateExpiration,
     LoggerHelper.getLogger(`${this.CLASS_NAME}.forecastGridData`)
   );
-  static async getForecastGridData(points: CacheEntry<PointsResponse>) {
+  static async getForecastGridData(points: CachableEntry<PointsResponse>) {
     const forecastGridDataUrl = points.item.properties.forecastGridData;
     return this.forecastGridData.get(forecastGridDataUrl, forecastGridDataUrl);
   }

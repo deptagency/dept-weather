@@ -1,5 +1,5 @@
 export * from './airnow-helper';
-export * from './cached';
+export * from './cachable';
 export * from './cities-helper';
 export * from './cities-req-query-helper';
 export * from './epa-helper';
