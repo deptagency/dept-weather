@@ -59,13 +59,13 @@ const getTopResults = results => {
 
 const searchWithLeven = (query, cities) => {
   const citiesSortedByLevenScore = cities
-    .map(city => {
-      let score = leven(query, city.cityAndStateCodeLower.slice(0, query.length));
-      let idxOfQuery = city.cityAndStateCodeLower.indexOf(query);
-      if (idxOfQuery === 0) score = 0;
-      else if (idxOfQuery > 0) score = 0.5;
-      return { ...city, score };
-    })
+    .map(city => ({
+      ...city,
+      score:
+        city.cityAndStateCodeLower.indexOf(query) > 0
+          ? 0.5
+          : leven(query, city.cityAndStateCodeLower.slice(0, query.length))
+    }))
     .sort((a, b) => (a.score < b.score ? -1 : a.score > b.score ? 1 : 0));
   return citiesSortedByLevenScore;
 };
