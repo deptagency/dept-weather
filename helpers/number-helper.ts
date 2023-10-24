@@ -4,26 +4,16 @@ import { ReqQuery } from 'models/api';
 import { NwsUnits, QuantitativeValue } from 'models/nws';
 
 export class NumberHelper {
-  static round(value: number | null, n: number | null = 1, method: 'floor' | 'ceil' | 'round' = 'round') {
-    if (value == null) {
-      return null;
-    }
-    if (n == null) {
-      return value;
-    }
+  static round(
+    value: number | null,
+    n: number | null = 1,
+    method: Extract<keyof Math, 'floor' | 'ceil' | 'round'> = 'round'
+  ) {
+    if (value == null) return null;
+    if (n == null) return value;
 
-    const multiple = n === 0 ? 1 : Math.pow(10, n);
-    const x = value * multiple;
-    let roundedX: number;
-    if (method === 'floor') {
-      roundedX = Math.floor(x);
-    } else if (method === 'ceil') {
-      roundedX = Math.ceil(x);
-    } else {
-      roundedX = Math.round(x);
-    }
-
-    return roundedX / multiple;
+    const multiple = Math.pow(10, n);
+    return Math[method](value * multiple) / multiple;
   }
 
   static roundNws(quantitativeValue: QuantitativeValue | undefined, n: number | null = 1) {
