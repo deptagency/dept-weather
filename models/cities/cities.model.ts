@@ -7,7 +7,7 @@ export interface FullCity {
   latitude: number;
   longitude: number;
   timeZone: string;
-  geonameid: number;
+  geonameid: string | number;
 }
 
 export interface InputCity extends Omit<FullCity, 'cityAndStateCode'> {}
@@ -27,7 +27,7 @@ export interface SearchResultCity
     Partial<Pick<FullCity, 'cityName' | 'stateCode'>>,
     Partial<Pick<FullCity, 'cityAndStateCode'>> {}
 
-export interface InputCityById extends Omit<City, 'geonameid' | 'cityAndStateCode'> {}
+export interface InputCityById extends Omit<City, 'geonameid' | 'cityAndStateCode'>, Pick<FullCity, 'population'> {}
 
 export interface MinimalQueriedCity extends CityWithCoordinates, Pick<FullCity, 'timeZone'> {}
 export interface CityWithCoordinates extends Pick<FullCity, 'latitude' | 'longitude'> {}

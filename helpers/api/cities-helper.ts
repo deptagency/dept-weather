@@ -5,7 +5,6 @@ import leven from 'leven';
 import path from 'path';
 import {
   CITY_SEARCH_CITIES_BY_ID_FILENAME,
-  CITY_SEARCH_CITIES_FILENAME,
   CITY_SEARCH_DATA_FOLDER,
   CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL,
   CITY_SEARCH_QUERY_CACHE_FILENAME,
@@ -13,7 +12,7 @@ import {
 } from 'constants/server';
 import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
-import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCity, ScoredCity } from 'models/cities';
+import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCityById, ScoredCity } from 'models/cities';
 import { Unit } from 'models';
 import { Cached } from './cached';
 import { LoggerHelper } from './logger-helper';
@@ -42,17 +41,32 @@ export class CitiesHelper {
     return JSON.parse(fileContents);
   }
 
+  private static citiesByIdPromise: Promise<CitiesById> = (async () => {
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as CitiesById;
+
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesByIdPromise`).verbose(`Took ${getFormattedDuration()}`);
+    return citiesById;
+  })();
   private static citiesPromise: Promise<FullCity[]> = (async () => {
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const inputCities = (await this.getFile(CITY_SEARCH_CITIES_FILENAME)) as InputCity[];
-    const returnVal = inputCities.map((inputCity: InputCity): FullCity => {
-      const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(inputCity);
-      return {
-        ...inputCity,
-        cityAndStateCode,
-        cityAndStateCodeLower: cityAndStateCode.toLowerCase()
-      };
-    });
+    const citiesById = await this.citiesByIdPromise;
+    const returnVal = Object.entries(citiesById).map(
+      ([geonameid, inputCityById]: [string, InputCityById]): FullCity => {
+        const fullCity: FullCity = {
+          ...inputCityById,
+          geonameid,
+          cityAndStateCode: '',
+          cityAndStateCodeLower: ''
+        };
+
+        const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(fullCity);
+        fullCity.cityAndStateCode = cityAndStateCode;
+        fullCity.cityAndStateCodeLower = cityAndStateCode.toLowerCase();
+
+        return fullCity;
+      }
+    );
 
     LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesPromise`).verbose(`Took ${getFormattedDuration()}`);
     return returnVal;
@@ -64,13 +78,6 @@ export class CitiesHelper {
 
     LoggerHelper.getLogger(`${this.CLASS_NAME}.topCitiesPromise`).verbose(`Took ${getFormattedDuration()}`);
     return returnVal;
-  })();
-  private static citiesByIdPromise: Promise<CitiesById> = (async () => {
-    const getFormattedDuration = LoggerHelper.trackPerformance();
-    const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as CitiesById;
-
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesByIdPromise`).verbose(`Took ${getFormattedDuration()}`);
-    return citiesById;
   })();
   private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {
     const getFormattedDuration = LoggerHelper.trackPerformance();
@@ -149,11 +156,11 @@ export class CitiesHelper {
     return topResults.map(this.mapToCity);
   }
 
-  static async getCityWithId(geonameidStr: string) {
-    const geonameid = Number(geonameidStr);
-    if (Number.isInteger(geonameid) && geonameid > 0) {
+  static async getCityWithId(geonameid: string) {
+    const geonameidNum = Number(geonameid);
+    if (Number.isInteger(geonameidNum) && geonameidNum > 0) {
       const citiesById = await this.citiesByIdPromise;
-      const match = citiesById[String(geonameid)];
+      const match = citiesById[geonameid];
       if (match != null) {
         return this.mapToCity({
           ...match,
