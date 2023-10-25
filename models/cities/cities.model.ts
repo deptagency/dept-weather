@@ -10,7 +10,7 @@ export interface FullCity {
   geonameid: string | number;
 }
 
-export interface InputCity extends Omit<FullCity, 'cityAndStateCode'> {}
+export interface InputCityById extends Omit<FullCity, 'cityAndStateCode' | 'cityAndStateCodeLower' | 'geonameid'> {}
 export interface ScoredCity extends FullCity {
   score: number;
 }
@@ -30,7 +30,7 @@ export interface SearchResultCity
 export interface MinimalQueriedCity extends CityWithCoordinates, Pick<FullCity, 'timeZone'> {}
 export interface CityWithCoordinates extends Pick<FullCity, 'latitude' | 'longitude'> {}
 
-export type InputCitiesById = Record<string, [string, string, number, number, number, string]>;
+export type InputCitiesById = Record<string, InputCityById>;
 export type CitiesById = Record<string, FullCity>;
 
 export type CitiesQueryCache = Record<string, number[]>;
