@@ -33,7 +33,7 @@ export type Units = Record<UnitType, UnitMapping>;
 const KM_M = 1_000;
 const M_MM = 1_000;
 const KM_MM = KM_M * M_MM;
-const KM_IN = 39370.078740157;
+const KM_IN = 39_370.078740157;
 
 const M_IN = KM_IN / KM_M; // 39.370078740157
 const MM_IN = KM_IN / KM_MM; // 0.039370078740157
