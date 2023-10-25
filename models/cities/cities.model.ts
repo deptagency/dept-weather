@@ -27,12 +27,10 @@ export interface SearchResultCity
     Partial<Pick<FullCity, 'cityName' | 'stateCode'>>,
     Partial<Pick<FullCity, 'cityAndStateCode'>> {}
 
-export interface InputCityById extends Omit<City, 'geonameid' | 'cityAndStateCode'>, Pick<FullCity, 'population'> {}
-
 export interface MinimalQueriedCity extends CityWithCoordinates, Pick<FullCity, 'timeZone'> {}
 export interface CityWithCoordinates extends Pick<FullCity, 'latitude' | 'longitude'> {}
 
-export type CitiesById = Record<string, InputCityById>;
+export type CitiesById = Record<string, FullCity>;
 
 export type CitiesQueryCache = Record<string, number[]>;
 export type CitiesCityAndStateCodeCache = Record<string, string>;

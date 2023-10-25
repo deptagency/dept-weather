@@ -12,7 +12,7 @@ import {
 } from 'constants/server';
 import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
-import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCityById, ScoredCity } from 'models/cities';
+import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, ScoredCity } from 'models/cities';
 import { Unit } from 'models';
 import { Cached } from './cached';
 import { LoggerHelper } from './logger-helper';
@@ -36,60 +36,52 @@ export class CitiesHelper {
   }
 
   private static async getFile(fName: string) {
+    const getFormattedDuration = LoggerHelper.trackPerformance();
     const dataDirectory = path.join(process.cwd(), CITY_SEARCH_DATA_FOLDER);
     const fileContents = await readFile(path.join(dataDirectory, fName), 'utf8');
-    return JSON.parse(fileContents);
+    const returnVal = JSON.parse(fileContents);
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.getFile(${fName})`).verbose(`Took ${getFormattedDuration()}`);
+
+    return returnVal;
   }
 
   private static citiesByIdPromise: Promise<CitiesById> = (async () => {
-    const getFormattedDuration = LoggerHelper.trackPerformance();
     const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as CitiesById;
 
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    for (const geonameid in citiesById) {
+      citiesById[geonameid].geonameid = geonameid;
+      const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(citiesById[geonameid]);
+      citiesById[geonameid].cityAndStateCode = cityAndStateCode;
+      citiesById[geonameid].cityAndStateCodeLower = cityAndStateCode.toLowerCase();
+    }
     LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesByIdPromise`).verbose(`Took ${getFormattedDuration()}`);
+
     return citiesById;
   })();
   private static citiesPromise: Promise<FullCity[]> = (async () => {
-    const getFormattedDuration = LoggerHelper.trackPerformance();
     const citiesById = await this.citiesByIdPromise;
-    const returnVal = Object.entries(citiesById).map(
-      ([geonameid, inputCityById]: [string, InputCityById]): FullCity => {
-        const fullCity: FullCity = {
-          ...inputCityById,
-          geonameid,
-          cityAndStateCode: '',
-          cityAndStateCodeLower: ''
-        };
 
-        const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(fullCity);
-        fullCity.cityAndStateCode = cityAndStateCode;
-        fullCity.cityAndStateCodeLower = cityAndStateCode.toLowerCase();
-
-        return fullCity;
-      }
-    );
-
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const returnVal = Object.values(citiesById);
     LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesPromise`).verbose(`Took ${getFormattedDuration()}`);
+
     return returnVal;
   })();
   private static topCitiesPromise: Promise<FullCity[]> = (async () => {
-    const getFormattedDuration = LoggerHelper.trackPerformance();
     const cities = await this.citiesPromise;
-    const returnVal = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
 
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.topCitiesPromise`).verbose(`Took ${getFormattedDuration()}`);
-    return returnVal;
-  })();
-  private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const returnVal = await this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME);
+    const returnVal = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.topCitiesPromise`).verbose(`Took ${getFormattedDuration()}`);
 
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.queryCachePromise`).verbose(`Took ${getFormattedDuration()}`);
     return returnVal;
   })();
+  private static queryCachePromise: Promise<CitiesQueryCache> = (async () =>
+    this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME))();
 
   private static getFromCache = async (query: string) => {
-    const queryCache = await this.queryCachePromise;
-    const cities = await this.citiesPromise;
+    const [queryCache, cities] = await Promise.all([this.queryCachePromise, this.citiesPromise]);
 
     const item = queryCache[query];
     if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
