@@ -49,7 +49,7 @@ export class CitiesHelper {
     const dataDirectory = path.join(process.cwd(), CITY_SEARCH_DATA_FOLDER);
     const fileContents = await readFile(path.join(dataDirectory, fName), 'utf8');
     const returnVal = JSON.parse(fileContents);
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.getFile(${fName})`).verbose(`Took ${getFormattedDuration()}`);
+    console.log(`${getFormattedDuration()} for ${this.CLASS_NAME}.getFile(${fName})`);
 
     return returnVal;
   }
@@ -75,7 +75,7 @@ export class CitiesHelper {
         cityAndStateCodeLower: cityAndStateCode.toLowerCase()
       };
     }
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesByIdPromise`).verbose(`Took ${getFormattedDuration()}`);
+    console.log(`${getFormattedDuration()} for ${this.CLASS_NAME}.citiesByIdPromise`);
 
     return returnCitiesById;
   })();
@@ -84,7 +84,7 @@ export class CitiesHelper {
 
     const getFormattedDuration = LoggerHelper.trackPerformance();
     const returnVal = Object.values(citiesById);
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesPromise`).verbose(`Took ${getFormattedDuration()}`);
+    console.log(`${getFormattedDuration()} for ${this.CLASS_NAME}.citiesPromise`);
 
     return returnVal;
   })();
@@ -93,7 +93,7 @@ export class CitiesHelper {
 
     const getFormattedDuration = LoggerHelper.trackPerformance();
     const returnVal = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.topCitiesPromise`).verbose(`Took ${getFormattedDuration()}`);
+    console.log(`${getFormattedDuration()} for ${this.CLASS_NAME}.topCitiesPromise`);
 
     return returnVal;
   })();
