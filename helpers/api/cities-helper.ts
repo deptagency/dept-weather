@@ -56,7 +56,7 @@ export class CitiesHelper {
 
   private static citiesByIdPromise: Promise<CitiesById> = (async () => {
     const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as InputCitiesById;
-    const returnCitiesById = citiesById as unknown as CitiesById;
+    const returnCitiesById: CitiesById = {};
 
     const getFormattedDuration = LoggerHelper.trackPerformance();
     for (const geonameid in citiesById) {
