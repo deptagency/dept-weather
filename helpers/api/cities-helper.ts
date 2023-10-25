@@ -12,7 +12,16 @@ import {
 } from 'constants/server';
 import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
-import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, ScoredCity } from 'models/cities';
+import {
+  CitiesById,
+  CitiesQueryCache,
+  City,
+  ClosestCity,
+  FullCity,
+  InputCitiesById,
+  ScoredCity,
+  SearchResultCity
+} from 'models/cities';
 import { Unit } from 'models';
 import { Cached } from './cached';
 import { LoggerHelper } from './logger-helper';
@@ -46,18 +55,29 @@ export class CitiesHelper {
   }
 
   private static citiesByIdPromise: Promise<CitiesById> = (async () => {
-    const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as CitiesById;
+    const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as InputCitiesById;
+    const returnCitiesById = citiesById as unknown as CitiesById;
 
     const getFormattedDuration = LoggerHelper.trackPerformance();
     for (const geonameid in citiesById) {
-      citiesById[geonameid].geonameid = geonameid;
-      const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(citiesById[geonameid]);
-      citiesById[geonameid].cityAndStateCode = cityAndStateCode;
-      citiesById[geonameid].cityAndStateCodeLower = cityAndStateCode.toLowerCase();
+      const [cityName, stateCode, population, latitude, longitude, timeZone] = citiesById[geonameid];
+      const cityAndStateCode = SearchQueryHelper.getCityAndStateCode({ cityName, stateCode } as SearchResultCity);
+
+      returnCitiesById[geonameid] = {
+        geonameid,
+        cityName,
+        stateCode,
+        population,
+        latitude,
+        longitude,
+        timeZone,
+        cityAndStateCode,
+        cityAndStateCodeLower: cityAndStateCode.toLowerCase()
+      };
     }
     LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesByIdPromise`).verbose(`Took ${getFormattedDuration()}`);
 
-    return citiesById;
+    return returnCitiesById;
   })();
   private static citiesPromise: Promise<FullCity[]> = (async () => {
     const citiesById = await this.citiesByIdPromise;

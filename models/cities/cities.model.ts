@@ -30,6 +30,7 @@ export interface SearchResultCity
 export interface MinimalQueriedCity extends CityWithCoordinates, Pick<FullCity, 'timeZone'> {}
 export interface CityWithCoordinates extends Pick<FullCity, 'latitude' | 'longitude'> {}
 
+export type InputCitiesById = Record<string, [string, string, number, number, number, string]>;
 export type CitiesById = Record<string, FullCity>;
 
 export type CitiesQueryCache = Record<string, number[]>;

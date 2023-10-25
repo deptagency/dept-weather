@@ -12,19 +12,27 @@ import { read, write } from './utils.js';
 
 const citiesToCitiesById = cities => {
   const citiesById = {};
+  const timeZones = {};
   for (const city of cities) {
-    const cityCopy = { ...city };
-    delete cityCopy.geonameid;
-    citiesById[city.geonameid] = cityCopy;
+    citiesById[city.geonameid] = [
+      city.cityName,
+      city.stateCode,
+      city.population,
+      city.latitude,
+      city.longitude,
+      city.timeZone
+    ];
+    timeZones[city.timeZone] = timeZones[city.timeZone] == null ? 1 : timeZones[city.timeZone] + 1;
   }
+  console.log(timeZones);
   return citiesById;
 };
 
 const run = async () => {
   const cities = await read(`${DOT_DATA_PATH}cities.json`);
   const citiesById = citiesToCitiesById(cities);
-  await write(`${DOT_DATA_PATH}cities-by-id.json`, citiesById);
-  await write(`${DOT_DATA_PATH}cities-by-id-formatted.json`, citiesById, true);
+  await write(`${DOT_DATA_PATH}cities-by-id-encoded.json`, citiesById);
+  await write(`${DOT_DATA_PATH}cities-by-id-encoded-formatted.json`, citiesById, true);
 };
 
 run();
