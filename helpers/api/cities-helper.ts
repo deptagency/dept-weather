@@ -43,8 +43,9 @@ export class CitiesHelper {
   }
 
   private static citiesPromise: Promise<FullCity[]> = (async () => {
+    const getFormattedDuration = LoggerHelper.trackPerformance();
     const inputCities = (await this.getFile(CITY_SEARCH_CITIES_FILENAME)) as InputCity[];
-    return inputCities.map((inputCity: InputCity): FullCity => {
+    const returnVal = inputCities.map((inputCity: InputCity): FullCity => {
       const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(inputCity);
       return {
         ...inputCity,
@@ -52,17 +53,31 @@ export class CitiesHelper {
         cityAndStateCodeLower: cityAndStateCode.toLowerCase()
       };
     });
+
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesPromise`).verbose(`Took ${getFormattedDuration()}`);
+    return returnVal;
   })();
   private static topCitiesPromise: Promise<FullCity[]> = (async () => {
+    const getFormattedDuration = LoggerHelper.trackPerformance();
     const cities = await this.citiesPromise;
-    return [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+    const returnVal = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.topCitiesPromise`).verbose(`Took ${getFormattedDuration()}`);
+    return returnVal;
   })();
   private static citiesByIdPromise: Promise<CitiesById> = (async () => {
+    const getFormattedDuration = LoggerHelper.trackPerformance();
     const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as CitiesById;
+
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.citiesByIdPromise`).verbose(`Took ${getFormattedDuration()}`);
     return citiesById;
   })();
   private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {
-    return this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME);
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const returnVal = await this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME);
+
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.queryCachePromise`).verbose(`Took ${getFormattedDuration()}`);
+    return returnVal;
   })();
 
   private static getFromCache = async (query: string) => {
