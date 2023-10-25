@@ -56,17 +56,28 @@ export class CitiesHelper {
 
   private static citiesByIdPromise: Promise<CitiesById> = (async () => {
     const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as InputCitiesById;
+    const returnCitiesById = citiesById as unknown as CitiesById;
 
     const getFormattedDuration = LoggerHelper.trackPerformance();
     for (const geonameid in citiesById) {
-      const value = citiesById[geonameid] as FullCity;
-      value.cityAndStateCode = SearchQueryHelper.getCityAndStateCode(value);
-      value.cityAndStateCodeLower = value.cityAndStateCode.toLowerCase();
-      value.geonameid = geonameid;
+      const [cityName, stateCode, population, latitude, longitude, timeZone] = citiesById[geonameid];
+      const cityAndStateCode = SearchQueryHelper.getCityAndStateCode({ cityName, stateCode } as SearchResultCity);
+
+      returnCitiesById[geonameid] = {
+        geonameid,
+        cityName,
+        stateCode,
+        population,
+        latitude,
+        longitude,
+        timeZone,
+        cityAndStateCode,
+        cityAndStateCodeLower: cityAndStateCode.toLowerCase()
+      };
     }
     console.log(`${getFormattedDuration()} for ${this.CLASS_NAME}.citiesByIdPromise`);
 
-    return citiesById as CitiesById;
+    return returnCitiesById;
   })();
   private static citiesPromise: Promise<FullCity[]> = (async () => {
     const citiesById = await this.citiesByIdPromise;
