@@ -27,11 +27,11 @@ export class CitiesReqQueryHelper {
   }
 
   static async getCityFromId(reqQuery: ReqQuery, downstreamKeys: string[], warnings: string[]) {
-    const geonameidStr = reqQuery[API_GEONAMEID_KEY];
+    const geonameid = reqQuery[API_GEONAMEID_KEY];
     let city: City | undefined;
 
-    if (typeof geonameidStr === 'string' && geonameidStr.length) {
-      city = await CitiesHelper.getCityWithId(geonameidStr);
+    if (typeof geonameid === 'string' && geonameid.length) {
+      city = await CitiesHelper.getCityWithId(geonameid);
       this.addWarningsForValue(city, reqQuery, API_GEONAMEID_KEY, downstreamKeys, warnings);
     }
 

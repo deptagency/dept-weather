@@ -5,7 +5,6 @@ import leven from 'leven';
 import path from 'path';
 import {
   CITY_SEARCH_CITIES_BY_ID_FILENAME,
-  CITY_SEARCH_CITIES_FILENAME,
   CITY_SEARCH_DATA_FOLDER,
   CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL,
   CITY_SEARCH_QUERY_CACHE_FILENAME,
@@ -13,7 +12,7 @@ import {
 } from 'constants/server';
 import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
-import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCity, ScoredCity } from 'models/cities';
+import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCitiesById, ScoredCity } from 'models/cities';
 import { Unit } from 'models';
 import { Cached } from './cached';
 import { LoggerHelper } from './logger-helper';
@@ -42,17 +41,24 @@ export class CitiesHelper {
     return JSON.parse(fileContents);
   }
 
-  private static citiesPromise: Promise<FullCity[]> = (async () => {
+  private static citiesByIdPromise: Promise<CitiesById> = (async () => {
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const inputCities = await this.getFile<InputCity[]>(CITY_SEARCH_CITIES_FILENAME);
-    const cities = inputCities.map((inputCity: InputCity): FullCity => {
-      const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(inputCity);
-      return {
-        ...inputCity,
-        cityAndStateCode,
-        cityAndStateCodeLower: cityAndStateCode.toLowerCase()
-      };
-    });
+    const citiesById: InputCitiesById = await this.getFile<InputCitiesById>(CITY_SEARCH_CITIES_BY_ID_FILENAME);
+    for (const geonameid in citiesById) {
+      const fullCityByIdValue = citiesById[geonameid] as FullCity;
+      fullCityByIdValue.cityAndStateCode = SearchQueryHelper.getCityAndStateCode(citiesById[geonameid]);
+      fullCityByIdValue.cityAndStateCodeLower = fullCityByIdValue.cityAndStateCode.toLowerCase();
+      fullCityByIdValue.geonameid = geonameid;
+    }
+    LoggerHelper.getLogger(`citiesByIdPromise`).verbose(getFormattedDuration());
+
+    return citiesById as CitiesById;
+  })();
+  private static citiesPromise: Promise<FullCity[]> = (async () => {
+    const citiesById = await this.citiesByIdPromise;
+
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const cities = Object.values(citiesById);
     LoggerHelper.getLogger(`citiesPromise`).verbose(getFormattedDuration());
 
     return cities;
@@ -65,13 +71,6 @@ export class CitiesHelper {
     LoggerHelper.getLogger(`topCitiesPromise`).verbose(getFormattedDuration());
 
     return topCities;
-  })();
-  private static citiesByIdPromise: Promise<CitiesById> = (async () => {
-    const getFormattedDuration = LoggerHelper.trackPerformance();
-    const citiesById = await this.getFile<CitiesById>(CITY_SEARCH_CITIES_BY_ID_FILENAME);
-    LoggerHelper.getLogger(`citiesByIdPromise`).verbose(getFormattedDuration());
-
-    return citiesById;
   })();
   private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {
     const getFormattedDuration = LoggerHelper.trackPerformance();
@@ -150,16 +149,13 @@ export class CitiesHelper {
     return topResults.map(this.mapToCity);
   }
 
-  static async getCityWithId(geonameidStr: string) {
-    const geonameid = Number(geonameidStr);
-    if (Number.isInteger(geonameid) && geonameid > 0) {
+  static async getCityWithId(geonameid: string) {
+    const geonameidNum = Number(geonameid);
+    if (Number.isInteger(geonameidNum) && geonameidNum > 0) {
       const citiesById = await this.citiesByIdPromise;
-      const match = citiesById[String(geonameid)];
+      const match = citiesById[geonameid];
       if (match != null) {
-        return this.mapToCity({
-          ...match,
-          geonameid: geonameid
-        });
+        return this.mapToCity(match);
       }
     }
   }

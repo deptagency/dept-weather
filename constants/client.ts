@@ -11,7 +11,7 @@ export const GEOPOSITION_PERMISSION_DENIED_ERROR_CODE = 1;
 
 export const CURRENT_LOCATION: SearchResultCity = {
   cityAndStateCode: 'Current Location',
-  geonameid: 0
+  geonameid: '0'
 } as SearchResultCity;
 
 export const CITY_SEARCH_DEBOUNCE_MS = 250;

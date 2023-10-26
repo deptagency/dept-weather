@@ -100,7 +100,7 @@ export class SearchQueryHelper {
     );
   }
 
-  static getCityAndStateCode(city: SearchResultCity) {
+  static getCityAndStateCode(city: Pick<SearchResultCity, 'cityAndStateCode' | 'cityName' | 'stateCode'>) {
     return city.cityAndStateCode ? city.cityAndStateCode : `${city.cityName}, ${city.stateCode}`;
   }
 }

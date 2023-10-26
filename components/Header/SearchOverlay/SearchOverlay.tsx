@@ -66,7 +66,7 @@ export default function SearchOverlay({
         // Map array of geonameids to array of objects, which also include the cityAndStateCode found in the gidCityAndStateCodeCache
         const cachedResults = cachedQuery.map(geonameid => ({
           cityAndStateCode: citiesGIDCache.gidCityAndStateCodeCache[String(geonameid)],
-          geonameid
+          geonameid: String(geonameid)
         }));
         abortSearchCallAndUse(cachedResults);
         return;

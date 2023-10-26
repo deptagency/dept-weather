@@ -16,17 +16,17 @@ import { APIRoute, getPath, QueryParams } from 'models/api';
 import { CitiesGIDCache, SearchResultCity } from 'models/cities';
 
 const getGeonameidFromUrl = (router: NextRouter) => {
-  let geonameidStr = router.query[API_GEONAMEID_KEY];
-  if (typeof geonameidStr === 'string' && geonameidStr.length) {
-    const geonameid = Number(geonameidStr);
-    if (Number.isInteger(geonameid) && geonameid >= 0) {
+  let geonameid = router.query[API_GEONAMEID_KEY];
+  if (typeof geonameid === 'string' && geonameid.length) {
+    const geonameidNum = Number(geonameid);
+    if (Number.isInteger(geonameidNum) && geonameidNum >= 0) {
       return geonameid;
     }
   }
   return undefined;
 };
 
-const getQueryParamsForGeonameid = (geonameid: number): QueryParams => ({
+const getQueryParamsForGeonameid = (geonameid: string): QueryParams => ({
   [API_GEONAMEID_KEY]: geonameid
 });
 
@@ -124,7 +124,7 @@ export default function Home() {
 
   const controllerRef = useRef<AbortController | undefined>();
   useEffect(() => {
-    const searchAndSetSelectedCity = async (searchGeonameid: number) => {
+    const searchAndSetSelectedCity = async (searchGeonameid: string) => {
       // Abort any pending search
       if (controllerRef.current) {
         controllerRef.current.abort();
