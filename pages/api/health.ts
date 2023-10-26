@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { LoggerHelper } from 'helpers/api';
+import { LoggerHelper } from 'helpers/api/logger-helper';
 import { APIRoute, getPath } from 'models/api';
 
 const LOGGER_LABEL = getPath(APIRoute.HEALTH);

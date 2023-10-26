@@ -1,16 +1,14 @@
 import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
-import {
-  AirNowHelper,
-  CacheEntry,
-  CitiesReqQueryHelper,
-  EpaHelper,
-  LoggerHelper,
-  NwsHelper,
-  NwsMapHelper,
-  SunTimesHelper,
-  WeatherlinkHelper
-} from 'helpers/api';
+import { AirNowHelper } from 'helpers/api/airnow-helper';
+import { CacheEntry } from 'helpers/api/cached';
+import { CitiesReqQueryHelper } from 'helpers/api/cities-req-query-helper';
+import { EpaHelper } from 'helpers/api/epa-helper';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { NwsHelper } from 'helpers/api/nws/nws-helper';
+import { NwsMapHelper } from 'helpers/api/nws/nws-map-helper';
+import { SunTimesHelper } from 'helpers/api/sun-times-helper';
+import { WeatherlinkHelper } from 'helpers/api/weatherlink-helper';
 import { DataSource } from 'models';
 import { APIRoute, BaseData, getPath, Observations, Response } from 'models/api';
 

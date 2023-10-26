@@ -10,7 +10,6 @@ export interface FullCity {
   geonameid: string | number;
 }
 
-export interface InputCity extends Omit<FullCity, 'cityAndStateCode'> {}
 export interface ScoredCity extends FullCity {
   score: number;
 }
