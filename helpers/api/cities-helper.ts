@@ -50,7 +50,7 @@ export class CitiesHelper {
 
     for (const geonameid in inputCitiesById) {
       const [cityName, stateCode, population, latitude, longitude, timeZone] = inputCitiesById[geonameid];
-      const cityAndStateCode = SearchQueryHelper.getCityAndStateCode({ cityName, stateCode });
+      const cityAndStateCode = `${cityName}, ${stateCode}`;
 
       citiesById[geonameid] = {
         cityName,
