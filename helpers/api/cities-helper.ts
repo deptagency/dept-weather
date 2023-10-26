@@ -64,7 +64,6 @@ export class CitiesHelper {
       const cityAndStateCode = SearchQueryHelper.getCityAndStateCode({ cityName, stateCode } as SearchResultCity);
 
       returnCitiesById[geonameid] = {
-        geonameid,
         cityName,
         stateCode,
         population,
@@ -72,7 +71,8 @@ export class CitiesHelper {
         longitude,
         timeZone,
         cityAndStateCode,
-        cityAndStateCodeLower: cityAndStateCode.toLowerCase()
+        cityAndStateCodeLower: cityAndStateCode.toLowerCase(),
+        geonameid
       };
     }
     console.log(`${getFormattedDuration()} for ${this.CLASS_NAME}.citiesByIdPromise`);
@@ -88,20 +88,34 @@ export class CitiesHelper {
 
     return returnVal;
   })();
-  private static topCitiesPromise: Promise<FullCity[]> = (async () => {
-    const cities = await this.citiesPromise;
 
-    const getFormattedDuration = LoggerHelper.trackPerformance();
-    const returnVal = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
-    console.log(`${getFormattedDuration()} for ${this.CLASS_NAME}.topCitiesPromise`);
+  private static _topCitiesPromise?: Promise<FullCity[]>;
+  private static getTopCities() {
+    if (this._topCitiesPromise == null) {
+      this._topCitiesPromise = new Promise<FullCity[]>(async resolve => {
+        const cities = await this.citiesPromise;
+        const getFormattedDuration = LoggerHelper.trackPerformance();
+        const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+        console.log(`${getFormattedDuration()} for ${this.CLASS_NAME}.topCitiesPromise`);
 
-    return returnVal;
-  })();
-  private static queryCachePromise: Promise<CitiesQueryCache> = (async () =>
-    this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME))();
+        resolve(topCities);
+      });
+    }
 
-  private static getFromCache = async (query: string) => {
-    const [queryCache, cities] = await Promise.all([this.queryCachePromise, this.citiesPromise]);
+    return this._topCitiesPromise;
+  }
+
+  private static _queryCachePromise?: Promise<CitiesQueryCache>;
+  private static getQueryCache() {
+    if (this._queryCachePromise == null) {
+      this._queryCachePromise = this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME) as Promise<CitiesQueryCache>;
+    }
+
+    return this._queryCachePromise;
+  }
+
+  private static async getFromCache(query: string) {
+    const [queryCache, cities] = await Promise.all([this.getQueryCache(), this.citiesPromise]);
 
     const item = queryCache[query];
     if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
@@ -109,7 +123,7 @@ export class CitiesHelper {
     }
 
     return undefined;
-  };
+  }
 
   private static getTopResults(results: ScoredCity[]) {
     const topResults: FullCity[] = [];
@@ -154,7 +168,7 @@ export class CitiesHelper {
   static async searchFor(query: string) {
     const getFormattedDuration = LoggerHelper.trackPerformance();
     if (!query.length) {
-      return (await this.topCitiesPromise).map(this.mapToCity);
+      return (await this.getTopCities()).map(this.mapToCity);
     }
 
     let topResults = await this.getFromCache(query);
