@@ -50,7 +50,14 @@ export default function Home() {
     // Only run on client-side (i.e., when window object is available)
     if (typeof window !== 'undefined') {
       const recentCitiesStr = localStorage.getItem(LOCAL_STORAGE_RECENT_CITIES_KEY);
-      return recentCitiesStr ? JSON.parse(recentCitiesStr) : [];
+      const parsedRecentCities = recentCitiesStr ? JSON.parse(recentCitiesStr) : [];
+      for (const recentCity of parsedRecentCities) {
+        // Convert number-typed geoname ids to strings
+        if (typeof recentCity.geonameid === 'number') {
+          recentCity.geonameid = String(recentCity.geonameid);
+        }
+      }
+      return parsedRecentCities;
     }
     return [];
   });
