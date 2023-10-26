@@ -43,16 +43,30 @@ export class CitiesHelper {
 
   private static citiesByIdPromise: Promise<CitiesById> = (async () => {
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const citiesById: InputCitiesById = await this.getFile<InputCitiesById>(CITY_SEARCH_CITIES_BY_ID_FILENAME);
-    for (const geonameid in citiesById) {
-      const fullCityByIdValue = citiesById[geonameid] as FullCity;
-      fullCityByIdValue.cityAndStateCode = SearchQueryHelper.getCityAndStateCode(citiesById[geonameid]);
-      fullCityByIdValue.cityAndStateCodeLower = fullCityByIdValue.cityAndStateCode.toLowerCase();
-      fullCityByIdValue.geonameid = geonameid;
+    const inputCitiesById: InputCitiesById = await this.getFile<InputCitiesById>(CITY_SEARCH_CITIES_BY_ID_FILENAME);
+    // Create a reference alias, for "unpacking" the input array values into a new object
+    //  This does NOT copy the array in memory and is only here for typing
+    const citiesById = inputCitiesById as unknown as CitiesById;
+
+    for (const geonameid in inputCitiesById) {
+      const [cityName, stateCode, population, latitude, longitude, timeZone] = inputCitiesById[geonameid];
+      const cityAndStateCode = SearchQueryHelper.getCityAndStateCode({ cityName, stateCode });
+
+      citiesById[geonameid] = {
+        cityName,
+        stateCode,
+        population,
+        latitude,
+        longitude,
+        timeZone,
+        cityAndStateCode,
+        cityAndStateCodeLower: cityAndStateCode.toLowerCase(),
+        geonameid
+      };
     }
     LoggerHelper.getLogger(`citiesByIdPromise`).verbose(getFormattedDuration());
 
-    return citiesById as CitiesById;
+    return citiesById;
   })();
   private static citiesPromise: Promise<FullCity[]> = (async () => {
     const citiesById = await this.citiesByIdPromise;

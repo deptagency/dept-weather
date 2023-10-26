@@ -26,8 +26,7 @@ export interface SearchResultCity
     Partial<Pick<FullCity, 'cityName' | 'stateCode'>>,
     Partial<Pick<FullCity, 'cityAndStateCode'>> {}
 
-export interface InputCityById extends Omit<City, 'geonameid'> {}
-export type InputCitiesById = Record<string, InputCityById>;
+export type InputCitiesById = Record<string, [string, string, number, number, number, string]>;
 export type CitiesById = Record<string, FullCity>;
 
 export interface MinimalQueriedCity extends CityWithCoordinates, Pick<FullCity, 'timeZone'> {}

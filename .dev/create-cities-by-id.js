@@ -1,4 +1,4 @@
-// Script to transform array of cities to an object with entries like { geonameid: city, ... } to enable faster lookup by geonameid
+// Script to transform array of cities to an object with entries like { geonameid: cityArr, ... } to enable faster lookup by geonameid
 //  Inputs:
 //    - "cities.json" file
 //  Outputs:
@@ -13,9 +13,14 @@ import { read, write } from './utils.js';
 const citiesToCitiesById = cities => {
   const citiesById = {};
   for (const city of cities) {
-    const cityCopy = { ...city };
-    delete cityCopy.geonameid;
-    citiesById[city.geonameid] = cityCopy;
+    citiesById[city.geonameid] = [
+      city.cityName,
+      city.stateCode,
+      city.population,
+      city.latitude,
+      city.longitude,
+      city.timeZone
+    ];
   }
   return citiesById;
 };
