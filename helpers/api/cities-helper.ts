@@ -11,7 +11,7 @@ import {
   CITY_SEARCH_RESULTS_MAX_AGE
 } from 'constants/server';
 import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
-import { CoordinatesHelper, NumberHelper, SearchQueryHelper } from 'helpers';
+import { CoordinatesHelper, NumberHelper } from 'helpers';
 import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCitiesById, ScoredCity } from 'models/cities';
 import { Unit } from 'models';
 import { Cached } from './cached';
@@ -42,12 +42,11 @@ export class CitiesHelper {
   }
 
   private static citiesByIdPromise: Promise<CitiesById> = (async () => {
-    const getFormattedDuration = LoggerHelper.trackPerformance();
     const inputCitiesById: InputCitiesById = await this.getFile<InputCitiesById>(CITY_SEARCH_CITIES_BY_ID_FILENAME);
+
     // Create a reference alias, for "unpacking" the input array values into a new object
     //  This does NOT copy the array in memory and is only here for typing
     const citiesById = inputCitiesById as unknown as CitiesById;
-
     for (const geonameid in inputCitiesById) {
       const [cityName, stateCode, population, latitude, longitude, timeZone] = inputCitiesById[geonameid];
       const cityAndStateCode = `${cityName}, ${stateCode}`;
@@ -64,17 +63,12 @@ export class CitiesHelper {
         geonameid
       };
     }
-    LoggerHelper.getLogger(`citiesByIdPromise`).verbose(getFormattedDuration());
 
     return citiesById;
   })();
   private static citiesPromise: Promise<FullCity[]> = (async () => {
     const citiesById = await this.citiesByIdPromise;
-
-    const getFormattedDuration = LoggerHelper.trackPerformance();
     const cities = Object.values(citiesById);
-    LoggerHelper.getLogger(`citiesPromise`).verbose(getFormattedDuration());
-
     return cities;
   })();
 
@@ -83,11 +77,7 @@ export class CitiesHelper {
     if (this._topCitiesPromise == null) {
       this._topCitiesPromise = new Promise<FullCity[]>(async resolve => {
         const cities = await this.citiesPromise;
-
-        const getFormattedDuration = LoggerHelper.trackPerformance();
         const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
-        LoggerHelper.getLogger(`topCitiesPromise`).verbose(getFormattedDuration());
-
         resolve(topCities);
       });
     }
@@ -98,13 +88,7 @@ export class CitiesHelper {
   private static _queryCachePromise?: Promise<CitiesQueryCache>;
   private static getQueryCache() {
     if (this._queryCachePromise == null) {
-      this._queryCachePromise = new Promise<CitiesQueryCache>(async resolve => {
-        const getFormattedDuration = LoggerHelper.trackPerformance();
-        const queryCache = await this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
-        LoggerHelper.getLogger(`queryCachePromise`).verbose(getFormattedDuration());
-
-        resolve(queryCache);
-      });
+      this._queryCachePromise = this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
     }
 
     return this._queryCachePromise;
