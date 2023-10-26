@@ -9,7 +9,12 @@ const LOGGER_LABEL = getPath(APIRoute.FORECAST);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(req.query);
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(
+      req.query,
+      getFormattedDuration
+    );
+
     const points = await NwsHelper.getPoints(CoordinatesHelper.cityToStr(minimalQueriedCity));
     const timeZone = points.item.properties.timeZone;
     const forecasts = await Promise.all([NwsHelper.getSummaryForecast(points), NwsHelper.getForecastGridData(points)]);

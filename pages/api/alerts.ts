@@ -7,7 +7,12 @@ const LOGGER_LABEL = getPath(APIRoute.ALERTS);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(req.query);
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const { queriedCity, minimalQueriedCity, warnings } = await CitiesReqQueryHelper.parseQueriedCity(
+      req.query,
+      getFormattedDuration
+    );
+
     const alerts = await NwsHelper.getAlerts(minimalQueriedCity);
 
     const data: Alerts = {

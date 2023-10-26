@@ -90,9 +90,9 @@ export class Cached<Item, Opts> {
       if (validUntil) {
         const ttl = validUntil - this.nowTimeInSeconds;
         this.nodeCache.set(key, cacheEntry, ttl);
-        this.logger?.info(`${expiresLogPrefix} has been cached and expires${this.formatForLog(validUntil)}`);
+        this.logger?.debug(`${expiresLogPrefix} has been cached and expires${this.formatForLog(validUntil)}`);
       } else {
-        this.logger?.warn(`${expiresLogPrefix} has NOT been cached`);
+        this.logger?.info(`${expiresLogPrefix} has NOT been cached`);
       }
     } else {
       this.logger?.debug(`Cache HIT for "${key}"`);
