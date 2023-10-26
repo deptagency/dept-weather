@@ -63,27 +63,41 @@ export class CitiesHelper {
 
     return cities;
   })();
-  private static topCitiesPromise: Promise<FullCity[]> = (async () => {
-    const cities = await this.citiesPromise;
 
-    const getFormattedDuration = LoggerHelper.trackPerformance();
-    const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
-    LoggerHelper.getLogger(`topCitiesPromise`).verbose(getFormattedDuration());
+  private static _topCitiesPromise?: Promise<FullCity[]>;
+  private static getTopCities() {
+    if (this._topCitiesPromise == null) {
+      this._topCitiesPromise = new Promise<FullCity[]>(async resolve => {
+        const cities = await this.citiesPromise;
 
-    return topCities;
-  })();
-  private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {
-    const getFormattedDuration = LoggerHelper.trackPerformance();
-    const queryCache = await this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
-    LoggerHelper.getLogger(`queryCachePromise`).verbose(getFormattedDuration());
+        const getFormattedDuration = LoggerHelper.trackPerformance();
+        const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+        LoggerHelper.getLogger(`topCitiesPromise`).verbose(getFormattedDuration());
 
-    return queryCache;
-  })();
+        resolve(topCities);
+      });
+    }
+
+    return this._topCitiesPromise;
+  }
+
+  private static _queryCachePromise?: Promise<CitiesQueryCache>;
+  private static getQueryCache() {
+    if (this._queryCachePromise == null) {
+      this._queryCachePromise = new Promise<CitiesQueryCache>(async resolve => {
+        const getFormattedDuration = LoggerHelper.trackPerformance();
+        const queryCache = await this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
+        LoggerHelper.getLogger(`queryCachePromise`).verbose(getFormattedDuration());
+
+        resolve(queryCache);
+      });
+    }
+
+    return this._queryCachePromise;
+  }
 
   private static getFromCache = async (query: string) => {
-    const queryCache = await this.queryCachePromise;
-    const cities = await this.citiesPromise;
-
+    const [cities, queryCache] = await Promise.all([this.citiesPromise, this.getQueryCache()]);
     const item = queryCache[query];
     if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
       return item.map(refIndex => cities[refIndex]).slice(0, CITY_SEARCH_RESULT_LIMIT);
@@ -135,7 +149,7 @@ export class CitiesHelper {
   static async searchFor(query: string) {
     const getFormattedDuration = LoggerHelper.trackPerformance();
     if (!query.length) {
-      return (await this.topCitiesPromise).map(this.mapToCity);
+      return (await this.getTopCities()).map(this.mapToCity);
     }
 
     let topResults = await this.getFromCache(query);
