@@ -84,7 +84,7 @@ export class CitiesReqQueryHelper {
         timeZone: queriedCity.timeZone
       };
       LoggerHelper.getLogger(`${this.CLASS_NAME}.parseQueriedCity()`).verbose(
-        `Took ${getFormattedDuration()} for ${
+        `${getFormattedDuration()} for ${
           reqQuery[API_GEONAMEID_KEY]
             ? `${API_GEONAMEID_KEY}="${reqQuery[API_GEONAMEID_KEY]}"`
             : `${API_COORDINATES_KEY}="${reqQuery[API_COORDINATES_KEY]}"`

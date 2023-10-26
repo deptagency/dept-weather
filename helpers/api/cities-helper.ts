@@ -36,15 +36,16 @@ export class CitiesHelper {
     };
   }
 
-  private static async getFile(fName: string) {
+  private static async getFile<T>(fName: string): Promise<T> {
     const dataDirectory = path.join(process.cwd(), CITY_SEARCH_DATA_FOLDER);
     const fileContents = await readFile(path.join(dataDirectory, fName), 'utf8');
     return JSON.parse(fileContents);
   }
 
   private static citiesPromise: Promise<FullCity[]> = (async () => {
-    const inputCities = (await this.getFile(CITY_SEARCH_CITIES_FILENAME)) as InputCity[];
-    return inputCities.map((inputCity: InputCity): FullCity => {
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const inputCities = await this.getFile<InputCity[]>(CITY_SEARCH_CITIES_FILENAME);
+    const cities = inputCities.map((inputCity: InputCity): FullCity => {
       const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(inputCity);
       return {
         ...inputCity,
@@ -52,17 +53,32 @@ export class CitiesHelper {
         cityAndStateCodeLower: cityAndStateCode.toLowerCase()
       };
     });
+    LoggerHelper.getLogger(`citiesPromise`).verbose(getFormattedDuration());
+
+    return cities;
   })();
   private static topCitiesPromise: Promise<FullCity[]> = (async () => {
     const cities = await this.citiesPromise;
-    return [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+    LoggerHelper.getLogger(`topCitiesPromise`).verbose(getFormattedDuration());
+
+    return topCities;
   })();
   private static citiesByIdPromise: Promise<CitiesById> = (async () => {
-    const citiesById = (await this.getFile(CITY_SEARCH_CITIES_BY_ID_FILENAME)) as CitiesById;
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const citiesById = await this.getFile<CitiesById>(CITY_SEARCH_CITIES_BY_ID_FILENAME);
+    LoggerHelper.getLogger(`citiesByIdPromise`).verbose(getFormattedDuration());
+
     return citiesById;
   })();
   private static queryCachePromise: Promise<CitiesQueryCache> = (async () => {
-    return this.getFile(CITY_SEARCH_QUERY_CACHE_FILENAME);
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const queryCache = await this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
+    LoggerHelper.getLogger(`queryCachePromise`).verbose(getFormattedDuration());
+
+    return queryCache;
   })();
 
   private static getFromCache = async (query: string) => {
