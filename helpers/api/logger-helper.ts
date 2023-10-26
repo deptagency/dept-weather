@@ -38,11 +38,16 @@ export class LoggerHelper {
           transports: [
             new winston.transports.Console({
               format: winston.format.combine(
-                this.FORMAT_LEVEL,
+                ...(process.env.NODE_ENV !== 'production' ? [this.FORMAT_LEVEL] : []),
                 this.getFormatLabel(label),
                 this.FORMAT_TIMESTAMP,
                 this.FORMAT_COLORIZE,
-                winston.format.printf(info => `${info.timestamp} ${info.level} ${info.label} ${info.message}`)
+                winston.format.printf(
+                  info =>
+                    `${info.timestamp}${process.env.NODE_ENV !== 'production' ? ` ${info.level}` : ''} ${info.label} ${
+                      info.message
+                    }`
+                )
               ),
               level: process.env.NODE_ENV !== 'production' ? MIN_LOG_LEVEL_DEV : MIN_LOG_LEVEL_PROD
             })
