@@ -24,35 +24,19 @@ export default function CurrentTemp({ observations }: { observations?: WeatherOb
     setTempAriaLabel(newTempAriaLabel);
     setFeelsLikeTxt(newFeelsLikeTxt);
 
-    if ('setAppBadge' in window.navigator) {
-      try {
-        (window.navigator as any).setAppBadge(
-          observations?.temperature != null ? Math.round(observations?.temperature) : 0
-        );
-      } catch (e) {
-        setFeelsLikeTxt(`1 - error: ${e}`);
-      }
-    } else {
-      setFeelsLikeTxt('0 - setAppBadge unavailable!');
-    }
-
     const queryNotificationsPermission = async () => {
       if ('permissions' in navigator) {
         let permissionState: PermissionState | NotificationPermission;
         const permissionStatus = await navigator.permissions.query({ name: 'notifications' });
         permissionState = permissionStatus.state;
 
-        if (permissionState !== 'granted' && permissionState !== 'denied') {
+        if (permissionStatus.state === 'prompt') {
           permissionState = await Notification.requestPermission();
         }
-        if (permissionState === 'granted') {
-          if ('setAppBadge' in window.navigator) {
-            (window.navigator as any).setAppBadge(
-              observations?.temperature != null ? Math.round(observations?.temperature) : 0
-            );
-          } else {
-            setFeelsLikeTxt('2 - setAppBadge unavailable!');
-          }
+        if (permissionState === 'granted' && 'setAppBadge' in window.navigator) {
+          (window.navigator as any).setAppBadge(
+            observations?.temperature != null ? Math.round(observations?.temperature) : 0
+          );
         }
       }
     };
