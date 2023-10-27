@@ -23,6 +23,12 @@ export default function CurrentTemp({ observations }: { observations?: WeatherOb
     setFractionalTemp(String(newFractionalTemp));
     setTempAriaLabel(newTempAriaLabel);
     setFeelsLikeTxt(newFeelsLikeTxt);
+
+    if ('setAppBadge' in window.navigator && observations?.temperature != null) {
+      (window.navigator as any).setAppBadge(Math.round(observations?.temperature));
+    } else if ('clearAppBadge' in window.navigator) {
+      (window.navigator as any).clearAppBadge();
+    }
   }, [observations]);
 
   return (
