@@ -2,7 +2,7 @@ import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, u
 import { IME_UNSETTLED_KEY_CODE } from 'constants/client';
 import { ArrowIcon, DEPTLogoIcon } from 'components/Icons';
 import { SearchQueryHelper } from 'helpers';
-import { CitiesGIDCache, SearchResultCity } from 'models/cities';
+import { CitiesCache, SearchResultCity } from 'models/cities';
 import SearchOverlay from './SearchOverlay/SearchOverlay';
 import homeStyles from 'styles/Home.module.css';
 import styles from './Header.module.css';
@@ -13,14 +13,14 @@ export default function Header({
   selectedCity,
   setSelectedCity,
   recentCities,
-  citiesGIDCache
+  citiesCache
 }: {
   showSearchOverlay: boolean;
   setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
   selectedCity: SearchResultCity | undefined;
   setSelectedCity: Dispatch<SetStateAction<SearchResultCity | undefined>>;
   recentCities: SearchResultCity[];
-  citiesGIDCache: CitiesGIDCache | undefined;
+  citiesCache: CitiesCache | undefined;
 }) {
   const [rawSearchQuery, setRawSearchQuery] = useState<string>('');
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
@@ -160,7 +160,7 @@ export default function Header({
         highlightedIndex={highlightedIndex}
         setSelectedCity={setSelectedCity}
         recentCities={recentCities}
-        citiesGIDCache={citiesGIDCache}
+        citiesCache={citiesCache}
       ></SearchOverlay>
     </>
   );

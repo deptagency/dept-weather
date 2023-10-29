@@ -5,7 +5,7 @@ export const APP_DESCRIPTION = `The ${APP_TITLE} app provides up-to-date weather
 export const APP_URL = 'https://weather.deptagency.com';
 export const APP_THEME_COLOR = '#ffffff';
 export const APP_MASK_ICON_COLOR = '#000000';
-export const GID_CACHE_FILENAME = 'cities-top10000-gid-cache.json';
+export const CITIES_CACHE_FILENAME = 'cities-top10000-bundled-cache.json';
 export const UI_ANIMATION_DURATION = 300;
 export const GEOPOSITION_PERMISSION_DENIED_ERROR_CODE = 1;
 

@@ -13,7 +13,7 @@ const CACHED_STATIC_ASSET_SOURCES = [
   '/icons/(.*)',
   '/splash-screens/(.*)',
   '/weather-icons/(.*)',
-  '/cities-top10000-gid-cache.json',
+  '/cities-top10000-bundled-cache.json',
   '/favicon.svg'
 ];
 

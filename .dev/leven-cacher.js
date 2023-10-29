@@ -1,12 +1,10 @@
-// Script to create index and/or generate caches (queryCache, cityAndStateCodeCache, and cache)
+// Script to generate caches (queryCache and cityAndStateCodeCache)
 //  Inputs:
 //    - "cities.json" file
 //  Outputs:
 //    - These files for each N in CACHE_LEVELS:
-//        - "cities-topN-query-cache.json":             Object where key is query and value is array of refIndexes of cities.json array
-//        - "cities-topN-cityAndStateCode-cache.json":  Object where key is refIndex and value is a string formatted as "City, State"
-//        - "cities-topN-gid-cache.json":               Object with gidQueryCache & gidCityAndStateCode keys; values are caches with
-//                                                        geonameid values instead of refIndex values
+//        - "cities-topN-query-cache.json":             Object where key is query and value is array of geonameids
+//        - "cities-topN-cityAndStateCode-cache.json":  Object where key is geonameid and value is a string formatted as "City, State"
 //  How to use:
 //    1. Uncomment/comment desired functionality in run() function at end of file
 //    2. Run "NODE_OPTIONS=--max_old_space_size=8192 node .dev/leven-cacher.js" in the terminal from the root project directory
@@ -73,7 +71,7 @@ const searchWithLeven = (query, cities) => {
 const searchFor = (query, cities) => {
   const results = searchWithLeven(query, cities);
   const topResults = getTopResults(results);
-  return topResults.map(result => cities.findIndex(city => city.geonameid === result.geonameid));
+  return topResults.map(result => result.geonameid);
 };
 
 const buildQueryCache = (cities, topCities, startIdx, queryCache) => {
@@ -100,35 +98,16 @@ const getOrderedQueryCache = queryCache => {
     }, {});
 };
 
-const getGidQueryCache = (queryCache, allCities) => {
-  const gidQueryCache = {};
-  for (const [query, refIdxs] of Object.entries(queryCache)) {
-    gidQueryCache[query] = refIdxs.map(refIdx => allCities[refIdx].geonameid);
-  }
-  return gidQueryCache;
-};
-
 const buildCityAndStateCodeCache = (cityAndStateCodeCache, allCities, queryCache) => {
   const queryCacheArrs = Object.values(queryCache);
   for (const queryCacheArr of queryCacheArrs) {
-    for (const idx of queryCacheArr) {
-      const idxStr = String(idx);
-      if (cityAndStateCodeCache[idxStr] == null) {
-        cityAndStateCodeCache[idxStr] = allCities[idx].cityAndStateCode;
+    for (const gid of queryCacheArr) {
+      const gidStr = String(gid);
+      if (cityAndStateCodeCache[gidStr] == null) {
+        cityAndStateCodeCache[gidStr] = allCities.find(city => city.geonameid === gid).cityAndStateCode;
       }
     }
   }
-};
-
-const getGidCityAndStateCodeCache = (cityAndStateCodeCache, allCities) => {
-  const gidCityAndStateCodeCache = {};
-  for (const [refIdx, cityAndStateCode] of Object.entries(cityAndStateCodeCache)) {
-    const geonameidStr = String(allCities[refIdx].geonameid);
-    if (gidCityAndStateCodeCache[geonameidStr] == null) {
-      gidCityAndStateCodeCache[geonameidStr] = cityAndStateCode;
-    }
-  }
-  return gidCityAndStateCodeCache;
 };
 
 const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, startIdx = 0) => {
@@ -159,14 +138,6 @@ const generateCaches = async (queryCache = {}, cityAndStateCodeCache = {}, start
     await write(`${DOT_DATA_PATH}cities-top${level}-cityAndStateCode-cache.json`, cityAndStateCodeCache);
     console.timeEnd(cascLabel);
 
-    const gidLabel = `L${level} - build & write gid cache`;
-    console.time(gidLabel);
-    await write(`${DOT_DATA_PATH}cities-top${level}-gid-cache.json`, {
-      gidQueryCache: getGidQueryCache(orderedQueryCache, cities),
-      gidCityAndStateCodeCache: getGidCityAndStateCodeCache(cityAndStateCodeCache, cities)
-    });
-    console.timeEnd(gidLabel);
-
     console.log();
   }
 };
@@ -175,13 +146,14 @@ const run = async () => {
   // Use to get the number of cities with population > 0 and add that number to CACHE_LEVELS
   // const cities = await getMinimalCities();
   // const numCitiesWithPop = cities.filter(city => city.population).length;
+  // console.log(`Number of cities with population > 0: ${numCitiesWithPop}`);
   // CACHE_LEVELS.push(numCitiesWithPop);
 
   // Use for generating a brand new cache
   // await generateCaches();
 
   // Use for building upon existing caches
-  const topN = 30_542;
+  const topN = 30_557;
   const queryCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-query-cache.json`);
   const cityAndStateCodeCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-cityAndStateCode-cache.json`);
   await generateCaches(queryCache, cityAndStateCodeCache, topN);

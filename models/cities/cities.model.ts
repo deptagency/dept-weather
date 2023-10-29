@@ -35,7 +35,7 @@ export interface CityWithCoordinates extends Pick<FullCity, 'latitude' | 'longit
 export type CitiesQueryCache = Record<string, number[]>;
 export type CitiesCityAndStateCodeCache = Record<string, string>;
 
-export interface CitiesGIDCache {
-  gidQueryCache: CitiesQueryCache;
-  gidCityAndStateCodeCache: CitiesCityAndStateCodeCache;
+export interface CitiesCache {
+  queryCache: CitiesQueryCache;
+  cityAndStateCodeCache: CitiesCityAndStateCodeCache;
 }

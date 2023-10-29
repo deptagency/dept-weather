@@ -95,10 +95,10 @@ export class CitiesHelper {
   }
 
   private static getFromCache = async (query: string) => {
-    const [cities, queryCache] = await Promise.all([this.citiesPromise, this.getQueryCache()]);
+    const [citiesById, queryCache] = await Promise.all([this.citiesByIdPromise, this.getQueryCache()]);
     const item = queryCache[query];
     if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
-      return item.map(refIndex => cities[refIndex]).slice(0, CITY_SEARCH_RESULT_LIMIT);
+      return item.map(geonameidNum => citiesById[String(geonameidNum)]).slice(0, CITY_SEARCH_RESULT_LIMIT);
     }
 
     return undefined;

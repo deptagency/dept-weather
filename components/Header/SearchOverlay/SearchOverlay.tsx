@@ -5,7 +5,7 @@ import { LocateIcon, RecentIcon } from 'components/Icons';
 import { SearchQueryHelper } from 'helpers';
 import { useDebounce } from 'hooks';
 import { APIRoute, getPath } from 'models/api';
-import { CitiesGIDCache, SearchResultCity } from 'models/cities';
+import { CitiesCache, SearchResultCity } from 'models/cities';
 import homeStyles from 'styles/Home.module.css';
 import styles from './SearchOverlay.module.css';
 
@@ -19,7 +19,7 @@ export default function SearchOverlay({
   highlightedIndex,
   setSelectedCity,
   recentCities,
-  citiesGIDCache
+  citiesCache
 }: {
   rawSearchQuery: string;
   showSearchOverlay: boolean;
@@ -30,7 +30,7 @@ export default function SearchOverlay({
   highlightedIndex: number;
   setSelectedCity: Dispatch<SetStateAction<SearchResultCity | undefined>>;
   recentCities: SearchResultCity[];
-  citiesGIDCache: CitiesGIDCache | undefined;
+  citiesCache: CitiesCache | undefined;
 }) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const debouncedSearchQuery: string = useDebounce<string>(searchQuery, CITY_SEARCH_DEBOUNCE_MS);
@@ -59,15 +59,18 @@ export default function SearchOverlay({
 
     const formattedQuery = SearchQueryHelper.formatQuery(rawSearchQuery);
     // If query is non-empty string & cache is defined...
-    if (formattedQuery && citiesGIDCache != null) {
-      const cachedQuery = citiesGIDCache.gidQueryCache[formattedQuery.toLowerCase()];
+    if (formattedQuery && citiesCache != null) {
+      const cachedQuery = citiesCache.queryCache[formattedQuery.toLowerCase()];
       // If query is in gidQueryCache...
       if (cachedQuery?.length) {
         // Map array of geonameids to array of objects, which also include the cityAndStateCode found in the gidCityAndStateCodeCache
-        const cachedResults = cachedQuery.map(geonameid => ({
-          cityAndStateCode: citiesGIDCache.gidCityAndStateCodeCache[String(geonameid)],
-          geonameid: String(geonameid)
-        }));
+        const cachedResults = cachedQuery.map(geonameidNum => {
+          const geonameid = String(geonameidNum);
+          return {
+            cityAndStateCode: citiesCache.cityAndStateCodeCache[geonameid],
+            geonameid
+          };
+        });
         abortSearchCallAndUse(cachedResults);
         return;
       }
@@ -101,7 +104,7 @@ export default function SearchOverlay({
       setSearchQuery(formattedQuery);
     };
     getCachedResponseElseDebounce();
-  }, [rawSearchQuery, recentCities, citiesGIDCache, sortRecentsToFront, setResults, setHighlightedIndexDistance]);
+  }, [rawSearchQuery, recentCities, citiesCache, sortRecentsToFront, setResults, setHighlightedIndexDistance]);
 
   useEffect(() => {
     const search = async (searchQuery: string) => {

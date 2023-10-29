@@ -5,15 +5,15 @@ import useSWRImmutable from 'swr/immutable';
 import { Footer, Header, LocateError, Main } from 'components';
 import {
   APP_TITLE,
+  CITIES_CACHE_FILENAME,
   CURRENT_LOCATION,
-  GID_CACHE_FILENAME,
   LOCAL_STORAGE_RECENT_CITIES_KEY,
   UI_ANIMATION_DURATION
 } from 'constants/client';
 import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY } from 'constants/shared';
 import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
 import { APIRoute, getPath, QueryParams } from 'models/api';
-import { CitiesGIDCache, SearchResultCity } from 'models/cities';
+import { CitiesCache, SearchResultCity } from 'models/cities';
 
 const getGeonameidFromUrl = (router: NextRouter) => {
   let geonameid = router.query[API_GEONAMEID_KEY];
@@ -32,9 +32,9 @@ const getQueryParamsForGeonameid = (geonameid: string): QueryParams => ({
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
 
-const useCitiesGIDCache = (): CitiesGIDCache | undefined => {
-  const { data } = useSWRImmutable<CitiesGIDCache | undefined>(GID_CACHE_FILENAME, fetcher);
-  return data?.gidQueryCache != null && data.gidCityAndStateCodeCache != null ? data : undefined;
+const useCitiesCache = (): CitiesCache | undefined => {
+  const { data } = useSWRImmutable<CitiesCache | undefined>(CITIES_CACHE_FILENAME, fetcher);
+  return data?.queryCache != null && data.cityAndStateCodeCache != null ? data : undefined;
 };
 
 export default function Home() {
@@ -44,7 +44,7 @@ export default function Home() {
   const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
   const [locateError, setLocateError] = useState<number | undefined>(undefined);
 
-  const citiesGIDCache = useCitiesGIDCache();
+  const citiesCache = useCitiesCache();
 
   const [recentCities, setRecentCities] = useState<SearchResultCity[]>((): SearchResultCity[] => {
     // Only run on client-side (i.e., when window object is available)
@@ -217,7 +217,7 @@ export default function Home() {
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         recentCities={recentCities}
-        citiesGIDCache={citiesGIDCache}
+        citiesCache={citiesCache}
       ></Header>
       <Main queryParams={queryParams}>
         {locateError != null ? <LocateError locateError={locateError}></LocateError> : undefined}
