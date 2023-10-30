@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import fetch, { HeadersInit } from 'node-fetch';
-import { NWS_RECORDING_INTERVAL, NWS_UPLOAD_DELAY } from 'constants/server';
+import { NWS_RECORDING_INTERVAL } from 'constants/server';
 import { CoordinatesHelper } from 'helpers';
 import { getQueryParamsStr } from 'models/api';
 import { MinimalQueriedCity } from 'models/cities';
@@ -100,9 +100,7 @@ export class NwsHelper {
       ).json() as Promise<ObservationResponse>,
     async (_: string, newItem: ObservationResponse) => {
       const lastReadingTimestamp = newItem?.properties?.timestamp;
-      return lastReadingTimestamp != null
-        ? dayjs(lastReadingTimestamp).unix() + NWS_RECORDING_INTERVAL + NWS_UPLOAD_DELAY
-        : 0;
+      return lastReadingTimestamp != null ? dayjs(lastReadingTimestamp).unix() + NWS_RECORDING_INTERVAL : 0;
     },
     LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
   );

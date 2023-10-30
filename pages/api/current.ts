@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       latestReadTime
     };
     if (process.env.NODE_ENV !== 'development') {
-      res.setHeader('Cache-Control', `public, immutable, stale-while-revalidate, max-age=${maxAge}`);
+      res.setHeader('Cache-Control', `public, stale-while-revalidate, max-age=${maxAge}`);
     }
     res.status(response.latestReadTime ? 200 : 502).json(response);
   } catch (err) {

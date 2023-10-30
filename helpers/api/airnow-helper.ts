@@ -3,7 +3,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import fetch from 'node-fetch';
-import { AIRNOW_RECORDING_INTERVAL, AIRNOW_UPLOAD_DELAY } from 'constants/server';
+import { AIRNOW_RECORDING_INTERVAL } from 'constants/server';
 import { CoordinatesHelper } from 'helpers';
 import { CurrentObservations } from 'models/airnow';
 import { AirNowObservations } from 'models/api';
@@ -54,7 +54,7 @@ export class AirNowHelper {
     },
     async (_: string, newItem: CurrentObservationsWithTz) => {
       const latestReadTime = this.getLatestReadTime(newItem);
-      return latestReadTime ? latestReadTime + AIRNOW_RECORDING_INTERVAL + AIRNOW_UPLOAD_DELAY : 0;
+      return latestReadTime ? latestReadTime + AIRNOW_RECORDING_INTERVAL : 0;
     },
     LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
   );

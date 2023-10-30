@@ -10,10 +10,7 @@ export const CITY_SEARCH_CITIES_BY_ID_FILENAME = 'cities-by-id.json';
 export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top30557-query-cache.json';
 
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
-export const NWS_UPLOAD_DELAY = 27 * 60; // 27 minutes
-
 export const AIRNOW_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
-export const AIRNOW_UPLOAD_DELAY = 70 * 60; // 70 minutes
 
 export const FEELS_UNITS: Record<UnitType, Unit> = {
   ...DEFAULT_UNITS,
