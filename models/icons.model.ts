@@ -42,6 +42,7 @@ export enum IconCondition {
   THUNDERSNOW = 'THUNDERSNOW',
   THUNDERSTORMS = 'THUNDERSTORMS',
   THUNDERSTORMS_HEAVY = 'HEAVY THUNDERSTORMS',
+  T_STORMS = 'T-STORMS',
   THUNDERSTORMS_HAIL = 'THUNDERSTORMS AND HAIL',
   UNKNOWN_PRECIPITATION = 'UNKNOWN PRECIPITATION',
   WINDY = 'WINDY'
@@ -125,6 +126,7 @@ export const DefaultIcons: Record<IconCondition, DefaultIconMapping> = {
   [IconCondition.THUNDERSNOW]: DefaultSetIcon.THUNDERSNOW,
   [IconCondition.THUNDERSTORMS]: DefaultSetIcon.THUNDERSTORMS,
   [IconCondition.THUNDERSTORMS_HEAVY]: DefaultSetIcon.THUNDERSTORMS,
+  [IconCondition.T_STORMS]: DefaultSetIcon.THUNDERSTORMS,
   [IconCondition.THUNDERSTORMS_HAIL]: DefaultSetIcon.THUNDERSTORMS_HAIL,
   [IconCondition.UNKNOWN_PRECIPITATION]: DefaultSetIcon.RAIN,
   [IconCondition.WINDY]: DefaultSetIcon.WINDY
