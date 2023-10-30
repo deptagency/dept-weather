@@ -1,10 +1,10 @@
-import Measurement from 'components/Card/Measurement/Measurement';
-import { WindIcon } from 'components/Icons';
-import { WindHelper } from 'helpers';
-import { Wind as WindModel } from 'models/api';
+import { Measurement } from 'components/Card/Measurement/Measurement';
+import { WindIcon } from 'components/Icons/WindIcon';
+import { WindHelper } from 'helpers/wind-helper';
+import { Wind as WindModel } from 'models/api/observations.model';
 import { roundOrEmDash } from 'utils';
 
-export default function Wind({ wind, includeGustSpeed }: { wind: WindModel | undefined; includeGustSpeed: boolean }) {
+export function Wind({ wind, includeGustSpeed }: { wind: WindModel | undefined; includeGustSpeed: boolean }) {
   return (
     <Measurement
       icon={<WindIcon directionDeg={wind?.directionDeg} />}

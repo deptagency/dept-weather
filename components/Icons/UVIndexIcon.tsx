@@ -3,7 +3,7 @@ import styles from './Icon.module.css';
 const DEFAULT_UV_INDEX_ICON_VALUE = 5;
 
 // Source (adaptation of): Dept Icon Kit/SVG/34-Weather/07-UV/uv-high-1.svg
-export default function UVIndexIcon({ uvIndex }: { uvIndex: number | null | undefined }) {
+export function UVIndexIcon({ uvIndex }: { uvIndex: number | null | undefined }) {
   const uvValue = uvIndex ?? DEFAULT_UV_INDEX_ICON_VALUE;
   return (
     <svg aria-hidden="true" className={styles.icon} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">

@@ -2,7 +2,7 @@ import arrowIconStyles from './ArrowIcon.module.css';
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/52-Arrows-Diagrams/01-Arrows/arrow-down-1.svg
-export default function ArrowIcon({
+export function ArrowIcon({
   useInverseFill,
   animationState
 }: {

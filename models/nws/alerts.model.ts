@@ -1,4 +1,4 @@
-import { Geometry } from './geometry.model';
+import { Geometry } from 'models/nws/geometry.model';
 
 export interface AlertsResponse {
   features: AlertsFeature[];

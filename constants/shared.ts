@@ -1,5 +1,5 @@
-import { Unit, UnitType } from '../models';
-import { City } from '../models/cities';
+import { City } from 'models/cities/cities.model';
+import { Unit, UnitType } from 'models/unit.enum';
 
 export const MAX_COORDINATE_PRECISION = 2;
 

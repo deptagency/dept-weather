@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/01-Interface Essential/14-Alerts/alert-triangle.svg
-export default function AlertTriangleIcon({ useInverseFill }: { useInverseFill?: boolean }) {
+export function AlertTriangleIcon({ useInverseFill }: { useInverseFill?: boolean }) {
   return (
     <svg
       aria-hidden="true"

@@ -1,8 +1,3 @@
-import dayjs from 'dayjs';
-import { readFile } from 'fs/promises';
-import geodist from 'geodist';
-import leven from 'leven';
-import path from 'path';
 import {
   CITY_SEARCH_CITIES_BY_ID_FILENAME,
   CITY_SEARCH_DATA_FOLDER,
@@ -11,11 +6,25 @@ import {
   CITY_SEARCH_RESULTS_MAX_AGE
 } from 'constants/server';
 import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
-import { CoordinatesHelper, NumberHelper } from 'helpers';
-import { CitiesById, CitiesQueryCache, City, ClosestCity, FullCity, InputCitiesById, ScoredCity } from 'models/cities';
-import { Unit } from 'models';
-import { Cached } from './cached';
-import { LoggerHelper } from './logger-helper';
+import dayjs from 'dayjs';
+import { readFile } from 'fs/promises';
+import geodist from 'geodist';
+import { Cached } from 'helpers/api/cached';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { CoordinatesHelper } from 'helpers/coordinates-helper';
+import { NumberHelper } from 'helpers/number-helper';
+import leven from 'leven';
+import {
+  CitiesById,
+  CitiesQueryCache,
+  City,
+  ClosestCity,
+  FullCity,
+  InputCitiesById,
+  ScoredCity
+} from 'models/cities/cities.model';
+import { Unit } from 'models/unit.enum';
+import path from 'path';
 
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';
@@ -75,10 +84,11 @@ export class CitiesHelper {
   private static _topCitiesPromise?: Promise<FullCity[]>;
   private static getTopCities() {
     if (this._topCitiesPromise == null) {
-      this._topCitiesPromise = new Promise<FullCity[]>(async resolve => {
-        const cities = await this.citiesPromise;
-        const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
-        resolve(topCities);
+      this._topCitiesPromise = new Promise<FullCity[]>(resolve => {
+        this.citiesPromise.then(cities => {
+          const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+          resolve(topCities);
+        });
       });
     }
 

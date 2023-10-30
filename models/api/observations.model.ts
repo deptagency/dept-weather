@@ -1,8 +1,8 @@
-import { AQILevelName } from '../airnow';
-import { DataSource } from 'models';
-import { SunriseSunset } from '../sunrise-sunset';
-import { QueriedCityInfo } from './queried-location-info.model';
-import { BaseData } from './response.model';
+import { AQILevelName } from 'models/airnow/current-observations';
+import { QueriedCityInfo } from 'models/api/queried-location-info.model';
+import { BaseData } from 'models/api/response.model';
+import { DataSource } from 'models/data-source.enum';
+import { SunriseSunset } from 'models/sunrise-sunset/sunrise-sunset';
 
 export interface Observations extends QueriedCityInfo {
   [DataSource.WEATHERLINK]?: WlObservations;

@@ -1,5 +1,5 @@
-import { Unit, UnitType } from '../models';
-import { DEFAULT_UNITS } from './shared';
+import { DEFAULT_UNITS } from 'constants/shared';
+import { Unit, UnitType } from 'models/unit.enum';
 
 export const AQ_COORDINATES_STR = '42.35826159869919,-71.05360507074275';
 

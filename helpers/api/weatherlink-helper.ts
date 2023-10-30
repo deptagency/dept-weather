@@ -1,14 +1,17 @@
-import geodist from 'geodist';
-import { default as WeatherLink } from 'weatherlink';
 import { AQ_COORDINATES_STR } from 'constants/server';
 import { DEFAULT_UNITS } from 'constants/shared';
-import { CoordinatesHelper, NumberHelper } from 'helpers';
-import { Unit, UnitType } from 'models';
-import { MinimalQueriedCity } from 'models/cities';
-import { ReqQuery, WlObservations } from 'models/api';
-import { BarometerSensorData, CurrentConditions, MainSensorData, SensorType } from 'models/weatherlink';
-import { Cached, CacheEntry } from './cached';
-import { LoggerHelper } from './logger-helper';
+import geodist from 'geodist';
+import { Cached, CacheEntry } from 'helpers/api/cached';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { CoordinatesHelper } from 'helpers/coordinates-helper';
+import { NumberHelper } from 'helpers/number-helper';
+import { WlObservations } from 'models/api/observations.model';
+import { ReqQuery } from 'models/api/req-query.model';
+import { MinimalQueriedCity } from 'models/cities/cities.model';
+import { Unit, UnitType } from 'models/unit.enum';
+import { BarometerSensorData, CurrentConditions, MainSensorData } from 'models/weatherlink/current-conditions.model';
+import { SensorType } from 'models/weatherlink/sensor-type.enum';
+import { default as WeatherLink } from 'weatherlink';
 
 export class WeatherlinkHelper {
   private static readonly CLASS_NAME = 'WeatherlinkHelper';

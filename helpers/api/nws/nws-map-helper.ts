@@ -3,39 +3,31 @@ import advancedFormat from 'dayjs/plugin/advancedFormat';
 import duration from 'dayjs/plugin/duration';
 import localeData from 'dayjs/plugin/localeData';
 import timezone from 'dayjs/plugin/timezone';
-import { NumberHelper, WindHelper } from 'helpers';
-import { Unit, UnitType } from 'models';
+import { CacheEntry } from 'helpers/api/cached';
+import { FeelsHelper } from 'helpers/api/feels-helper';
+import { NumberHelper } from 'helpers/number-helper';
+import { WindHelper } from 'helpers/wind-helper';
+import { DescriptionItem, NwsAlert, NwsAlerts } from 'models/api/alerts.model';
+import { NwsForecast, NwsHourlyPeriodForecast, NwsPeriod, NwsPeriodForecast } from 'models/api/forecast.model';
+import { NwsObservations, Wind } from 'models/api/observations.model';
+import { ReqQuery } from 'models/api/req-query.model';
+import { AlertSeverity, AlertsResponse, AlertStatus } from 'models/nws/alerts.model';
 import {
-  DescriptionItem,
-  NwsAlert,
-  NwsAlerts,
-  NwsForecast,
-  NwsHourlyPeriodForecast,
-  NwsObservations,
-  NwsPeriod,
-  NwsPeriodForecast,
-  ReqQuery,
-  Wind
-} from 'models/api';
-import {
-  AlertSeverity,
-  AlertsResponse,
-  AlertStatus,
   ForecastGridData,
   ForecastGridDataDatapoints,
   ForecastGridDataResponse,
-  GridpointQuantitativeValue,
-  NwsUnits,
-  ObservationResponse,
-  QuantitativeMinMaxValue,
-  QuantitativeValue,
-  SummaryForecastPeriod,
-  SummaryForecastResponse,
   WeatherIntensity,
   WeatherValueLayer
-} from 'models/nws';
-import { CacheEntry } from '../cached';
-import { FeelsHelper } from '../feels-helper';
+} from 'models/nws/forecast-grid-data.model';
+import { NwsUnits } from 'models/nws/nws-units';
+import { ObservationResponse } from 'models/nws/observation.model';
+import {
+  GridpointQuantitativeValue,
+  QuantitativeMinMaxValue,
+  QuantitativeValue
+} from 'models/nws/quantitative-value.model';
+import { SummaryForecastPeriod, SummaryForecastResponse } from 'models/nws/summary-forecast.model';
+import { Unit, UnitType } from 'models/unit.enum';
 
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
@@ -116,7 +108,7 @@ export class NwsMapHelper {
   }
 
   private static getWind(period: SummaryForecastPeriod, reqQuery: ReqQuery): Wind {
-    let wind: Wind = {
+    const wind: Wind = {
       speed: null,
       gustSpeed: null,
       directionDeg: WindHelper.dirToDeg(period.windDirection)
@@ -252,7 +244,7 @@ export class NwsMapHelper {
         intensity = 'Light ';
       }
 
-      const formattedWeather = weatherValueLayer.value[0].weather
+      const formattedWeather = (weatherValueLayer.value[0].weather as string)
         .split('_')
         .map(word => `${word[0].toUpperCase()}${word.substring(1)}`)
         .join(' ');
@@ -333,7 +325,7 @@ export class NwsMapHelper {
     const forecastGridData = forecastGridDataCacheEntry.item?.properties;
     const hourlyForecastsMetadata = this.getHourlyForecastsMetadata(forecastGridData);
 
-    let periods: NwsPeriod[] = [];
+    const periods: NwsPeriod[] = [];
     for (let i = 0; i < (summaryForecast?.periods ?? []).length; ) {
       const startTime = dayjs(summaryForecast!.periods[i].startTime).tz(timeZone);
       const endTime = dayjs(summaryForecast!.periods[i].endTime).tz(timeZone);
@@ -454,12 +446,12 @@ export class NwsMapHelper {
     const now = dayjs().tz(timeZone);
     const alerts = response.features
       .filter(
-        alert =>
+        (alert: any) =>
           alert.properties.status === AlertStatus.ACTUAL &&
           (alert.properties.ends ? dayjs(alert.properties.ends).isAfter(now) : true) &&
           dayjs(alert.properties.expires).isAfter(now)
       )
-      .map((alert): NwsAlert => {
+      .map((alert: any): NwsAlert => {
         const rawDescription = alert.properties.description;
 
         // Split raw description on '\n\n' if present or '\n' if it has headings; otherwise, don't split
@@ -474,8 +466,8 @@ export class NwsMapHelper {
             const headingExecd = NWS_ALERTS_HEADING_REGEX.exec(normDescItemStr);
             const bodyExecd = NWS_ALERTS_BODY_REGEX.exec(normDescItemStr);
 
-            let heading = headingExecd && headingExecd.length > 0 ? headingExecd[0].toUpperCase() : undefined;
-            let body = bodyExecd && bodyExecd.length > 0 ? bodyExecd[0] : undefined;
+            const heading = headingExecd && headingExecd.length > 0 ? headingExecd[0].toUpperCase() : undefined;
+            const body = bodyExecd && bodyExecd.length > 0 ? bodyExecd[0] : undefined;
             return heading != null && body != null
               ? {
                   heading,
@@ -484,7 +476,9 @@ export class NwsMapHelper {
               : { body: normDescItemStr };
           });
         const instruction =
-          alert.properties.instruction?.split('\n\n')?.map(insParagraph => insParagraph.replaceAll('\n', ' ')) ?? [];
+          alert.properties.instruction
+            ?.split('\n\n')
+            ?.map((insParagraph: string) => insParagraph.replaceAll('\n', ' ')) ?? [];
 
         const onsetDayjs = dayjs(alert.properties.onset ?? alert.properties.effective).tz(timeZone);
         const onsetIncludeDay = !onsetDayjs.isSame(now, 'day');
@@ -511,7 +505,10 @@ export class NwsMapHelper {
           instruction
         };
       })
-      .sort((alert1, alert2) => this.getNumericSeverity(alert2.severity) - this.getNumericSeverity(alert1.severity));
+      .sort(
+        (alert1: any, alert2: any) =>
+          this.getNumericSeverity(alert2.severity) - this.getNumericSeverity(alert1.severity)
+      );
 
     return {
       readTime: response.updated ? dayjs(response.updated).unix() : 0,

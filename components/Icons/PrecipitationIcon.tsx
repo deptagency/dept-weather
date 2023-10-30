@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Source (adaptation of): Dept Icon Kit/SVG/31-Ecology/03-Water-Protection/water-protection-drop.svg
-export default function PrecipitationIcon({
+export function PrecipitationIcon({
   innerDropHeightPercent,
   ariaLabel
 }: {

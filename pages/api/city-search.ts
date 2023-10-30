@@ -2,9 +2,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { CITY_SEARCH_RESULTS_MAX_AGE } from 'constants/server';
 import { API_COORDINATES_KEY, API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY } from 'constants/shared';
 import dayjs from 'dayjs';
-import { CitiesReqQueryHelper, LoggerHelper } from 'helpers/api';
-import { APIRoute, getPath, Response } from 'models/api';
-import { City } from 'models/cities';
+import { CitiesReqQueryHelper } from 'helpers/api/cities-req-query-helper';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { APIRoute, getPath } from 'models/api/api-route.model';
+import { Response } from 'models/api/response.model';
+import { City } from 'models/cities/cities.model';
 
 const LOGGER_LABEL = getPath(APIRoute.CITY_SEARCH);
 

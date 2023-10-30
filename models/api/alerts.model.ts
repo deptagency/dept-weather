@@ -1,7 +1,7 @@
-import { DataSource } from 'models';
-import { AlertSeverity } from 'models/nws';
-import { QueriedCityInfo } from './queried-location-info.model';
-import { BaseData } from './response.model';
+import { QueriedCityInfo } from 'models/api/queried-location-info.model';
+import { BaseData } from 'models/api/response.model';
+import { DataSource } from 'models/data-source.enum';
+import { AlertSeverity } from 'models/nws/alerts.model';
 
 export interface Alerts extends QueriedCityInfo {
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsAlerts;

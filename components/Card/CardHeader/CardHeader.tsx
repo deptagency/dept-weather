@@ -1,10 +1,10 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
-import { ArrowIcon } from 'components/Icons';
-import { Color } from 'models';
+import { ArrowIcon } from 'components/Icons/ArrowIcon';
+import { Color } from 'models/color.enum';
 
 import styles from './CardHeader.module.css';
 
-export default function CardHeader({
+export function CardHeader({
   preContents,
   contents,
   backgroundColor,

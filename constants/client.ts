@@ -1,4 +1,4 @@
-import { SearchResultCity } from '../models/cities';
+import { SearchResultCity } from 'models/cities/cities.model';
 
 export const APP_TITLE = 'DEPT® Weather';
 export const APP_DESCRIPTION = `The ${APP_TITLE} app provides up-to-date weather observations, daily & hourly forecasts, and alerts for locations across the U.S.`;

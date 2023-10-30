@@ -14,7 +14,7 @@ export enum PressureTrend {
 }
 
 // Source (adaptation of): Dept Icon Kit/SVG/34-Weather/07-UV/uv-high.svg
-export default function PressureIcon({ level, trend }: { level: PressureLevel; trend: PressureTrend }) {
+export function PressureIcon({ level, trend }: { level: PressureLevel; trend: PressureTrend }) {
   return (
     <svg aria-hidden="true" className={styles.icon} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
       <path d="M1.5 16C0.672667 16 0 15.3273 0 14.5V1.5C0 0.672667 0.672667 0 1.5 0H5.5C5.776 0 6 0.224 6 0.5C6 0.776 5.776 1 5.5 1H1.5C1.224 1 1 1.224 1 1.5V14.5C1 14.776 1.224 15 1.5 15H5.5C5.776 15 6 14.776 6 14.5V11.5C6 11.224 6.224 11 6.5 11C6.776 11 7 11.224 7 11.5V14.5C7 15.3273 6.32733 16 5.5 16H1.5Z" />

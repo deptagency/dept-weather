@@ -1,9 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import dayjs from 'dayjs';
-import { CoordinatesHelper } from 'helpers';
-import { CitiesReqQueryHelper, LoggerHelper, NwsHelper, NwsMapHelper } from 'helpers/api';
-import { DataSource } from 'models';
-import { APIRoute, Forecast, getPath, Response } from 'models/api';
+import { CitiesReqQueryHelper } from 'helpers/api/cities-req-query-helper';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { NwsHelper } from 'helpers/api/nws/nws-helper';
+import { NwsMapHelper } from 'helpers/api/nws/nws-map-helper';
+import { CoordinatesHelper } from 'helpers/coordinates-helper';
+import { APIRoute, getPath } from 'models/api/api-route.model';
+import { Forecast } from 'models/api/forecast.model';
+import { Response } from 'models/api/response.model';
+import { DataSource } from 'models/data-source.enum';
 
 const LOGGER_LABEL = getPath(APIRoute.FORECAST);
 

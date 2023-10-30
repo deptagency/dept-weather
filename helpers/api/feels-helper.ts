@@ -1,10 +1,10 @@
-import Feels from 'feels';
 import { FEELS_UNITS } from 'constants/server';
-import { NumberHelper } from 'helpers';
-import { Unit, UnitType } from 'models';
-import { ReqQuery } from 'models/api';
-import { Observation } from 'models/nws';
-import { LoggerHelper } from './logger-helper';
+import Feels from 'feels';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { NumberHelper } from 'helpers/number-helper';
+import { ReqQuery } from 'models/api/req-query.model';
+import { Observation } from 'models/nws/observation.model';
+import { Unit, UnitType } from 'models/unit.enum';
 
 export class FeelsHelper {
   private static readonly CLASS_NAME = 'FeelsHelper';

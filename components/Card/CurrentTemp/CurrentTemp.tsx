@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { WeatherObservations } from 'models/api';
+import { WeatherObservations } from 'models/api/observations.model';
 import { floorOrEmDash, roundOrEmDash } from 'utils';
 
 import styles from './CurrentTemp.module.css';
 
-export default function CurrentTemp({ observations }: { observations?: WeatherObservations }) {
+export function CurrentTemp({ observations }: { observations?: WeatherObservations }) {
   const [tempDisplayTxt, setTempDisplayTxt] = useState<string>('');
   const [fractionalTemp, setFractionalTemp] = useState<string>('');
   const [tempAriaLabel, setTempAriaLabel] = useState<string>('');

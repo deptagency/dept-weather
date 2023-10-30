@@ -1,8 +1,8 @@
-import Measurement from 'components/Card/Measurement/Measurement';
-import { PrecipitationIcon } from 'components/Icons';
+import { Measurement } from 'components/Card/Measurement/Measurement';
+import { PrecipitationIcon } from 'components/Icons/PrecipitationIcon';
 import { roundTensOrEmDash } from 'utils';
 
-export default function PrecipitationForecast({
+export function PrecipitationForecast({
   chanceOfPrecipitation
 }: {
   chanceOfPrecipitation?: number | null | undefined;

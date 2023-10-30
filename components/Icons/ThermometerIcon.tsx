@@ -7,7 +7,7 @@ export enum ThermometerLevel {
 }
 
 // Source (adaptation of): Dept Icon Kit/SVG/34-Weather/06-Temperatures/temperature-thermometer-high.svg
-export default function ThermometerIcon({ level, ariaLabel }: { level: ThermometerLevel; ariaLabel?: string }) {
+export function ThermometerIcon({ level, ariaLabel }: { level: ThermometerLevel; ariaLabel?: string }) {
   return (
     <svg
       aria-hidden={ariaLabel ? undefined : true}

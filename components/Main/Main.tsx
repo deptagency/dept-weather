@@ -1,18 +1,14 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { AlertCard, ForecastCard, ObservationsCard } from 'components/Card';
-import { OfflineError } from 'components/Errors';
-import { useOnlineStatus } from 'hooks';
-import {
-  Alerts,
-  APIRoute,
-  Forecast,
-  getPath,
-  NwsAlert,
-  NwsPeriod,
-  Observations,
-  QueryParams,
-  Response
-} from 'models/api';
+import { AlertCard } from 'components/Card/AlertCard/AlertCard';
+import { ForecastCard } from 'components/Card/ForecastCard';
+import { ObservationsCard } from 'components/Card/ObservationsCard';
+import { OfflineError } from 'components/Errors/OfflineError/OfflineError';
+import { useOnlineStatus } from 'hooks/use-online-status';
+import { Alerts, NwsAlert } from 'models/api/alerts.model';
+import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
+import { Forecast, NwsPeriod } from 'models/api/forecast.model';
+import { Observations } from 'models/api/observations.model';
+import { Response } from 'models/api/response.model';
 import useSWR from 'swr';
 
 import homeStyles from 'styles/Home.module.css';
@@ -91,7 +87,7 @@ const ForecastCards = ({
   </>
 );
 
-export default function Main({ queryParams, children }: { queryParams: QueryParams; children?: ReactNode }) {
+export function Main({ queryParams, children }: { queryParams: QueryParams; children?: ReactNode }) {
   const isOnline = useOnlineStatus();
   const { alerts, alertsIsError } = useAlerts(queryParams);
   const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);

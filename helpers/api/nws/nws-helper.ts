@@ -1,19 +1,17 @@
-import dayjs from 'dayjs';
-import fetch, { HeadersInit } from 'node-fetch';
 import { NWS_RECORDING_INTERVAL } from 'constants/server';
-import { CoordinatesHelper } from 'helpers';
-import { getQueryParamsStr } from 'models/api';
-import { MinimalQueriedCity } from 'models/cities';
-import {
-  AlertsResponse,
-  ForecastGridDataResponse,
-  ObservationResponse,
-  PointsResponse,
-  StationsResponse,
-  SummaryForecastResponse
-} from 'models/nws';
-import { Cached, CacheEntry } from '../cached';
-import { LoggerHelper } from '../logger-helper';
+import dayjs from 'dayjs';
+import { Cached, CacheEntry } from 'helpers/api/cached';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { CoordinatesHelper } from 'helpers/coordinates-helper';
+import { getQueryParamsStr } from 'models/api/api-route.model';
+import { MinimalQueriedCity } from 'models/cities/cities.model';
+import { AlertsResponse } from 'models/nws/alerts.model';
+import { ForecastGridDataResponse } from 'models/nws/forecast-grid-data.model';
+import { ObservationResponse } from 'models/nws/observation.model';
+import { PointsResponse } from 'models/nws/points.model';
+import { StationsResponse } from 'models/nws/stations.model';
+import { SummaryForecastResponse } from 'models/nws/summary-forecast.model';
+import fetch, { HeadersInit } from 'node-fetch';
 
 export class NwsHelper {
   private static readonly CLASS_NAME = 'NwsHelper';
@@ -48,7 +46,9 @@ export class NwsHelper {
           }
           return jsonResponse as ResponseItem;
         }
-      } catch {}
+      } catch {
+        /* empty */
+      }
 
       logger.warn(
         `Attempt #${attemptNum} for ${url} FAILED with code ${status} - ${
@@ -57,7 +57,7 @@ export class NwsHelper {
             : 'response was nullish'
         }`
       );
-      let numSecondsToWait = Math.pow(2, attemptNum - 1);
+      const numSecondsToWait = Math.pow(2, attemptNum - 1);
       if (numSecondsToWait < 0 || attemptNum === 3) {
         break;
       }
@@ -70,7 +70,7 @@ export class NwsHelper {
   private static readonly points = new Cached<PointsResponse, string>(
     async (coordinatesStr: string) =>
       (await this.fetch(`${this.BASE_URL}points/${coordinatesStr}`)).json() as Promise<PointsResponse>,
-    async (_: string, __: PointsResponse) => dayjs().add(1, 'week').unix(),
+    async () => dayjs().add(1, 'week').unix(),
     LoggerHelper.getLogger(`${this.CLASS_NAME}.points`)
   );
   static async getPoints(coordinatesStr: string) {
@@ -79,7 +79,7 @@ export class NwsHelper {
 
   private static readonly stations = new Cached<StationsResponse, string>(
     async (stationsUrl: string) => (await this.fetch(stationsUrl)).json() as Promise<StationsResponse>,
-    async (_: string, __: StationsResponse) => dayjs().add(1, 'week').unix(),
+    async () => dayjs().add(1, 'week').unix(),
     LoggerHelper.getLogger(`${this.CLASS_NAME}.stations`)
   );
   private static async getStations(coordinatesStr: string) {

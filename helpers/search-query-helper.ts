@@ -1,4 +1,4 @@
-import { SearchResultCity } from 'models/cities';
+import { SearchResultCity } from 'models/cities/cities.model';
 
 export class SearchQueryHelper {
   private static readonly US_STATE_CODES: Record<string, string> = {

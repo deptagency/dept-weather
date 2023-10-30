@@ -3,7 +3,7 @@ import { roundOrEmDash } from 'utils';
 
 import styles from './ForecastTemps.module.css';
 
-export default function ForecastTemps({
+export function ForecastTemps({
   highTemperature,
   lowTemperature
 }: {

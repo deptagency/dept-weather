@@ -1,7 +1,7 @@
-import { DataSource } from 'models';
-import { Wind } from './observations.model';
-import { QueriedCityInfo } from './queried-location-info.model';
-import { BaseData } from './response.model';
+import { Wind } from 'models/api/observations.model';
+import { QueriedCityInfo } from 'models/api/queried-location-info.model';
+import { BaseData } from 'models/api/response.model';
+import { DataSource } from 'models/data-source.enum';
 
 export interface Forecast extends QueriedCityInfo {
   [DataSource.NATIONAL_WEATHER_SERVICE]?: NwsForecast;

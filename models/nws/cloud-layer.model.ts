@@ -1,4 +1,4 @@
-import { QuantitativeValue } from './quantitative-value.model';
+import { QuantitativeValue } from 'models/nws/quantitative-value.model';
 
 export interface CloudLayer {
   base: QuantitativeValue;

@@ -1,16 +1,16 @@
 import { Fragment, useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import AlertCardHeader from 'components/Card/CardHeader/AlertCardHeader';
+import { AlertCardHeader } from 'components/Card/CardHeader/AlertCardHeader';
 import { UI_ANIMATION_DURATION } from 'constants/client';
-import { useShouldContinueRendering } from 'hooks';
-import { NwsAlert } from 'models/api';
+import { useShouldContinueRendering } from 'hooks/use-should-continue-rendering';
+import { NwsAlert } from 'models/api/alerts.model';
 
 import baseStyles from '../Card.module.css';
 import styles from './AlertCard.module.css';
 
 const ANIMATED_CONTENTS_WRAPPER_ID = 'AlertCardAccordianContentsWrapper';
 
-export default function AlertCard({ alert, _key }: { alert: NwsAlert; _key: string }) {
+export function AlertCard({ alert, _key }: { alert: NwsAlert; _key: string }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const shouldContinueRendering = useShouldContinueRendering(isExpanded);
 

@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import { NextRouter, useRouter } from 'next/router';
-import { Footer, Header, LocateError, Main } from 'components';
+import { LocateError } from 'components/Errors/LocateError/LocateError';
+import { Footer } from 'components/Footer/Footer';
+import { Header } from 'components/Header/Header';
+import { Main } from 'components/Main/Main';
 import {
   APP_TITLE,
   CITIES_CACHE_FILENAME,
@@ -10,9 +13,10 @@ import {
   UI_ANIMATION_DURATION
 } from 'constants/client';
 import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY } from 'constants/shared';
-import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
-import { APIRoute, getPath, QueryParams } from 'models/api';
-import { CitiesCache, SearchResultCity } from 'models/cities';
+import { CoordinatesHelper } from 'helpers/coordinates-helper';
+import { SearchQueryHelper } from 'helpers/search-query-helper';
+import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
+import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
 import useSWRImmutable from 'swr/immutable';
 
 const getGeonameidFromUrl = (router: NextRouter) => {

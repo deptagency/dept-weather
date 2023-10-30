@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import Condition from 'components/Card/Condition/Condition';
-import { PrecipitationForecast, Wind } from 'components/Card/Measurement';
-import { NwsPeriodForecast } from 'models/api';
+import { Condition } from 'components/Card/Condition/Condition';
+import { PrecipitationForecast } from 'components/Card/Measurement/PrecipitationForecast';
+import { Wind } from 'components/Card/Measurement/Wind';
+import { NwsPeriodForecast } from 'models/api/forecast.model';
 
 import styles from './SummaryForecast.module.css';
 
@@ -21,7 +22,7 @@ const simplifyCondition = (conditionIn: string | null | undefined) => {
   return condition.trim();
 };
 
-export default function SummaryForecast({
+export function SummaryForecast({
   forecast,
   isDaytime
 }: {

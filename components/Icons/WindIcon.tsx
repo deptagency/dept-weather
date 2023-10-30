@@ -2,13 +2,7 @@ import styles from './Icon.module.css';
 import windIconStyles from './WindIcon.module.css';
 
 // Source (adaptation of): Dept Icon Kit/SVG/34-Weather/09-Wind/wind-north.svg
-export default function WindIcon({
-  directionDeg,
-  ariaLabel
-}: {
-  directionDeg: number | null | undefined;
-  ariaLabel?: string;
-}) {
+export function WindIcon({ directionDeg, ariaLabel }: { directionDeg: number | null | undefined; ariaLabel?: string }) {
   const rotateDeg = directionDeg != null ? (directionDeg < 180 ? directionDeg + 180 : directionDeg - 180) : 0;
   return (
     <svg

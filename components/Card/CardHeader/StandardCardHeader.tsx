@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import CardHeader from 'components/Card/CardHeader/CardHeader';
-import StandardCardHeaderContents from 'components/Card/CardHeader/StandardCardHeaderContents';
-import { Color } from 'models';
+import { CardHeader } from 'components/Card/CardHeader/CardHeader';
+import { StandardCardHeaderContents } from 'components/Card/CardHeader/StandardCardHeaderContents';
+import { Color } from 'models/color.enum';
 
-export default function StandardCardHeader({
+export function StandardCardHeader({
   isLoading,
   lastUpdatedTime,
   label,

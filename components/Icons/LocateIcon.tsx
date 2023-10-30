@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/48-Maps-Navigation/03-Location/location-target-1.svg
-export default function LocateIcon() {
+export function LocateIcon() {
   //     className={styles['search-overlay__result__icon']}
   return (
     <svg aria-hidden="true" className={styles.icon} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">

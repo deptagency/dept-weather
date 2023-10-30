@@ -1,10 +1,10 @@
 import { API_COORDINATES_KEY, API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, DEFAULT_CITY } from 'constants/shared';
-import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
-import { ReqQuery } from 'models/api';
-import { City, ClosestCity, MinimalQueriedCity } from 'models/cities';
-
-import { CitiesHelper } from './cities-helper';
-import { LoggerHelper } from './logger-helper';
+import { CitiesHelper } from 'helpers/api/cities-helper';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { CoordinatesHelper } from 'helpers/coordinates-helper';
+import { SearchQueryHelper } from 'helpers/search-query-helper';
+import { ReqQuery } from 'models/api/req-query.model';
+import { City, ClosestCity, MinimalQueriedCity } from 'models/cities/cities.model';
 
 export class CitiesReqQueryHelper {
   private static readonly CLASS_NAME = 'CitiesReqQueryHelper';

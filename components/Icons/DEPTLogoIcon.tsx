@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Source: DEPT® Logos/DEPT®/Main Logo/SVG/DEPT® LOGO - 2022 Black.svg
-export default function DEPTLogoIcon() {
+export function DEPTLogoIcon() {
   return (
     <svg aria-hidden={true} className={styles.icon} viewBox="0 0 10688 3035" xmlns="http://www.w3.org/2000/svg">
       <path d="M2726.46 1485.34C2726.46 732.215 2315.32 152 1270.16 152H152V2818.68H1270.16C2315.32 2818.68 2726.46 2238.47 2726.46 1485.34ZM1965.65 1485.34C1965.65 2011.76 1669.78 2207.73 1258.64 2207.73H878.229V762.955H1258.64C1669.78 762.955 1965.65 958.921 1965.65 1485.34Z" />

@@ -1,6 +1,6 @@
 import { MAX_COORDINATE_PRECISION } from 'constants/shared';
-import { CityWithCoordinates } from 'models/cities';
-import { NumberHelper } from './number-helper';
+import { NumberHelper } from 'helpers/number-helper';
+import { CityWithCoordinates } from 'models/cities/cities.model';
 
 export class CoordinatesHelper {
   private static readonly LATITUDE_MIN = -90;

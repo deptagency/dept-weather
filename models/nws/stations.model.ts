@@ -1,5 +1,5 @@
-import { Geometry } from './geometry.model';
-import { QuantitativeValue } from './quantitative-value.model';
+import { Geometry } from 'models/nws/geometry.model';
+import { QuantitativeValue } from 'models/nws/quantitative-value.model';
 
 export interface StationsResponse {
   features: Array<Feature>;

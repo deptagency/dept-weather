@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/01-Interface Essential/44-Synchronize/synchronize-arrow-clock.svg
-export default function RecentIcon({ isHidden }: { isHidden: boolean }) {
+export function RecentIcon({ isHidden }: { isHidden: boolean }) {
   return (
     <svg
       aria-label="Recent City"

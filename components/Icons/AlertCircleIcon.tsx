@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/01-Interface Essential/14-Alerts/alert-circle.svg
-export default function AlertCircleIcon({ useInverseFill }: { useInverseFill?: boolean }) {
+export function AlertCircleIcon({ useInverseFill }: { useInverseFill?: boolean }) {
   return (
     <svg
       aria-hidden="true"

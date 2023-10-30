@@ -1,6 +1,6 @@
-import Measurement from 'components/Card/Measurement/Measurement';
-import { PressureIcon, PressureLevel, PressureTrend } from 'components/Icons';
-import { WlPressure } from 'models/api';
+import { Measurement } from 'components/Card/Measurement/Measurement';
+import { PressureIcon, PressureLevel, PressureTrend } from 'components/Icons/PressureIcon';
+import { WlPressure } from 'models/api/observations.model';
 import { toFixedOrEmDash } from 'utils';
 
 type PressureArg = (Pick<WlPressure, 'atSeaLevel'> & Partial<Pick<WlPressure, 'trend'>>) | null | undefined;
@@ -22,7 +22,7 @@ const getPressureTrend = (pressure?: PressureArg): PressureTrend => {
   else return PressureTrend.STABLE;
 };
 
-export default function Pressure({ pressure }: { pressure?: PressureArg }) {
+export function Pressure({ pressure }: { pressure?: PressureArg }) {
   const level = getPressureLevel(pressure);
   const trend = getPressureTrend(pressure);
 

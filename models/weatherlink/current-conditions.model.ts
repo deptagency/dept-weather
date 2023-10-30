@@ -1,4 +1,4 @@
-import { SensorType } from './sensor-type.enum';
+import { SensorType } from 'models/weatherlink/sensor-type.enum';
 
 export interface CurrentConditions {
   sensors: Sensor[];

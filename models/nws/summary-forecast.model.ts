@@ -1,6 +1,7 @@
-import { DetailedWindDirection, WindDirection } from 'models';
-import { Geometry } from './geometry.model';
-import { QuantitativeMinMaxValue, QuantitativeValue } from './quantitative-value.model';
+import { DetailedWindDirection } from 'models/detailed-wind-direction.enum';
+import { Geometry } from 'models/nws/geometry.model';
+import { QuantitativeMinMaxValue, QuantitativeValue } from 'models/nws/quantitative-value.model';
+import { WindDirection } from 'models/wind-direction.enum';
 
 export interface SummaryForecastResponse {
   geometry: Geometry;

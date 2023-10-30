@@ -1,10 +1,10 @@
 import { ConditionSize } from 'components/Card/Condition/condition-size.model';
-import ConditionIcon from 'components/Card/Condition/ConditionIcon';
-import ConditionLabel from 'components/Card/Condition/ConditionLabel';
+import { ConditionIcon } from 'components/Card/Condition/ConditionIcon';
+import { ConditionLabel } from 'components/Card/Condition/ConditionLabel';
 
 import styles from './Condition.module.css';
 
-export default function Condition({
+export function Condition({
   condition,
   size,
   isNight

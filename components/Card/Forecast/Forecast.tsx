@@ -1,14 +1,17 @@
 import AnimateHeight from 'react-animate-height';
-import HourlyForecast from 'components/Card/HourlyForecast/HourlyForecast';
-import SummaryForecast from 'components/Card/SummaryForecast/SummaryForecast';
-import { HumidityIcon, PrecipitationIcon, ThermometerIcon, ThermometerLevel, WindIcon } from 'components/Icons';
+import { HourlyForecast } from 'components/Card/HourlyForecast/HourlyForecast';
+import { SummaryForecast } from 'components/Card/SummaryForecast/SummaryForecast';
+import { HumidityIcon } from 'components/Icons/HumidityIcon';
+import { PrecipitationIcon } from 'components/Icons/PrecipitationIcon';
+import { ThermometerIcon, ThermometerLevel } from 'components/Icons/ThermometerIcon';
+import { WindIcon } from 'components/Icons/WindIcon';
 import { UI_ANIMATION_DURATION } from 'constants/client';
-import { useShouldContinueRendering } from 'hooks';
-import { NwsHourlyPeriodForecast, NwsPeriodForecast } from 'models/api';
+import { useShouldContinueRendering } from 'hooks/use-should-continue-rendering';
+import { NwsHourlyPeriodForecast, NwsPeriodForecast } from 'models/api/forecast.model';
 
 import styles from './Forecast.module.css';
 
-export default function Forecast({
+export function Forecast({
   summaryForecast,
   hourlyForecasts,
   isDaytime,

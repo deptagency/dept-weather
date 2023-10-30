@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import StandardCardHeader from 'components/Card/CardHeader/StandardCardHeader';
-import Forecast from 'components/Card/Forecast/Forecast';
-import ForecastTemps from 'components/Card/ForecastTemps/ForecastTemps';
-import { Color } from 'models';
-import { NwsPeriod } from 'models/api';
+import { StandardCardHeader } from 'components/Card/CardHeader/StandardCardHeader';
+import { Forecast } from 'components/Card/Forecast/Forecast';
+import { ForecastTemps } from 'components/Card/ForecastTemps/ForecastTemps';
+import { NwsPeriod } from 'models/api/forecast.model';
+import { Color } from 'models/color.enum';
 
 import styles from './Card.module.css';
 
 const ANIMATED_HOURLY_FORECASTS_WRAPPER_ID = 'HourlyForecastsWrapper';
 
-export default function ForecastCard({
+export function ForecastCard({
   isLoading,
   latestReadTime,
   period,

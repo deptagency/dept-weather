@@ -1,9 +1,14 @@
-import StandardCardHeader from 'components/Card/CardHeader/StandardCardHeader';
-import Condition from 'components/Card/Condition/Condition';
-import CurrentTemp from 'components/Card/CurrentTemp/CurrentTemp';
-import { AirQuality, Humidity, Precipitation, Pressure, UVIndex, Wind } from 'components/Card/Measurement';
-import { Color } from 'models';
-import { Observations, SunTimesObservations } from 'models/api';
+import { StandardCardHeader } from 'components/Card/CardHeader/StandardCardHeader';
+import { Condition } from 'components/Card/Condition/Condition';
+import { CurrentTemp } from 'components/Card/CurrentTemp/CurrentTemp';
+import { AirQuality } from 'components/Card/Measurement/AirQuality';
+import { Humidity } from 'components/Card/Measurement/Humidity';
+import { Precipitation } from 'components/Card/Measurement/Precipitation';
+import { Pressure } from 'components/Card/Measurement/Pressure';
+import { UVIndex } from 'components/Card/Measurement/UVIndex';
+import { Wind } from 'components/Card/Measurement/Wind';
+import { Observations, SunTimesObservations } from 'models/api/observations.model';
+import { Color } from 'models/color.enum';
 
 import styles from './Card.module.css';
 
@@ -18,7 +23,7 @@ const getIsNight = (sunData?: SunTimesObservations) => {
   return isNight;
 };
 
-export default function ObservationsCard({
+export function ObservationsCard({
   isLoading,
   latestReadTime,
   observations

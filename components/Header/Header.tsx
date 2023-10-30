@@ -1,14 +1,15 @@
 import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, useState } from 'react';
-import SearchOverlay from 'components/Header/SearchOverlay/SearchOverlay';
-import { ArrowIcon, DEPTLogoIcon } from 'components/Icons';
+import { SearchOverlay } from 'components/Header/SearchOverlay/SearchOverlay';
+import { ArrowIcon } from 'components/Icons/ArrowIcon';
+import { DEPTLogoIcon } from 'components/Icons/DEPTLogoIcon';
 import { IME_UNSETTLED_KEY_CODE } from 'constants/client';
-import { SearchQueryHelper } from 'helpers';
-import { CitiesCache, SearchResultCity } from 'models/cities';
+import { SearchQueryHelper } from 'helpers/search-query-helper';
+import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
 
 import styles from './Header.module.css';
 import homeStyles from 'styles/Home.module.css';
 
-export default function Header({
+export function Header({
   showSearchOverlay,
   setShowSearchOverlay,
   selectedCity,

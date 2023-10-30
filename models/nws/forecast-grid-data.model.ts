@@ -1,9 +1,9 @@
-import { Geometry } from './geometry.model';
+import { Geometry } from 'models/nws/geometry.model';
 import {
   GridpointQuantitativeValueLayer,
   QuantitativeMinMaxValue,
   QuantitativeValue
-} from './quantitative-value.model';
+} from 'models/nws/quantitative-value.model';
 
 export interface ForecastGridDataResponse {
   geometry: Geometry;

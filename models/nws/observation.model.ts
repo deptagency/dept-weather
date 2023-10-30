@@ -1,7 +1,7 @@
-import { CloudLayer } from './cloud-layer.model';
-import { Geometry } from './geometry.model';
-import { MetarPhenomenon } from './metar-phenomenon.model';
-import { QuantitativeValue } from './quantitative-value.model';
+import { CloudLayer } from 'models/nws/cloud-layer.model';
+import { Geometry } from 'models/nws/geometry.model';
+import { MetarPhenomenon } from 'models/nws/metar-phenomenon.model';
+import { QuantitativeValue } from 'models/nws/quantitative-value.model';
 
 export interface ObservationResponse {
   id: string;

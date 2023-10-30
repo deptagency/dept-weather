@@ -2,7 +2,7 @@ import { ReactElement } from 'react';
 
 import styles from './Measurement.module.css';
 
-export default function Measurement({
+export function Measurement({
   value,
   secondaryValue,
   icon,

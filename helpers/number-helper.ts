@@ -1,7 +1,8 @@
 import { DEFAULT_UNITS } from 'constants/shared';
-import { CONVERSION_FACTORS, Unit, UnitMapping, Units, UnitType } from 'models';
-import { ReqQuery } from 'models/api';
-import { NwsUnits, QuantitativeValue } from 'models/nws';
+import { ReqQuery } from 'models/api/req-query.model';
+import { NwsUnits } from 'models/nws/nws-units';
+import { QuantitativeValue } from 'models/nws/quantitative-value.model';
+import { CONVERSION_FACTORS, Unit, UnitMapping, Units, UnitType } from 'models/unit.enum';
 
 export class NumberHelper {
   static round(

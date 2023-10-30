@@ -1,5 +1,3 @@
-import winston from 'winston';
-import type { Logger } from 'winston';
 import {
   LOG_LABEL_STR_PADDING,
   LOG_LEVEL_STR_PADDING,
@@ -7,7 +5,9 @@ import {
   MIN_LOG_LEVEL_DEV,
   MIN_LOG_LEVEL_PROD
 } from 'constants/server';
-import { NumberHelper } from 'helpers';
+import { NumberHelper } from 'helpers/number-helper';
+import type { Logger } from 'winston';
+import winston from 'winston';
 
 export class LoggerHelper {
   private static readonly FORMAT_COLORIZE = winston.format.colorize({

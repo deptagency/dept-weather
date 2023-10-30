@@ -1,9 +1,9 @@
 import TimeAgo from 'react-timeago';
-import { getTimeAgoFormatter } from 'helpers';
+import { getTimeAgoFormatter } from 'helpers/timeago-formatter';
 
 import styles from './CardHeader.module.css';
 
-export default function CardHeaderContents({
+export function StandardCardHeaderContents({
   isLoading,
   lastUpdatedTime,
   label,

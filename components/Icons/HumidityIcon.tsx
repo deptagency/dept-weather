@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/34-Weather/10-Humidity/humidity-high.svg
-export default function HumidityIcon({ ariaLabel }: { ariaLabel?: string }) {
+export function HumidityIcon({ ariaLabel }: { ariaLabel?: string }) {
   return (
     <svg
       aria-hidden={ariaLabel ? undefined : true}

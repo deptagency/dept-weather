@@ -3,7 +3,7 @@ import { ConditionSize } from 'components/Card/Condition/condition-size.model';
 import styles from './Condition.module.css';
 
 const MAXIMUM_CONDITION_TEXT_LENGTH = 20;
-export default function ConditionLabel({
+export function ConditionLabel({
   condition,
   size,
   className

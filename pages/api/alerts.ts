@@ -1,7 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CitiesReqQueryHelper, LoggerHelper, NwsHelper, NwsMapHelper } from 'helpers/api';
-import { DataSource } from 'models';
-import { Alerts, APIRoute, getPath, Response } from 'models/api';
+import { CitiesReqQueryHelper } from 'helpers/api/cities-req-query-helper';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { NwsHelper } from 'helpers/api/nws/nws-helper';
+import { NwsMapHelper } from 'helpers/api/nws/nws-map-helper';
+import { Alerts } from 'models/api/alerts.model';
+import { APIRoute, getPath } from 'models/api/api-route.model';
+import { Response } from 'models/api/response.model';
+import { DataSource } from 'models/data-source.enum';
 
 const LOGGER_LABEL = getPath(APIRoute.ALERTS);
 

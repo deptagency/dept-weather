@@ -1,7 +1,7 @@
-import Measurement from 'components/Card/Measurement/Measurement';
-import { UVIndexIcon } from 'components/Icons';
-import { UVLevelName } from 'models';
-import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api';
+import { Measurement } from 'components/Card/Measurement/Measurement';
+import { UVIndexIcon } from 'components/Icons/UVIndexIcon';
+import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api/observations.model';
+import { UVLevelName } from 'models/uv-level-name.enum';
 
 const uvValueToLevelName = (uvValue: number | null | undefined) => {
   if (uvValue == null || uvValue < 0) return null;
@@ -12,7 +12,7 @@ const uvValueToLevelName = (uvValue: number | null | undefined) => {
   else return UVLevelName.EXTREME;
 };
 
-export default function UVIndex({ epaData }: { epaData?: EpaHourlyForecast }) {
+export function UVIndex({ epaData }: { epaData?: EpaHourlyForecast }) {
   const uvIndex = epaData?.hourlyForecast?.length
     ? epaData.hourlyForecast.reduce(
         (prev: EpaHourlyForecastItem, current: EpaHourlyForecastItem) =>

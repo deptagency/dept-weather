@@ -1,14 +1,17 @@
 import { Dispatch, ReactElement, SetStateAction, useEffect, useState } from 'react';
-import AlertCardHeaderContents from 'components/Card/CardHeader/AlertCardHeaderContents';
-import CardHeader from 'components/Card/CardHeader/CardHeader';
-import { AlertCircleIcon, AlertDiamondIcon, AlertHexagonIcon, AlertTriangleIcon } from 'components/Icons';
-import { Color } from 'models';
-import { NwsAlert } from 'models/api';
-import { AlertSeverity } from 'models/nws';
+import { AlertCardHeaderContents } from 'components/Card/CardHeader/AlertCardHeaderContents';
+import { CardHeader } from 'components/Card/CardHeader/CardHeader';
+import { AlertCircleIcon } from 'components/Icons/AlertCircleIcon';
+import { AlertDiamondIcon } from 'components/Icons/AlertDiamondIcon';
+import { AlertHexagonIcon } from 'components/Icons/AlertHexagonIcon';
+import { AlertTriangleIcon } from 'components/Icons/AlertTriangleIcon';
+import { NwsAlert } from 'models/api/alerts.model';
+import { Color } from 'models/color.enum';
+import { AlertSeverity } from 'models/nws/alerts.model';
 
 import styles from './CardHeader.module.css';
 
-export default function AlertCardHeader({
+export function AlertCardHeader({
   alert,
   isExpanded,
   setIsExpanded,

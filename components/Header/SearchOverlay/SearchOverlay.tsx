@@ -1,16 +1,17 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { LocateIcon, RecentIcon } from 'components/Icons';
+import { LocateIcon } from 'components/Icons/LocateIcon';
+import { RecentIcon } from 'components/Icons/RecentIcon';
 import { CITY_SEARCH_DEBOUNCE_MS, CURRENT_LOCATION } from 'constants/client';
 import { API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
-import { SearchQueryHelper } from 'helpers';
-import { useDebounce } from 'hooks';
-import { APIRoute, getPath } from 'models/api';
-import { CitiesCache, SearchResultCity } from 'models/cities';
+import { SearchQueryHelper } from 'helpers/search-query-helper';
+import { useDebounce } from 'hooks/use-debounce';
+import { APIRoute, getPath } from 'models/api/api-route.model';
+import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
 
 import styles from './SearchOverlay.module.css';
 import homeStyles from 'styles/Home.module.css';
 
-export default function SearchOverlay({
+export function SearchOverlay({
   rawSearchQuery,
   showSearchOverlay,
   setShowSearchOverlay,

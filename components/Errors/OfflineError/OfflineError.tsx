@@ -1,7 +1,7 @@
-import ErrorComponent from 'components/Errors/ErrorComponent';
-import { WiFiOffIcon } from 'components/Icons';
+import { ErrorComponent } from 'components/Errors/ErrorComponent';
+import { WiFiOffIcon } from 'components/Icons/WiFiOffIcon';
 
-export default function OfflineError() {
+export function OfflineError() {
   return (
     <ErrorComponent
       errorMessage="Reconnect to the internet to check the weather"

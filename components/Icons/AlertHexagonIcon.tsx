@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Designed in Figma
-export default function AlertHexagonIcon({ useInverseFill }: { useInverseFill?: boolean }) {
+export function AlertHexagonIcon({ useInverseFill }: { useInverseFill?: boolean }) {
   return (
     <svg
       aria-hidden="true"

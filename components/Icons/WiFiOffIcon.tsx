@@ -1,7 +1,7 @@
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/05-Internet-Networks-Servers/02-Wifi/wifi-off.svg
-export default function WiFiOffIcon() {
+export function WiFiOffIcon() {
   return (
     <svg aria-hidden="true" className={styles.icon} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
       <path d="M0.500005 16C0.366671 16 0.240671 15.948 0.146671 15.8533C-0.0479953 15.6587 -0.0479953 15.3413 0.146671 15.146L15.1467 0.146C15.2407 0.052 15.3667 0 15.5 0C15.6333 0 15.7593 0.052 15.8533 0.146667C15.948 0.240667 16 0.366667 16 0.5C16 0.633333 15.948 0.759333 15.8533 0.853333L0.853338 15.8533C0.759338 15.948 0.633338 16 0.500005 16Z" />

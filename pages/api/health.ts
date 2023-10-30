@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { LoggerHelper } from 'helpers/api';
-import { APIRoute, getPath } from 'models/api';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { APIRoute, getPath } from 'models/api/api-route.model';
 
 const LOGGER_LABEL = getPath(APIRoute.HEALTH);
 export default function health(_: NextApiRequest, res: NextApiResponse) {

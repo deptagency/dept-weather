@@ -1,20 +1,14 @@
 import { ConditionSize } from 'components/Card/Condition/condition-size.model';
-import ConditionIcon from 'components/Card/Condition/ConditionIcon';
-import ConditionLabel from 'components/Card/Condition/ConditionLabel';
-import { WindHelper } from 'helpers';
-import { NwsHourlyPeriodForecast } from 'models/api';
+import { ConditionIcon } from 'components/Card/Condition/ConditionIcon';
+import { ConditionLabel } from 'components/Card/Condition/ConditionLabel';
+import { WindHelper } from 'helpers/wind-helper';
+import { NwsHourlyPeriodForecast } from 'models/api/forecast.model';
 import { roundOrEmDash, roundTensOrEmDash } from 'utils';
 
 import styles from './HourlyForecast.module.css';
 
 const HOURLY_FORECAST_CONDITION_SIZE: ConditionSize = 'x-small';
-export default function HourlyForecast({
-  forecast,
-  isDaytime
-}: {
-  forecast: NwsHourlyPeriodForecast;
-  isDaytime: boolean;
-}) {
+export function HourlyForecast({ forecast, isDaytime }: { forecast: NwsHourlyPeriodForecast; isDaytime: boolean }) {
   return (
     <>
       <h5 className={styles['hourly-forecast__time-label']}>{forecast.startLabel}</h5>

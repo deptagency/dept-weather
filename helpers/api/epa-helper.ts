@@ -3,13 +3,13 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import geo2zip from 'geo2zip';
+import { Cached, CacheEntry } from 'helpers/api/cached';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { CoordinatesHelper } from 'helpers/coordinates-helper';
+import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api/observations.model';
+import { MinimalQueriedCity } from 'models/cities/cities.model';
+import { UVHourlyForecast, UVHourlyForecastItem } from 'models/epa/uv-hourly-forecast';
 import fetch from 'node-fetch';
-import { CoordinatesHelper } from 'helpers';
-import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api';
-import { MinimalQueriedCity } from 'models/cities';
-import { UVHourlyForecast, UVHourlyForecastItem } from 'models/epa';
-import { Cached, CacheEntry } from './cached';
-import { LoggerHelper } from './logger-helper';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);
@@ -54,11 +54,10 @@ export class EpaHelper {
         timeZone: minQueriedCity.timeZone
       };
     },
-    async (_: string, newItem: UVHourlyForecastWithTz) => {
-      return newItem.uvHourlyForecast?.length > 0
+    async (_: string, newItem: UVHourlyForecastWithTz) =>
+      newItem.uvHourlyForecast?.length > 0
         ? this.getParsedUnixTime(newItem.uvHourlyForecast[newItem.uvHourlyForecast.length - 1], newItem.timeZone)
-        : 0;
-    },
+        : 0,
     LoggerHelper.getLogger(`${this.CLASS_NAME}.hourly`)
   );
   static async getHourly(minQueriedCity: MinimalQueriedCity) {

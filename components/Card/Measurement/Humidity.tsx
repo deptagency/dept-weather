@@ -1,8 +1,8 @@
-import Measurement from 'components/Card/Measurement/Measurement';
-import { HumidityIcon } from 'components/Icons';
+import { Measurement } from 'components/Card/Measurement/Measurement';
+import { HumidityIcon } from 'components/Icons/HumidityIcon';
 import { roundOrEmDash } from 'utils';
 
-export default function Humidity({ humidity }: { humidity?: number | null | undefined }) {
+export function Humidity({ humidity }: { humidity?: number | null | undefined }) {
   return (
     <Measurement
       icon={<HumidityIcon />}

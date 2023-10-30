@@ -1,4 +1,5 @@
-import { DetailedWindDirection, WindDirection } from 'models';
+import { DetailedWindDirection } from 'models/detailed-wind-direction.enum';
+import { WindDirection } from 'models/wind-direction.enum';
 
 export class WindHelper {
   static degToDir(deg: number) {

@@ -10,9 +10,8 @@ export enum APIRoute {
 
 export type QueryParams = Record<string, string | number> | undefined;
 
-export const getPath = (route: APIRoute, queryParams?: QueryParams) => {
-  return `${API_ROUTE_PATH}/${route}${getQueryParamsStr(queryParams)}`;
-};
+export const getPath = (route: APIRoute, queryParams?: QueryParams) =>
+  `${API_ROUTE_PATH}/${route}${getQueryParamsStr(queryParams)}`;
 
 export const getQueryParamsStr = (queryParams?: QueryParams) => {
   let queryParamsStr = '';
