@@ -1,7 +1,8 @@
+import Measurement from 'components/Card/Measurement/Measurement';
 import { PressureIcon, PressureLevel, PressureTrend } from 'components/Icons';
 import { WlPressure } from 'models/api';
 import { toFixedOrEmDash } from 'utils';
-import Measurement from '../Measurement';
+
 type PressureArg = (Pick<WlPressure, 'atSeaLevel'> & Partial<Pick<WlPressure, 'trend'>>) | null | undefined;
 
 const LOW_PRESSURE = 29.7;
@@ -32,14 +33,14 @@ export default function Pressure({ pressure }: { pressure?: PressureArg }) {
 
   return (
     <Measurement
+      icon={<PressureIcon level={level} trend={trend} />}
+      label="Pressure"
       value={
         <>
           {toFixedOrEmDash(pressure?.atSeaLevel)} <span>in</span>
           {trendArrow}
         </>
       }
-      label="Pressure"
-      icon={<PressureIcon level={level} trend={trend}></PressureIcon>}
-    ></Measurement>
+    />
   );
 }

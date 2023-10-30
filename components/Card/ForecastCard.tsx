@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import StandardCardHeader from 'components/Card/CardHeader/StandardCardHeader';
+import Forecast from 'components/Card/Forecast/Forecast';
+import ForecastTemps from 'components/Card/ForecastTemps/ForecastTemps';
 import { Color } from 'models';
 import { NwsPeriod } from 'models/api';
-import StandardCardHeader from './CardHeader/StandardCardHeader';
-import Forecast from './Forecast/Forecast';
-import ForecastTemps from './ForecastTemps/ForecastTemps';
+
 import styles from './Card.module.css';
 
 const ANIMATED_HOURLY_FORECASTS_WRAPPER_ID = 'HourlyForecastsWrapper';
@@ -32,38 +33,38 @@ export default function ForecastCard({
   return (
     <article className={styles.card}>
       <StandardCardHeader
-        isLoading={isLoading}
-        lastUpdatedTime={latestReadTime}
-        label={period.dayName}
-        secondaryLabel={period.shortDateName}
+        ariaControls={animatedContentsWrapperIds.join(',')}
         backgroundColor={Color.ONYX}
         disabledExpand={!period.dayHourlyForecasts?.length && !period.nightHourlyForecasts?.length}
         isExpanded={isExpanded}
+        isLoading={isLoading}
+        label={period.dayName}
+        lastUpdatedTime={latestReadTime}
+        secondaryLabel={period.shortDateName}
         setIsExpanded={setIsExpanded}
-        ariaControls={animatedContentsWrapperIds.join(',')}
-      ></StandardCardHeader>
+      />
       <div className={styles['card-contents']}>
         <div className={`${styles['card-contents__overview']} ${styles['card-contents__overview--forecast']}`}>
           <ForecastTemps
             highTemperature={period.dayForecast?.temperature}
             lowTemperature={period.nightForecast?.temperature}
-          ></ForecastTemps>
+          />
         </div>
         <div className={styles['card-contents__forecasts']}>
           <Forecast
+            animatedContentsWrapperId={animatedContentsWrapperIds[0]}
+            hourlyForecasts={period.dayHourlyForecasts}
             isDaytime={true}
             isExpanded={isExpanded}
             summaryForecast={period.dayForecast}
-            hourlyForecasts={period.dayHourlyForecasts}
-            animatedContentsWrapperId={animatedContentsWrapperIds[0]}
-          ></Forecast>
+          />
           <Forecast
+            animatedContentsWrapperId={animatedContentsWrapperIds[1]}
+            hourlyForecasts={period.nightHourlyForecasts}
             isDaytime={false}
             isExpanded={isExpanded}
             summaryForecast={period.nightForecast}
-            hourlyForecasts={period.nightHourlyForecasts}
-            animatedContentsWrapperId={animatedContentsWrapperIds[1]}
-          ></Forecast>
+          />
         </div>
       </div>
     </article>

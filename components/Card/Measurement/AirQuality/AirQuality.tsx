@@ -1,7 +1,7 @@
+import { useEffect, useState } from 'react';
+import Measurement from 'components/Card/Measurement/Measurement';
 import { AirQualityIcon } from 'components/Icons';
 import { AirNowObservations } from 'models/api';
-import { useEffect, useState } from 'react';
-import Measurement from '../Measurement';
 
 export default function AirQuality({ airnowData }: { airnowData?: AirNowObservations }) {
   const [measurementInfo, setMeasurementInfo] = useState<{
@@ -19,5 +19,5 @@ export default function AirQuality({ airnowData }: { airnowData?: AirNowObservat
     });
   }, [airnowData]);
 
-  return <Measurement {...measurementInfo} icon={<AirQualityIcon></AirQualityIcon>} />;
+  return <Measurement {...measurementInfo} icon={<AirQualityIcon />} />;
 }

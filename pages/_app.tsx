@@ -1,7 +1,8 @@
-import localFont from 'next/font/local';
 import { AppProps } from 'next/app';
-import styles from 'styles/Home.module.css';
+import localFont from 'next/font/local';
+
 import '../styles/globals.css';
+import styles from 'styles/Home.module.css';
 
 const maisonNeue = localFont({
   src: [

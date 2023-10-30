@@ -1,9 +1,10 @@
+import StandardCardHeader from 'components/Card/CardHeader/StandardCardHeader';
+import Condition from 'components/Card/Condition/Condition';
+import CurrentTemp from 'components/Card/CurrentTemp/CurrentTemp';
+import { AirQuality, Humidity, Precipitation, Pressure, UVIndex, Wind } from 'components/Card/Measurement';
 import { Color } from 'models';
 import { Observations, SunTimesObservations } from 'models/api';
-import StandardCardHeader from './CardHeader/StandardCardHeader';
-import Condition from './Condition/Condition';
-import CurrentTemp from './CurrentTemp/CurrentTemp';
-import { AirQuality, Humidity, Precipitation, Pressure, UVIndex, Wind } from './Measurement';
+
 import styles from './Card.module.css';
 
 const getIsNight = (sunData?: SunTimesObservations) => {
@@ -29,36 +30,30 @@ export default function ObservationsCard({
   return (
     <article className={styles.card}>
       <StandardCardHeader
-        isLoading={isLoading}
-        lastUpdatedTime={latestReadTime}
-        label="Now"
         backgroundColor={Color.INDIGO}
-      ></StandardCardHeader>
+        isLoading={isLoading}
+        label="Now"
+        lastUpdatedTime={latestReadTime}
+      />
       <div className={styles['card-contents']}>
         <div className={styles['card-contents__overview']}>
-          <CurrentTemp observations={observations?.wl ?? observations?.nws}></CurrentTemp>
+          <CurrentTemp observations={observations?.wl ?? observations?.nws} />
           <Condition
             condition={observations?.nws?.textDescription}
-            size="large"
             isNight={getIsNight(observations?.sun)}
-          ></Condition>
+            size="large"
+          />
         </div>
         <div className={styles['card-contents__measurements']}>
-          <Wind wind={observations?.wl?.wind ?? observations?.nws?.wind} includeGustSpeed={true}></Wind>
-          <UVIndex epaData={observations?.epa}></UVIndex>
-          <AirQuality airnowData={observations?.airnow}></AirQuality>
-          <Humidity humidity={observations?.wl?.humidity ?? observations?.nws?.humidity}></Humidity>
-          <Pressure pressure={observations?.wl?.pressure ?? observations?.nws?.pressure}></Pressure>
+          <Wind includeGustSpeed={true} wind={observations?.wl?.wind ?? observations?.nws?.wind} />
+          <UVIndex epaData={observations?.epa} />
+          <AirQuality airnowData={observations?.airnow} />
+          <Humidity humidity={observations?.wl?.humidity ?? observations?.nws?.humidity} />
+          <Pressure pressure={observations?.wl?.pressure ?? observations?.nws?.pressure} />
           {observations?.wl?.rainfall?.last24Hrs != null ? (
-            <Precipitation
-              precipitation={observations.wl.rainfall.last24Hrs}
-              label="Last 24hr Rainfall"
-            ></Precipitation>
+            <Precipitation label="Last 24hr Rainfall" precipitation={observations.wl.rainfall.last24Hrs} />
           ) : (
-            <Precipitation
-              precipitation={observations?.nws?.precipitation?.last6Hrs}
-              label="Last 6hr Precip"
-            ></Precipitation>
+            <Precipitation label="Last 6hr Precip" precipitation={observations?.nws?.precipitation?.last6Hrs} />
           )}
         </div>
       </div>

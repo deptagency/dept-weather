@@ -4,8 +4,8 @@ import styles from './Icon.module.css';
 export default function AlertDiamondIcon({ useInverseFill }: { useInverseFill?: boolean }) {
   return (
     <svg
-      className={`${styles.icon} ${useInverseFill ? styles['icon--inverse-fill'] : ''}`}
       aria-hidden="true"
+      className={`${styles.icon} ${useInverseFill ? styles['icon--inverse-fill'] : ''}`}
       viewBox="0 0 16 16"
       xmlns="http://www.w3.org/2000/svg"
     >

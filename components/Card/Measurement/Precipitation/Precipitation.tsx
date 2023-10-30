@@ -1,6 +1,6 @@
+import Measurement from 'components/Card/Measurement/Measurement';
 import { PrecipitationIcon } from 'components/Icons';
 import { toFixedOrEmDash } from 'utils';
-import Measurement from '../Measurement';
 
 export default function Precipitation({
   precipitation,
@@ -11,13 +11,13 @@ export default function Precipitation({
 }) {
   return (
     <Measurement
+      icon={<PrecipitationIcon innerDropHeightPercent={0} />}
+      label={label}
       value={
         <>
           {toFixedOrEmDash(precipitation)} <span>in</span>
         </>
       }
-      label={label}
-      icon={<PrecipitationIcon innerDropHeightPercent={0}></PrecipitationIcon>}
-    ></Measurement>
+    />
   );
 }

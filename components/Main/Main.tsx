@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
-import useSWR from 'swr';
+import { AlertCard, ForecastCard, ObservationsCard } from 'components/Card';
 import { OfflineError } from 'components/Errors';
 import { useOnlineStatus } from 'hooks';
 import {
@@ -13,7 +13,8 @@ import {
   QueryParams,
   Response
 } from 'models/api';
-import { AlertCard, ForecastCard, ObservationsCard } from '../Card';
+import useSWR from 'swr';
+
 import homeStyles from 'styles/Home.module.css';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
@@ -64,7 +65,7 @@ const AlertCards = ({ alerts, lid }: { alerts: NwsAlert[]; lid: string }) => (
   <>
     {alerts.map((alert, i) => {
       const key = `${lid}-${i}`;
-      return <AlertCard key={key} _key={key} alert={alert}></AlertCard>;
+      return <AlertCard _key={key} alert={alert} key={key} />;
     })}
   </>
 );
@@ -79,18 +80,16 @@ const ForecastCards = ({
   latestReadTime?: number;
   periods: NwsPeriod[];
   lid: string;
-}) => {
-  return (
-    <>
-      {periods.map((period, idx) => {
-        const key = `${lid}-${idx}`;
-        return (
-          <ForecastCard period={period} isLoading={isLoading} latestReadTime={latestReadTime} key={key} _key={key} />
-        );
-      })}
-    </>
-  );
-};
+}) => (
+  <>
+    {periods.map((period, idx) => {
+      const key = `${lid}-${idx}`;
+      return (
+        <ForecastCard _key={key} isLoading={isLoading} key={key} latestReadTime={latestReadTime} period={period} />
+      );
+    })}
+  </>
+);
 
 export default function Main({ queryParams, children }: { queryParams: QueryParams; children?: ReactNode }) {
   const isOnline = useOnlineStatus();
@@ -105,7 +104,7 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
 
   useEffect(() => {
     const _placeholderPeriods: NwsPeriod[] = Array(7);
-    let date = new Date(new Date().setHours(0, 0, 0, 0));
+    const date = new Date(new Date().setHours(0, 0, 0, 0));
     for (let i = 0; i < _placeholderPeriods.length; i++) {
       _placeholderPeriods[i] = {
         dayName: i === 0 ? 'Today' : date.toLocaleString('default', { weekday: 'long' }),
@@ -125,7 +124,7 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
     let newObservationsLatestReadTime: number | undefined;
 
     if (observations != null) {
-      let readTimes: number[] = [];
+      const readTimes: number[] = [];
       if (observations.data?.wl?.readTime) readTimes.push(observations.data.wl.readTime);
       if (observations.data?.nws?.readTime) readTimes.push(observations.data.nws.readTime);
 
@@ -144,21 +143,21 @@ export default function Main({ queryParams, children }: { queryParams: QueryPara
       {children != null ? (
         children
       ) : !isOnline && alertsIsError && observationsIsError && forecastIsError ? (
-        <OfflineError></OfflineError>
+        <OfflineError />
       ) : (
         <>
-          <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} lid={lid}></AlertCards>
+          <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} lid={lid} />
           <ObservationsCard
             isLoading={observationsIsLoading}
             latestReadTime={observationsLatestReadTime}
             observations={observations?.data}
-          ></ObservationsCard>
+          />
           <ForecastCards
             isLoading={forecastIsLoading}
             latestReadTime={forecast?.latestReadTime ? forecast!.latestReadTime! : undefined}
-            periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
             lid={lid}
-          ></ForecastCards>
+            periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
+          />
         </>
       )}
     </main>

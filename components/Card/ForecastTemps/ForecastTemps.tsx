@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { roundOrEmDash } from 'utils';
+
 import styles from './ForecastTemps.module.css';
 
 export default function ForecastTemps({
@@ -24,11 +25,11 @@ export default function ForecastTemps({
   }, [highTemperature, lowTemperature]);
 
   return (
-    <h3 className={styles['forecast-temps__temps']} aria-label={ariaLabel}>
-      <span className={styles['forecast-temps__temps__high']} aria-hidden={true}>
+    <h3 aria-label={ariaLabel} className={styles['forecast-temps__temps']}>
+      <span aria-hidden={true} className={styles['forecast-temps__temps__high']}>
         {highTempTxt}
       </span>
-      <span className={styles['forecast-temps__temps__low']} aria-hidden={true}>
+      <span aria-hidden={true} className={styles['forecast-temps__temps__low']}>
         /{lowTempText}
       </span>
     </h3>

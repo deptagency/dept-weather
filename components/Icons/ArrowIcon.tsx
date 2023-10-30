@@ -1,5 +1,5 @@
-import styles from './Icon.module.css';
 import arrowIconStyles from './ArrowIcon.module.css';
+import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/52-Arrows-Diagrams/01-Arrows/arrow-down-1.svg
 export default function ArrowIcon({
@@ -11,6 +11,7 @@ export default function ArrowIcon({
 }) {
   return (
     <svg
+      aria-hidden="true"
       className={`${styles.icon} ${useInverseFill ? styles['icon--inverse-fill'] : ''} ${
         animationState
           ? `animated ${arrowIconStyles['icon__arrow__animated']} ${
@@ -18,7 +19,6 @@ export default function ArrowIcon({
             }`
           : ''
       }`}
-      aria-hidden="true"
       viewBox="0 0 16 16"
       xmlns="http://www.w3.org/2000/svg"
     >

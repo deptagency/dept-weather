@@ -1,5 +1,5 @@
-import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
+import dayjs from 'dayjs';
 import {
   AirNowHelper,
   CacheEntry,
@@ -24,6 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       getFormattedDuration
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const promises: Array<Promise<CacheEntry<any>>> = [
       NwsHelper.getCurrent(minimalQueriedCity),
       AirNowHelper.getCurrent(minimalQueriedCity),

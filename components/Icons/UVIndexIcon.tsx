@@ -6,7 +6,7 @@ const DEFAULT_UV_INDEX_ICON_VALUE = 5;
 export default function UVIndexIcon({ uvIndex }: { uvIndex: number | null | undefined }) {
   const uvValue = uvIndex ?? DEFAULT_UV_INDEX_ICON_VALUE;
   return (
-    <svg className={styles.icon} aria-hidden="true" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <svg aria-hidden="true" className={styles.icon} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
       <path d="M1.5 16C0.672667 16 0 15.3273 0 14.5V1.5C0 0.672667 0.672667 0 1.5 0H5.5C5.776 0 6 0.224 6 0.5C6 0.776 5.776 1 5.5 1H1.5C1.224 1 1 1.224 1 1.5V14.5C1 14.776 1.224 15 1.5 15H5.5C5.776 15 6 14.776 6 14.5V11.5C6 11.224 6.224 11 6.5 11C6.776 11 7 11.224 7 11.5V14.5C7 15.3273 6.32733 16 5.5 16H1.5Z" />
       <path d="M10.5 11C7.46733 11 5 8.53267 5 5.5C5 2.46733 7.46733 0 10.5 0C13.5327 0 16 2.46733 16 5.5C16 8.53267 13.5327 11 10.5 11ZM10.5 1C8.01867 1 6 3.01867 6 5.5C6 7.98133 8.01867 10 10.5 10C12.9813 10 15 7.98133 15 5.5C15 3.01867 12.9813 1 10.5 1Z" />
       <path d="M8.5 8C7.67267 8 7 7.32733 7 6.5V4C7 3.724 7.224 3.5 7.5 3.5C7.776 3.5 8 3.724 8 4V6.5C8 6.776 8.224 7 8.5 7C8.776 7 9 6.776 9 6.5V4C9 3.724 9.224 3.5 9.5 3.5C9.776 3.5 10 3.724 10 4V6.5C10 7.32733 9.32733 8 8.5 8Z" />

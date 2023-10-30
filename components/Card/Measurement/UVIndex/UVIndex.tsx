@@ -1,7 +1,7 @@
+import Measurement from 'components/Card/Measurement/Measurement';
 import { UVIndexIcon } from 'components/Icons';
 import { UVLevelName } from 'models';
 import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api';
-import Measurement from '../Measurement';
 
 const uvValueToLevelName = (uvValue: number | null | undefined) => {
   if (uvValue == null || uvValue < 0) return null;
@@ -23,10 +23,10 @@ export default function UVIndex({ epaData }: { epaData?: EpaHourlyForecast }) {
 
   return (
     <Measurement
-      value={uvIndex ?? '–'}
-      secondaryValue={uvValueToLevelName(uvIndex) ?? '–'}
+      icon={<UVIndexIcon uvIndex={uvIndex} />}
       label="UV Index"
-      icon={<UVIndexIcon uvIndex={uvIndex}></UVIndexIcon>}
+      secondaryValue={uvValueToLevelName(uvIndex) ?? '–'}
+      value={uvIndex ?? '–'}
     />
   );
 }

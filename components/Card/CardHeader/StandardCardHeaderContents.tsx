@@ -1,5 +1,6 @@
-import { getTimeAgoFormatter } from 'helpers';
 import TimeAgo from 'react-timeago';
+import { getTimeAgoFormatter } from 'helpers';
+
 import styles from './CardHeader.module.css';
 
 export default function CardHeaderContents({
@@ -16,8 +17,8 @@ export default function CardHeaderContents({
   return (
     <div className={styles['card-header__contents']}>
       <h2
-        className={styles['card-header__contents__title']}
         aria-label={`${label}${secondaryLabel ? ` ${secondaryLabel}` : ''}`}
+        className={styles['card-header__contents__title']}
       >
         {label}
         {secondaryLabel != null ? (

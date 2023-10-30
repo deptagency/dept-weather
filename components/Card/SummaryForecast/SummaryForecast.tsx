@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import Condition from 'components/Card/Condition/Condition';
+import { PrecipitationForecast, Wind } from 'components/Card/Measurement';
 import { NwsPeriodForecast } from 'models/api';
-import Condition from '../Condition/Condition';
-import { PrecipitationForecast, Wind } from '../Measurement';
+
 import styles from './SummaryForecast.module.css';
 
 const removeWord = (str: string, word: string) => str.replace(new RegExp(` *${word} *`, 'ig'), '');
@@ -36,15 +37,15 @@ export default function SummaryForecast({
   return (
     <div className={styles['summary-forecast']}>
       <div className={styles['summary-forecast__overview']}>
-        <h4 className={styles['summary-forecast__overview__label']} aria-label={periodLabel}>
+        <h4 aria-label={periodLabel} className={styles['summary-forecast__overview__label']}>
           {periodLabel.toUpperCase()}
         </h4>
 
-        <Condition condition={condition} size="small" isNight={!isDaytime}></Condition>
+        <Condition condition={condition} isNight={!isDaytime} size="small" />
       </div>
       <div className={styles['summary-forecast__measurements']}>
-        <Wind wind={forecast?.wind} includeGustSpeed={false}></Wind>
-        <PrecipitationForecast chanceOfPrecipitation={forecast?.chanceOfPrecip}></PrecipitationForecast>
+        <Wind includeGustSpeed={false} wind={forecast?.wind} />
+        <PrecipitationForecast chanceOfPrecipitation={forecast?.chanceOfPrecip} />
       </div>
     </div>
   );

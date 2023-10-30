@@ -4,8 +4,8 @@ import styles from './Icon.module.css';
 export default function RecentIcon({ isHidden }: { isHidden: boolean }) {
   return (
     <svg
-      className={`${styles.icon} ${isHidden ? styles['icon--hidden'] : ''}`}
       aria-label="Recent City"
+      className={`${styles.icon} ${isHidden ? styles['icon--hidden'] : ''}`}
       viewBox="0 0 16 16"
       xmlns="http://www.w3.org/2000/svg"
     >

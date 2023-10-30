@@ -1,6 +1,7 @@
-import ConditionIcon from './ConditionIcon';
-import ConditionLabel from './ConditionLabel';
-import { ConditionSize } from './condition-size.model';
+import { ConditionSize } from 'components/Card/Condition/condition-size.model';
+import ConditionIcon from 'components/Card/Condition/ConditionIcon';
+import ConditionLabel from 'components/Card/Condition/ConditionLabel';
+
 import styles from './Condition.module.css';
 
 export default function Condition({
@@ -14,8 +15,8 @@ export default function Condition({
 }) {
   return (
     <div className={styles.condition}>
-      <ConditionIcon condition={condition} size={size} useEmptyDivIfNoIcon={false} isNight={isNight}></ConditionIcon>
-      <ConditionLabel condition={condition} size={size}></ConditionLabel>
+      <ConditionIcon condition={condition} isNight={isNight} size={size} useEmptyDivIfNoIcon={false} />
+      <ConditionLabel condition={condition} size={size} />
     </div>
   );
 }

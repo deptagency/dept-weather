@@ -1,6 +1,6 @@
-import { GEOPOSITION_PERMISSION_DENIED_ERROR_CODE } from 'constants/client';
+import ErrorComponent from 'components/Errors/ErrorComponent';
 import { LocateOffIcon } from 'components/Icons';
-import ErrorComponent from '../ErrorComponent';
+import { GEOPOSITION_PERMISSION_DENIED_ERROR_CODE } from 'constants/client';
 
 export default function LocateError({ locateError }: { locateError: number | undefined }) {
   let errorTitle = 'Location Unavailable';
@@ -10,11 +10,5 @@ export default function LocateError({ locateError }: { locateError: number | und
     errorMessage = 'Update your browser settings or search for a city instead';
   }
 
-  return (
-    <ErrorComponent
-      errorTitle={errorTitle}
-      errorMessage={errorMessage}
-      icon={<LocateOffIcon></LocateOffIcon>}
-    ></ErrorComponent>
-  );
+  return <ErrorComponent errorMessage={errorMessage} errorTitle={errorTitle} icon={<LocateOffIcon />} />;
 }

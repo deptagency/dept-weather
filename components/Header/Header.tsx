@@ -1,11 +1,12 @@
 import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, useState } from 'react';
-import { IME_UNSETTLED_KEY_CODE } from 'constants/client';
+import SearchOverlay from 'components/Header/SearchOverlay/SearchOverlay';
 import { ArrowIcon, DEPTLogoIcon } from 'components/Icons';
+import { IME_UNSETTLED_KEY_CODE } from 'constants/client';
 import { SearchQueryHelper } from 'helpers';
 import { CitiesCache, SearchResultCity } from 'models/cities';
-import SearchOverlay from './SearchOverlay/SearchOverlay';
-import homeStyles from 'styles/Home.module.css';
+
 import styles from './Header.module.css';
+import homeStyles from 'styles/Home.module.css';
 
 export default function Header({
   showSearchOverlay,
@@ -92,26 +93,22 @@ export default function Header({
         }}
       >
         <header className={`${styles.header} ${homeStyles.container__content}`}>
-          <h1 className={styles.header__branding} aria-label="DEPT® Weather">
-            <DEPTLogoIcon aria-hidden="true"></DEPTLogoIcon>
-            <span className={`${styles.header__text} ${styles.header__branding__text}`} aria-hidden={true}>
+          <h1 aria-label="DEPT® Weather" className={styles.header__branding}>
+            <DEPTLogoIcon aria-hidden="true" />
+            <span aria-hidden={true} className={`${styles.header__text} ${styles.header__branding__text}`}>
               Weather
             </span>
           </h1>
           <div className={styles.header__location}>
             <input
-              className={`${styles.header__text} ${styles.header__location__input}`}
-              placeholder={selectedCity != null ? 'City, State' : ''}
-              aria-label={'Search City, State'}
-              aria-expanded={showSearchOverlay}
-              aria-controls="SearchResultsList"
-              aria-autocomplete="list"
-              aria-haspopup="listbox"
               aria-activedescendant={results.length ? `SearchResult${highlightedIndex}` : undefined}
-              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="SearchResultsList"
+              aria-expanded={showSearchOverlay}
+              aria-haspopup="listbox"
+              aria-label={'Search City, State'}
               autoComplete="off"
-              type="text"
-              ref={inputRef}
+              className={`${styles.header__text} ${styles.header__location__input}`}
               onChange={e => setRawSearchQuery(e.target.value)}
               onClick={e => {
                 e.preventDefault();
@@ -121,6 +118,10 @@ export default function Header({
                 }
               }}
               onKeyDown={handleKeyDown}
+              placeholder={selectedCity != null ? 'City, State' : ''}
+              ref={inputRef}
+              role="combobox"
+              type="text"
               value={
                 showSearchOverlay
                   ? rawSearchQuery
@@ -128,12 +129,12 @@ export default function Header({
                   ? SearchQueryHelper.getCityAndStateCode(selectedCity)
                   : ''
               }
-            ></input>
+            />
             <button
-              className={styles.header__location__arrow}
-              aria-label={'Location search panel'}
-              aria-expanded={showSearchOverlay}
               aria-controls="SearchResultsList"
+              aria-expanded={showSearchOverlay}
+              aria-label={'Location search panel'}
+              className={styles.header__location__arrow}
               onClick={e => {
                 e.preventDefault();
                 if (showSearchOverlay) {
@@ -144,24 +145,24 @@ export default function Header({
                 }
               }}
             >
-              <ArrowIcon animationState={showSearchOverlay ? 'end' : 'start'}></ArrowIcon>
+              <ArrowIcon animationState={showSearchOverlay ? 'end' : 'start'} />
             </button>
           </div>
         </header>
       </div>
 
       <SearchOverlay
-        rawSearchQuery={rawSearchQuery}
-        showSearchOverlay={showSearchOverlay}
-        setShowSearchOverlay={setShowSearchOverlay}
-        results={results}
-        setResults={setResults}
-        setHighlightedIndexDistance={setHighlightedIndexDistance}
-        highlightedIndex={highlightedIndex}
-        setSelectedCity={setSelectedCity}
-        recentCities={recentCities}
         citiesCache={citiesCache}
-      ></SearchOverlay>
+        highlightedIndex={highlightedIndex}
+        rawSearchQuery={rawSearchQuery}
+        recentCities={recentCities}
+        results={results}
+        setHighlightedIndexDistance={setHighlightedIndexDistance}
+        setResults={setResults}
+        setSelectedCity={setSelectedCity}
+        setShowSearchOverlay={setShowSearchOverlay}
+        showSearchOverlay={showSearchOverlay}
+      />
     </>
   );
 }

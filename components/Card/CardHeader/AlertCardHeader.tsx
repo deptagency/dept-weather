@@ -1,10 +1,11 @@
 import { Dispatch, ReactElement, SetStateAction, useEffect, useState } from 'react';
-import { AlertCircleIcon, AlertDiamondIcon, AlertHexagonIcon, AlertTriangleIcon, ArrowIcon } from 'components/Icons';
+import AlertCardHeaderContents from 'components/Card/CardHeader/AlertCardHeaderContents';
+import CardHeader from 'components/Card/CardHeader/CardHeader';
+import { AlertCircleIcon, AlertDiamondIcon, AlertHexagonIcon, AlertTriangleIcon } from 'components/Icons';
 import { Color } from 'models';
 import { NwsAlert } from 'models/api';
 import { AlertSeverity } from 'models/nws';
-import AlertCardHeaderContents from './AlertCardHeaderContents';
-import CardHeader from './CardHeader';
+
 import styles from './CardHeader.module.css';
 
 export default function AlertCardHeader({
@@ -31,13 +32,13 @@ export default function AlertCardHeader({
 
   return (
     <CardHeader
-      preContents={<div className={styles['card-header__pre-icon']}>{alertIcon}</div>}
-      contents={<AlertCardHeaderContents alert={alert}></AlertCardHeaderContents>}
-      backgroundColor={`alert-${alert.severity.toLowerCase()}` as Color}
-      roundBottomCornersWhenCollapsed={true}
-      isExpanded={isExpanded}
-      setIsExpanded={setIsExpanded}
       ariaControls={ariaControls}
-    ></CardHeader>
+      backgroundColor={`alert-${alert.severity.toLowerCase()}` as Color}
+      contents={<AlertCardHeaderContents alert={alert} />}
+      isExpanded={isExpanded}
+      preContents={<div className={styles['card-header__pre-icon']}>{alertIcon}</div>}
+      roundBottomCornersWhenCollapsed={true}
+      setIsExpanded={setIsExpanded}
+    />
   );
 }

@@ -1,6 +1,7 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import { ArrowIcon } from 'components/Icons';
 import { Color } from 'models';
+
 import styles from './CardHeader.module.css';
 
 export default function CardHeader({
@@ -30,23 +31,21 @@ export default function CardHeader({
 
   return canExpand ? (
     <button
+      aria-controls={ariaControls!}
+      aria-expanded={isExpanded!}
       className={`${styles['card-header']} ${
         roundBottomCornersWhenCollapsed ? styles['card-header--rounded-bottom-corners'] : ''
       } ${isExpanded ? styles['card-header--expanded'] : ''} animated`}
-      style={{ '--card-background-color': `var(--${backgroundColor})` } as React.CSSProperties}
+      disabled={disabledExpand ? disabledExpand : undefined}
       onClick={e => {
         e.preventDefault();
         setIsExpanded!(!isExpanded!);
       }}
-      aria-expanded={isExpanded!}
-      aria-controls={ariaControls!}
-      disabled={disabledExpand ? disabledExpand : undefined}
+      style={{ '--card-background-color': `var(--${backgroundColor})` } as React.CSSProperties}
     >
       {preContents}
       {contents}
-      {disabledExpand ? undefined : (
-        <ArrowIcon useInverseFill={true} animationState={isExpanded ? 'end' : 'start'}></ArrowIcon>
-      )}
+      {disabledExpand ? undefined : <ArrowIcon animationState={isExpanded ? 'end' : 'start'} useInverseFill={true} />}
     </button>
   ) : (
     <header

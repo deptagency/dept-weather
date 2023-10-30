@@ -1,6 +1,7 @@
-import { WeatherObservations } from 'models/api';
 import { useEffect, useState } from 'react';
+import { WeatherObservations } from 'models/api';
 import { floorOrEmDash, roundOrEmDash } from 'utils';
+
 import styles from './CurrentTemp.module.css';
 
 export default function CurrentTemp({ observations }: { observations?: WeatherObservations }) {
@@ -27,21 +28,21 @@ export default function CurrentTemp({ observations }: { observations?: WeatherOb
 
   return (
     <>
-      <h3 className={styles['current-temp__temp']} aria-label={tempAriaLabel}>
+      <h3 aria-label={tempAriaLabel} className={styles['current-temp__temp']}>
         <span aria-hidden={true}>{tempDisplayTxt}</span>
         {fractionalTemp ? (
-          <span className={styles['current-temp__temp__decimal']} aria-hidden={true}>{`.${fractionalTemp}`}</span>
+          <span aria-hidden={true} className={styles['current-temp__temp__decimal']}>{`.${fractionalTemp}`}</span>
         ) : (
           <></>
         )}
         <span
-          className={fractionalTemp ? styles['current-temp__temp__degree-symbol--fractional'] : ''}
           aria-hidden={true}
+          className={fractionalTemp ? styles['current-temp__temp__degree-symbol--fractional'] : ''}
         >
           °
         </span>
       </h3>
-      <p className={styles['current-temp__feels-like']} aria-label={feelsLikeTxt}>
+      <p aria-label={feelsLikeTxt} className={styles['current-temp__feels-like']}>
         {feelsLikeTxt}
       </p>
     </>

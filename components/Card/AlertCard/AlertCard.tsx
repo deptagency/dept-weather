@@ -1,9 +1,10 @@
 import { Fragment, useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
+import AlertCardHeader from 'components/Card/CardHeader/AlertCardHeader';
 import { UI_ANIMATION_DURATION } from 'constants/client';
 import { useShouldContinueRendering } from 'hooks';
 import { NwsAlert } from 'models/api';
-import AlertCardHeader from '../CardHeader/AlertCardHeader';
+
 import baseStyles from '../Card.module.css';
 import styles from './AlertCard.module.css';
 
@@ -20,23 +21,23 @@ export default function AlertCard({ alert, _key }: { alert: NwsAlert; _key: stri
     <article className={baseStyles.card}>
       <AlertCardHeader
         alert={alert}
+        ariaControls={animatedContentsWrapperId}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
-        ariaControls={animatedContentsWrapperId}
-      ></AlertCardHeader>
-      <AnimateHeight id={animatedContentsWrapperId} duration={UI_ANIMATION_DURATION} height={isExpanded ? 'auto' : 0}>
+      />
+      <AnimateHeight duration={UI_ANIMATION_DURATION} height={isExpanded ? 'auto' : 0} id={animatedContentsWrapperId}>
         {isExpanded || shouldContinueRendering ? (
           <div className={styles['alert-card-content']}>
             {alert.description.map((descItem, idx) => (
               <Fragment key={idx}>
                 {descItem.heading ? (
-                  <h3 key={`${idx}Heading`} className={styles['alert-card-content__description-heading']}>
+                  <h3 className={styles['alert-card-content__description-heading']} key={`${idx}Heading`}>
                     {descItem.heading}
                   </h3>
                 ) : (
                   <></>
                 )}
-                <p key={`${idx}Body`} className={styles['alert-card-content__description-body']}>
+                <p className={styles['alert-card-content__description-body']} key={`${idx}Body`}>
                   {descItem.body}
                 </p>
               </Fragment>

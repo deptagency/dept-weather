@@ -1,7 +1,6 @@
+import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import { NextRouter, useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
-import useSWRImmutable from 'swr/immutable';
 import { Footer, Header, LocateError, Main } from 'components';
 import {
   APP_TITLE,
@@ -14,9 +13,10 @@ import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY } from 'constants/
 import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
 import { APIRoute, getPath, QueryParams } from 'models/api';
 import { CitiesCache, SearchResultCity } from 'models/cities';
+import useSWRImmutable from 'swr/immutable';
 
 const getGeonameidFromUrl = (router: NextRouter) => {
-  let geonameid = router.query[API_GEONAMEID_KEY];
+  const geonameid = router.query[API_GEONAMEID_KEY];
   if (typeof geonameid === 'string' && geonameid.length) {
     const geonameidNum = Number(geonameid);
     if (Number.isInteger(geonameidNum) && geonameidNum >= 0) {
@@ -74,7 +74,7 @@ export default function Home() {
     ) {
       const idxOfSelectedInRecents = recentCities.findIndex(city => city.geonameid === selectedCity.geonameid);
       if (idxOfSelectedInRecents === -1 || idxOfSelectedInRecents > 0) {
-        let newRecentCities = [...recentCities];
+        const newRecentCities = [...recentCities];
 
         if (idxOfSelectedInRecents >= 0) {
           newRecentCities.splice(idxOfSelectedInRecents, 1);
@@ -179,7 +179,7 @@ export default function Home() {
 
   const [isPopState, setIsPopState] = useState<boolean>(false);
   useEffect(() => {
-    router.beforePopState(_ => {
+    router.beforePopState(() => {
       setIsPopState(true);
       return true;
     });
@@ -212,17 +212,17 @@ export default function Home() {
         </title>
       </Head>
       <Header
-        showSearchOverlay={showSearchOverlay}
-        setShowSearchOverlay={setShowSearchOverlay}
+        citiesCache={citiesCache}
+        recentCities={recentCities}
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
-        recentCities={recentCities}
-        citiesCache={citiesCache}
-      ></Header>
+        setShowSearchOverlay={setShowSearchOverlay}
+        showSearchOverlay={showSearchOverlay}
+      />
       <Main queryParams={queryParams}>
-        {locateError != null ? <LocateError locateError={locateError}></LocateError> : undefined}
+        {locateError != null ? <LocateError locateError={locateError} /> : undefined}
       </Main>
-      <Footer></Footer>
+      <Footer />
     </>
   );
 }

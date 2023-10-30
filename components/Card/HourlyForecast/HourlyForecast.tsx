@@ -1,9 +1,10 @@
+import { ConditionSize } from 'components/Card/Condition/condition-size.model';
+import ConditionIcon from 'components/Card/Condition/ConditionIcon';
+import ConditionLabel from 'components/Card/Condition/ConditionLabel';
 import { WindHelper } from 'helpers';
 import { NwsHourlyPeriodForecast } from 'models/api';
 import { roundOrEmDash, roundTensOrEmDash } from 'utils';
-import { ConditionSize } from '../Condition/condition-size.model';
-import ConditionIcon from '../Condition/ConditionIcon';
-import ConditionLabel from '../Condition/ConditionLabel';
+
 import styles from './HourlyForecast.module.css';
 
 const HOURLY_FORECAST_CONDITION_SIZE: ConditionSize = 'x-small';
@@ -20,15 +21,15 @@ export default function HourlyForecast({
       <ConditionIcon
         className={styles['hourly-forecast__condition__icon']}
         condition={forecast.condition}
+        isNight={!isDaytime}
         size={HOURLY_FORECAST_CONDITION_SIZE}
         useEmptyDivIfNoIcon={true}
-        isNight={!isDaytime}
-      ></ConditionIcon>
+      />
       <ConditionLabel
         className={styles['hourly-forecast__condition__label']}
         condition={forecast.condition}
         size={HOURLY_FORECAST_CONDITION_SIZE}
-      ></ConditionLabel>
+      />
       <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.temperature)}°`}</p>
       <p className={styles['hourly-forecast__measurement']}>{`${roundTensOrEmDash(forecast.chanceOfPrecip)}%`}</p>
       <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.humidity)}%`}</p>

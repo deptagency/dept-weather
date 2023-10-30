@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NwsAlert } from 'models/api';
+
 import styles from './CardHeader.module.css';
 
 const TimeLabel = ({ alert }: { alert: NwsAlert }) => {
@@ -35,7 +36,7 @@ export default function AlertCardHeaderContents({ alert }: { alert: NwsAlert }) 
   return (
     <div className={styles['card-header__contents']}>
       <h2 className={styles['card-header__contents__title']}>{alert.title}</h2>
-      <TimeLabel alert={alert}></TimeLabel>
+      <TimeLabel alert={alert} />
     </div>
   );
 }

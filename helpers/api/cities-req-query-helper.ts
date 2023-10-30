@@ -2,6 +2,7 @@ import { API_COORDINATES_KEY, API_GEONAMEID_KEY, API_SEARCH_QUERY_KEY, DEFAULT_C
 import { CoordinatesHelper, SearchQueryHelper } from 'helpers';
 import { ReqQuery } from 'models/api';
 import { City, ClosestCity, MinimalQueriedCity } from 'models/cities';
+
 import { CitiesHelper } from './cities-helper';
 import { LoggerHelper } from './logger-helper';
 
@@ -9,7 +10,7 @@ export class CitiesReqQueryHelper {
   private static readonly CLASS_NAME = 'CitiesReqQueryHelper';
 
   private static addWarningsForValue(
-    value: any,
+    value: unknown,
     reqQuery: ReqQuery,
     key: string,
     downstreamKeys: string[],
@@ -73,7 +74,7 @@ export class CitiesReqQueryHelper {
 
   static async parseQueriedCity(
     reqQuery: ReqQuery,
-    getFormattedDuration: ReturnType<typeof LoggerHelper['trackPerformance']>
+    getFormattedDuration: ReturnType<(typeof LoggerHelper)['trackPerformance']>
   ) {
     const warnings: string[] = [];
     const getReturnValFor = (queriedCity: City | ClosestCity) => {

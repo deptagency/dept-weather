@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import CardHeader from 'components/Card/CardHeader/CardHeader';
+import StandardCardHeaderContents from 'components/Card/CardHeader/StandardCardHeaderContents';
 import { Color } from 'models';
-import CardHeader from './CardHeader';
-import StandardCardHeaderContents from './StandardCardHeaderContents';
 
 export default function StandardCardHeader({
   isLoading,
@@ -30,22 +30,22 @@ export default function StandardCardHeader({
       setContents(
         <StandardCardHeaderContents
           isLoading={isLoading}
-          lastUpdatedTime={lastUpdatedTime}
           label={label}
+          lastUpdatedTime={lastUpdatedTime}
           secondaryLabel={secondaryLabel}
-        ></StandardCardHeaderContents>
+        />
       ),
     [isLoading, lastUpdatedTime, label, secondaryLabel]
   );
 
   return (
     <CardHeader
-      contents={contents}
+      ariaControls={ariaControls}
       backgroundColor={backgroundColor}
+      contents={contents}
+      disabledExpand={disabledExpand}
       isExpanded={isExpanded}
       setIsExpanded={setIsExpanded}
-      ariaControls={ariaControls}
-      disabledExpand={disabledExpand}
-    ></CardHeader>
+    />
   );
 }

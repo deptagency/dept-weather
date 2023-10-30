@@ -1,4 +1,4 @@
-import { Html, Head, Main, NextScript } from 'next/document';
+import { Head, Html, Main, NextScript } from 'next/document';
 import { APP_DESCRIPTION, APP_MASK_ICON_COLOR, APP_THEME_COLOR, APP_TITLE, APP_URL } from 'constants/client';
 
 const AppleSplashLink = ({
@@ -13,20 +13,20 @@ const AppleSplashLink = ({
   isDark: boolean;
 }) => (
   <link
-    rel="apple-touch-startup-image"
     href={`/splash-screens/apple-splash${isDark ? '-dark' : ''}-${width}x${height}.png`}
     media={`${isDark ? '(prefers-color-scheme: dark) and ' : ''}(device-width: ${
       width / ratio
     }px) and (device-height: ${height / ratio}px) and (-webkit-device-pixel-ratio: ${ratio}) and (orientation: ${
       width > height ? 'landscape' : 'portrait'
     })`}
+    rel="apple-touch-startup-image"
   />
 );
 
 const AppleSplash = ({ width, height, ratio }: { width: number; height: number; ratio: number }) => (
   <>
-    <AppleSplashLink width={width} height={height} ratio={ratio} isDark={false}></AppleSplashLink>
-    <AppleSplashLink width={width} height={height} ratio={ratio} isDark={true}></AppleSplashLink>
+    <AppleSplashLink height={height} isDark={false} ratio={ratio} width={width} />
+    <AppleSplashLink height={height} isDark={true} ratio={ratio} width={width} />
   </>
 );
 
@@ -47,41 +47,41 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        <meta name="application-name" content={APP_TITLE} />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content={APP_TITLE} />
-        <meta name="description" content={APP_DESCRIPTION} />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content={APP_THEME_COLOR} />
+        <meta content={APP_TITLE} name="application-name" />
+        <meta content="yes" name="apple-mobile-web-app-capable" />
+        <meta content="default" name="apple-mobile-web-app-status-bar-style" />
+        <meta content={APP_TITLE} name="apple-mobile-web-app-title" />
+        <meta content={APP_DESCRIPTION} name="description" />
+        <meta content="yes" name="mobile-web-app-capable" />
+        <meta content={APP_THEME_COLOR} name="theme-color" />
 
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="mask-icon" href="/favicon.svg" color={APP_MASK_ICON_COLOR} />
-        <link rel="shortcut icon" href="/favicon.svg" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
+        <link href="/manifest.json" rel="manifest" />
+        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+        <link color={APP_MASK_ICON_COLOR} href="/favicon.svg" rel="mask-icon" />
+        <link href="/favicon.svg" rel="shortcut icon" />
+        <link href="/icons/apple-touch-icon-180.png" rel="apple-touch-icon" />
 
-        <meta name="msapplication-square70x70logo" content="/icons/msapplication-128.png" />
-        <meta name="msapplication-square150x150logo" content="/icons/msapplication-270.png" />
-        <meta name="msapplication-square310x310logo" content="/icons/msapplication-558.png" />
-        <meta name="msapplication-wide310x150logo" content="/icons/msapplication-558x270.png" />
+        <meta content="/icons/msapplication-128.png" name="msapplication-square70x70logo" />
+        <meta content="/icons/msapplication-270.png" name="msapplication-square150x150logo" />
+        <meta content="/icons/msapplication-558.png" name="msapplication-square310x310logo" />
+        <meta content="/icons/msapplication-558x270.png" name="msapplication-wide310x150logo" />
 
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content={APP_TITLE} />
-        <meta name="twitter:text:title" content={APP_TITLE} />
-        <meta name="twitter:description" content={APP_DESCRIPTION} />
-        <meta name="twitter:site" content="@DeptAgency" />
-        <meta name="twitter:image" content={`${APP_URL}/icons/icon-512.png`} />
-        <meta name="twitter:image:alt" content={`${APP_TITLE} App Icon`} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content={APP_TITLE} />
-        <meta property="og:title" content={APP_TITLE} />
-        <meta property="og:description" content={APP_DESCRIPTION} />
-        <meta property="og:url" content={APP_URL} />
-        <meta property="og:image" content={`${APP_URL}/icons/apple-touch-icon-180.png`} />
+        <meta content="summary" name="twitter:card" />
+        <meta content={APP_TITLE} name="twitter:title" />
+        <meta content={APP_TITLE} name="twitter:text:title" />
+        <meta content={APP_DESCRIPTION} name="twitter:description" />
+        <meta content="@DeptAgency" name="twitter:site" />
+        <meta content={`${APP_URL}/icons/icon-512.png`} name="twitter:image" />
+        <meta content={`${APP_TITLE} App Icon`} name="twitter:image:alt" />
+        <meta content="website" property="og:type" />
+        <meta content={APP_TITLE} property="og:site_name" />
+        <meta content={APP_TITLE} property="og:title" />
+        <meta content={APP_DESCRIPTION} property="og:description" />
+        <meta content={APP_URL} property="og:url" />
+        <meta content={`${APP_URL}/icons/apple-touch-icon-180.png`} property="og:image" />
 
         {APPLE_SPLASH_SIZES.map((splashSize, i) => (
-          <AppleSplash key={i} {...splashSize}></AppleSplash>
+          <AppleSplash key={i} {...splashSize} />
         ))}
       </Head>
       <body>

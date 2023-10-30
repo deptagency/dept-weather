@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+
 import styles from './ErrorComponent.module.css';
 
 export default function ErrorComponent({

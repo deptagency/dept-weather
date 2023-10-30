@@ -1,7 +1,8 @@
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { ConditionSize } from 'components/Card/Condition/condition-size.model';
 import { DefaultIconMapping, DefaultIcons, IconCondition } from 'models';
-import { ConditionSize } from './condition-size.model';
+
 import styles from './Condition.module.css';
 
 const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
@@ -63,11 +64,7 @@ export default function ConditionIcon({
     <div
       className={`${styles.condition__icon} ${styles[`condition__icon--${size}`]}${className ? ` ${className}` : ''}`}
     >
-      {iconSrc ? (
-        <Image src={iconSrc} className={styles.condition__icon__image} fill sizes="2rem" alt=""></Image>
-      ) : (
-        <></>
-      )}
+      {iconSrc ? <Image alt="" className={styles.condition__icon__image} fill sizes="2rem" src={iconSrc} /> : <></>}
     </div>
   ) : (
     <></>
