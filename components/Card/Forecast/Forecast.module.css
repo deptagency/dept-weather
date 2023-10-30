@@ -1,8 +1,14 @@
 .forecast__hourly-forecasts {
   display: grid;
-  grid-template-columns: min-content 1rem minmax(5.75rem, auto) repeat(3, auto);
+  grid-template-columns: min-content 1rem minmax(9rem, auto) repeat(4, auto);
   row-gap: 0.5rem;
   margin: 0.5rem 0rem 1rem 0.25rem;
+}
+
+@media screen and (max-width: 460px) {
+  .forecast__hourly-forecasts {
+    grid-template-columns: min-content auto 0rem repeat(4, auto);
+  }
 }
 
 .forecast__hourly-forecasts > svg {
@@ -10,9 +16,4 @@
   width: 1rem;
   height: 1rem;
   margin: 0rem auto 0.5rem;
-}
-
-.forecast__hourly-forecasts p {
-  overflow: hidden;
-  margin-left: 0.25rem;
 }

@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import { PrecipitationIcon, ThermometerIcon, ThermometerLevel, WindIcon } from 'components/Icons';
+import { HumidityIcon, PrecipitationIcon, ThermometerIcon, ThermometerLevel, WindIcon } from 'components/Icons';
 import { UI_ANIMATION_DURATION } from 'constants/client';
 import { NwsHourlyPeriodForecast, NwsPeriodForecast } from 'models/api';
 import HourlyForecast from '../HourlyForecast/HourlyForecast';
@@ -34,6 +33,7 @@ export default function Forecast({
               <div></div>
               <ThermometerIcon level={ThermometerLevel.MEDIUM} ariaLabel="Temperature"></ThermometerIcon>
               <PrecipitationIcon innerDropHeightPercent={0} ariaLabel="Chance of Precipitation"></PrecipitationIcon>
+              <HumidityIcon ariaLabel="Humidity"></HumidityIcon>
               <WindIcon directionDeg={undefined} ariaLabel="Wind"></WindIcon>
               {hourlyForecasts.map((hourlyForecast, i) => (
                 <HourlyForecast key={i} forecast={hourlyForecast} isDaytime={isDaytime}></HourlyForecast>

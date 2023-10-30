@@ -8,12 +8,10 @@ const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
   const conditionUpped = condition.toUpperCase();
   let match: DefaultIconMapping = DefaultIcons[conditionUpped as IconCondition] ?? undefined;
   if (match == null) {
-    const baseCondition = conditionUpped
-      .replaceAll(new RegExp(' *isolated *', 'ig'), '')
-      .replaceAll(new RegExp(' *scattered *', 'ig'), '')
-      .replaceAll(new RegExp(' *occasional *', 'ig'), '')
-      .replaceAll(new RegExp(' *periods of *', 'ig'), '')
-      .replaceAll(new RegExp(' *areas of *', 'ig'), '');
+    const baseCondition = conditionUpped.replaceAll(
+      new RegExp(' *(?:isolated|scattered|occasional|periods of|areas of) *', 'ig'),
+      ''
+    );
     match = DefaultIcons[baseCondition.trim() as IconCondition] ?? undefined;
     if (match == null) {
       const subConditions = conditionUpped.split(new RegExp(' *and *', 'i'));
@@ -41,11 +39,13 @@ const getWeatherIconSrc = (condition: string, isNight?: boolean) => {
 };
 
 export default function ConditionIcon({
+  className,
   condition,
   size,
   useEmptyDivIfNoIcon,
   isNight
 }: {
+  className?: string;
   condition: string | null | undefined;
   size: ConditionSize;
   useEmptyDivIfNoIcon: boolean;
@@ -60,7 +60,9 @@ export default function ConditionIcon({
   }, [condition, isNight]);
 
   return iconSrc || useEmptyDivIfNoIcon ? (
-    <div className={`${styles.condition__icon} ${styles[`condition__icon--${size}`]}`}>
+    <div
+      className={`${styles.condition__icon} ${styles[`condition__icon--${size}`]}${className ? ` ${className}` : ''}`}
+    >
       {iconSrc ? (
         <Image src={iconSrc} className={styles.condition__icon__image} fill sizes="2rem" alt=""></Image>
       ) : (

@@ -18,14 +18,20 @@ export default function HourlyForecast({
     <>
       <h5 className={styles['hourly-forecast__time-label']}>{forecast.startLabel}</h5>
       <ConditionIcon
+        className={styles['hourly-forecast__condition__icon']}
         condition={forecast.condition}
         size={HOURLY_FORECAST_CONDITION_SIZE}
         useEmptyDivIfNoIcon={true}
         isNight={!isDaytime}
       ></ConditionIcon>
-      <ConditionLabel condition={forecast.condition} size={HOURLY_FORECAST_CONDITION_SIZE}></ConditionLabel>
+      <ConditionLabel
+        className={styles['hourly-forecast__condition__label']}
+        condition={forecast.condition}
+        size={HOURLY_FORECAST_CONDITION_SIZE}
+      ></ConditionLabel>
       <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.temperature)}°`}</p>
       <p className={styles['hourly-forecast__measurement']}>{`${roundTensOrEmDash(forecast.chanceOfPrecip)}%`}</p>
+      <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.humidity)}%`}</p>
       <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.wind.speed)}mph ${
         forecast.wind.directionDeg != null ? ` ${WindHelper.degToDir(forecast.wind.directionDeg)}` : ''
       }`}</p>
