@@ -107,24 +107,38 @@ export class NwsMapHelper {
     return time.isBefore(dayjs().tz(timeZone).endOf('day'));
   }
 
-  private static getWind(period: SummaryForecastPeriod, reqQuery: ReqQuery): Wind {
+  private static getWind(
+    period: SummaryForecastPeriod,
+    reqQuery: ReqQuery,
+    hourlyPeriodForecasts: NwsHourlyPeriodForecast[]
+  ): Wind {
     const wind: Wind = {
       speed: null,
       gustSpeed: null,
       directionDeg: WindHelper.dirToDeg(period.windDirection)
     };
 
-    const speedAsValue = period.windSpeed as QuantitativeValue;
-    const speedAsMinMax = period.windSpeed as QuantitativeMinMaxValue;
-    if (speedAsValue?.value != null) {
-      wind.speed = NumberHelper.convertNws(speedAsValue, UnitType.wind, reqQuery);
-    } else if (speedAsMinMax?.maxValue != null) {
-      wind.speed = NumberHelper.convertNwsRawValueAndUnitCode(
-        speedAsMinMax.maxValue,
-        speedAsMinMax.unitCode,
-        UnitType.wind,
-        reqQuery
-      );
+    // Map the wind speeds from the hourlyPeriodForecasts
+    const hourlyPeriodWindSpeeds = hourlyPeriodForecasts
+      .map(hourForecast => hourForecast.wind.speed)
+      .filter(windSpeed => windSpeed != null);
+    if (hourlyPeriodWindSpeeds.length) {
+      // Use the max non-null hourly wind speed
+      wind.speed = Math.max(...(hourlyPeriodWindSpeeds as number[]));
+    } else {
+      // Use the summary wind speed
+      const speedAsValue = period.windSpeed as QuantitativeValue;
+      const speedAsMinMax = period.windSpeed as QuantitativeMinMaxValue;
+      if (speedAsValue?.value != null) {
+        wind.speed = NumberHelper.convertNws(speedAsValue, UnitType.wind, reqQuery);
+      } else if (speedAsMinMax?.maxValue != null) {
+        wind.speed = NumberHelper.convertNwsRawValueAndUnitCode(
+          speedAsMinMax.maxValue,
+          speedAsMinMax.unitCode,
+          UnitType.wind,
+          reqQuery
+        );
+      }
     }
 
     const gustSpeedAsValue = period.windGust as QuantitativeValue;
@@ -182,7 +196,7 @@ export class NwsMapHelper {
       startIsoTz: this.getIsoTzString(start),
       condition: period.shortForecast,
       temperature: NumberHelper.convertNws(period.temperature, UnitType.temp, reqQuery),
-      wind: this.getWind(period, reqQuery),
+      wind: this.getWind(period, reqQuery, hourlyPeriodForecasts),
       chanceOfPrecip: this.getChanceOfPrecip(period, hourlyPeriodForecasts)
     };
   }
