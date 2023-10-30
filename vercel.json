@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/alerts?id=4560349",
+      "schedule": "*/9 * * * *"
+    },
+    {
+      "path": "/api/current?id=4560349",
+      "schedule": "*/9 * * * *"
+    },
+    {
+      "path": "/api/forecast?id=4560349",
+      "schedule": "*/9 * * * *"
+    }
+  ]
+}
