@@ -19,6 +19,9 @@ const CACHED_STATIC_ASSET_SOURCES = [
 
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    webpackBuildWorker: true
+  },
   async headers() {
     return process.env.NODE_ENV !== 'development'
       ? CACHED_STATIC_ASSET_SOURCES.map(source => ({ source, headers: STATIC_ASSET_CACHE_HEADERS }))
