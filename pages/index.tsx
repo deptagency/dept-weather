@@ -192,8 +192,8 @@ export default function Home() {
       } else {
         const href = `/?${API_GEONAMEID_KEY}=${selectedCity.geonameid}`;
         selectedCity === DEFAULT_CITY
-          ? router.replace(href, href, { shallow: true })
-          : router.push(href, href, { shallow: true });
+          ? router.replace(href, href, { scroll: true, shallow: true })
+          : router.push(href, href, { scroll: true, shallow: true });
       }
     }
   }, [geonameid, selectedCity, router, isPopState]);
