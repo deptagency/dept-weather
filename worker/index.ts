@@ -21,17 +21,13 @@ self.addEventListener('push', event => {
   console.log('ON PUSH!');
   const data = JSON.parse(event?.data.text() || '{}');
   event?.waitUntil(
-    /*
-              alertTitle: 'Freeze Watch',
-          timeLabel: 'From Thu 12am to 10am EDT',
-          severity: AlertSeverity.SEVERE
-    */
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: `/icons/Alert-${data.severity}-icon.svg`,
-      badge: `/icons/Alert-${data.severity}-badge.svg`
-      // TODO - set tag
-      // TODO - set timestamp
+      // TODO - use data.severity
+      icon: `/icons/Alert-Severe-icon.svg`,
+      badge: `/icons/Alert-Severe-badge.svg`,
+      tag: data.id,
+      timestamp: data.onset
       // TODO - set vibrate
     })
   );

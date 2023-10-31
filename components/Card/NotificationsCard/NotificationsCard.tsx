@@ -65,10 +65,10 @@ export function NotificationsCard() {
       />
       <div className={styles['notifications-card-content']}>
         <div className={styles['status-grid']}>
-          <p>Permission State</p>
-          <p>isSubscribed</p>
+          <p>Permission:</p>
           <h4>{(permissionState ?? '').toUpperCase()}</h4>
-          <h4>{String(isSubscribed ?? '')?.toUpperCase()}</h4>
+          <p>isSubscribed?</p>
+          <h4>{isSubscribed ? 'YES' : 'NO'}</h4>
         </div>
 
         <p>Subscription Details</p>
@@ -116,14 +116,8 @@ export function NotificationsCard() {
           onClick={async () => {
             try {
               setIsRequestingSend(true);
-              await fetch(getPath(APIRoute.NOTIFICATION), {
-                method: 'POST',
-                headers: {
-                  'Content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                  subscription
-                })
+              await fetch(getPath(APIRoute.SEND_NOTIFICATIONS), {
+                method: 'POST'
               });
             } catch (err) {
               console.error(err);
@@ -131,6 +125,7 @@ export function NotificationsCard() {
 
             setIsRequestingSend(false);
           }}
+          type="button"
         >
           {isRequestingSend ? 'Sending...' : 'Send Notification'}
         </button>

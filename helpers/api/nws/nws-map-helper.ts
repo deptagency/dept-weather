@@ -518,7 +518,8 @@ export class NwsMapHelper {
           senderName: alert.properties.senderName,
           title: alert.properties.event,
           description,
-          instruction
+          instruction,
+          id: alert.properties.id
         };
       })
       .sort(

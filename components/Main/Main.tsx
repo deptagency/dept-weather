@@ -143,7 +143,6 @@ export function Main({ queryParams, children }: { queryParams: QueryParams; chil
         <OfflineError />
       ) : (
         <>
-          <NotificationsCard />
           <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} lid={lid} />
           <ObservationsCard
             isLoading={observationsIsLoading}
@@ -156,6 +155,7 @@ export function Main({ queryParams, children }: { queryParams: QueryParams; chil
             lid={lid}
             periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
           />
+          <NotificationsCard />
         </>
       )}
     </main>

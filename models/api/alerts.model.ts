@@ -25,6 +25,7 @@ export interface NwsAlert {
   title: string;
   description: DescriptionItem[];
   instruction: string[];
+  id: string;
 }
 
 export interface DescriptionItem {
