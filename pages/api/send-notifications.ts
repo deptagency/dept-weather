@@ -46,8 +46,9 @@ export default async function sendNotifications(_: NextApiRequest, res: NextApiR
         : `Until `;
       const body = `${bodyPrefix}${alert.endsLabel} ${alert.endsShortTz}`;
 
-      LoggerHelper.getLogger(LOGGER_LABEL).info(`Sending notifications for alert.id: ${alert.id}`);
-      console.log(subscriptions);
+      LoggerHelper.getLogger(LOGGER_LABEL).info(
+        `Sending notifications to ${subscriptions.length} subscriptions for alert.id: ${alert.id}`
+      );
       for (const subscription of subscriptions) {
         const notificationRes = await sendNotification(
           subscription,
