@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { LoggerHelper } from 'helpers/api/logger-helper';
 import { APIRoute, getPath } from 'models/api/api-route.model';
+import { AlertSeverity } from 'models/nws/alerts.model';
 import { sendNotification, setVapidDetails } from 'web-push';
 
 setVapidDetails(
@@ -15,9 +16,15 @@ export default async function notification(req: NextApiRequest, res: NextApiResp
     const { subscription } = req.body;
     try {
       LoggerHelper.getLogger(LOGGER_LABEL).info(`Calling sendNotification() for endpoint: ${subscription.endpoint}`);
+
       const notificationRes = await sendNotification(
         subscription,
-        JSON.stringify({ title: 'Hello Web Push', message: 'Your web push notification is here!' })
+        JSON.stringify({
+          title: 'Freeze Watch',
+          body: 'Issued for Some City, AB until 10am EDT',
+          severity: AlertSeverity.SEVERE
+        }),
+        { urgency: 'high' }
       );
 
       for (const headerName in notificationRes.headers) {

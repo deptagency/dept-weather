@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "babel-loader": "~9.1.3",
     "dayjs": "^1.11.10",
     "feels": "^3.0.0",
     "geo2zip": "^4.0.2",
