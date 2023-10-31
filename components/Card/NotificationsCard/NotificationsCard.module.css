@@ -1,0 +1,39 @@
+.notifications-card-content {
+  padding: 1rem;
+}
+
+.notifications-card-content > :first-child {
+  margin-top: 0rem;
+}
+
+.notifications-card-content > :last-child {
+  margin-bottom: 0rem;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  row-gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.notifications-card-content p,
+.notifications-card-content h4 {
+  margin: 0;
+}
+
+.notifications-card-content > button:first-of-type {
+  margin-top: 2rem;
+}
+
+.notifications-card-content > button {
+  display: block;
+  margin: 1rem 0rem;
+  padding: 0.5rem 0.75rem;
+  font-weight: 700;
+  background: #f2f2f2;
+}
+
+.notifications-card-content > button:disabled {
+  color: #646464;
+}

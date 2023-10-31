@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { AlertCard } from 'components/Card/AlertCard/AlertCard';
 import { ForecastCard } from 'components/Card/ForecastCard';
+import { NotificationsCard } from 'components/Card/NotificationsCard/NotificationsCard';
 import { ObservationsCard } from 'components/Card/ObservationsCard';
 import { OfflineError } from 'components/Errors/OfflineError/OfflineError';
 import { useOnlineStatus } from 'hooks/use-online-status';
@@ -142,6 +143,7 @@ export function Main({ queryParams, children }: { queryParams: QueryParams; chil
         <OfflineError />
       ) : (
         <>
+          <NotificationsCard />
           <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} lid={lid} />
           <ObservationsCard
             isLoading={observationsIsLoading}

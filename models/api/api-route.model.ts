@@ -5,7 +5,8 @@ export enum APIRoute {
   CITY_SEARCH = 'city-search',
   CURRENT = 'current',
   FORECAST = 'forecast',
-  HEALTH = 'health'
+  HEALTH = 'health',
+  NOTIFICATION = 'notification'
 }
 
 export type QueryParams = Record<string, string | number> | undefined;
