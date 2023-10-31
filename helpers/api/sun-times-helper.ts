@@ -28,6 +28,7 @@ export class SunTimesHelper {
       LoggerHelper.getLogger(`${this.CLASS_NAME}.getSun()`).error(
         `Couldn't get sun${riseOrSet} for "${CoordinatesHelper.cityToStr(minQueriedCity)}"`
       );
+      console.error(err);
     }
   }
 

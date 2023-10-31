@@ -33,9 +33,8 @@ export class EpaHelper {
         timeZone ? dayjs.tz(stringToParse, dateTimeFormat, timeZone) : dayjs(stringToParse, dateTimeFormat)
       ).unix();
     } catch (err) {
-      LoggerHelper.getLogger(`${this.CLASS_NAME}.getParsedUnixTime()`).error(
-        `Couldn't parse "${stringToParse}" - ${err}`
-      );
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getParsedUnixTime()`).error(`Couldn't parse "${stringToParse}"`);
+      console.error(err);
     }
     return 0;
   }

@@ -3,6 +3,7 @@ import advancedFormat from 'dayjs/plugin/advancedFormat';
 import duration from 'dayjs/plugin/duration';
 import localeData from 'dayjs/plugin/localeData';
 import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { CacheEntry } from 'helpers/api/cached';
 import { FeelsHelper } from 'helpers/api/feels-helper';
 import { NumberHelper } from 'helpers/number-helper';
@@ -33,6 +34,7 @@ dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 dayjs.extend(localeData);
 dayjs.extend(timezone);
+dayjs.extend(utc);
 
 type HourlyForecastsMetadata = { unitsOfMeasure: (string | undefined)[]; dpRefIdxsByTime: Record<number, number[]> };
 

@@ -49,7 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     res.status(response.errors.length ? 400 : 200).json(response);
   } catch (err) {
-    LoggerHelper.getLogger(LOGGER_LABEL).error(err);
+    LoggerHelper.getLogger(LOGGER_LABEL).error('Failed');
+    console.error(err);
     const errorResponse: Response<null> = {
       data: null,
       warnings: [],

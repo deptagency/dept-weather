@@ -33,9 +33,8 @@ export class AirNowHelper {
       try {
         return dayjs.tz(stringToParse, 'YYYY-M-D H', observationsWithTz.timeZone).unix();
       } catch (err) {
-        LoggerHelper.getLogger(`${this.CLASS_NAME}.getLatestReadTime()`).error(
-          `Couldn't parse "${stringToParse}" - ${err}`
-        );
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.getLatestReadTime()`).error(`Couldn't parse "${stringToParse}"`);
+        console.error(err);
         return 0;
       }
     });

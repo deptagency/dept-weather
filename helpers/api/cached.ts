@@ -82,7 +82,8 @@ export class Cached<Item, Opts> {
       try {
         validUntil = item != null ? await this.calculateExpiration(key, item) : 0;
       } catch (err) {
-        this.logger?.error(`Couldn't calculate cachedItemExpiration due to an exception: ${err}`);
+        this.logger?.error(`Couldn't calculate cachedItemExpiration due to an exception`);
+        console.error(err);
       }
       cacheEntry = { item, validUntil, key };
 
