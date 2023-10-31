@@ -1,9 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { LoggerHelper } from 'helpers/api/logger-helper';
 import { APIRoute, getPath } from 'models/api/api-route.model';
-import { sendNotification } from 'web-push';
+import { sendNotification, setVapidDetails } from 'web-push';
 
-const LOGGER_LABEL = getPath(APIRoute.HEALTH);
+setVapidDetails(
+  `mailto:${process.env.WEB_PUSH_EMAIL}`,
+  process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!,
+  process.env.WEB_PUSH_PRIVATE_KEY!
+);
+
+const LOGGER_LABEL = getPath(APIRoute.NOTIFICATION);
 export default async function notification(req: NextApiRequest, res: NextApiResponse) {
   if (req.method == 'POST') {
     const { subscription } = req.body;
@@ -11,16 +17,8 @@ export default async function notification(req: NextApiRequest, res: NextApiResp
       LoggerHelper.getLogger(LOGGER_LABEL).info(`Calling sendNotification() for endpoint: ${subscription.endpoint}`);
       const notificationRes = await sendNotification(
         subscription,
-        JSON.stringify({ title: 'Hello Web Push', message: 'Your web push notification is here!' }),
-        {
-          vapidDetails: {
-            subject: `mailto:${process.env.WEB_PUSH_EMAIL}`,
-            publicKey: process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!,
-            privateKey: process.env.WEB_PUSH_PRIVATE_KEY!
-          }
-        }
+        JSON.stringify({ title: 'Hello Web Push', message: 'Your web push notification is here!' })
       );
-      LoggerHelper.getLogger(LOGGER_LABEL).info(`notificationRes status code: ${notificationRes.statusCode}`);
 
       for (const headerName in notificationRes.headers) {
         res.setHeader(headerName, notificationRes.headers[headerName]);

@@ -22,8 +22,11 @@
   margin: 0;
 }
 
-.notifications-card-content > button:first-of-type {
-  margin-top: 2rem;
+.notifications-card-content textarea {
+  margin-top: 0.5rem;
+  width: 100%;
+  height: 6rem;
+  resize: none;
 }
 
 .notifications-card-content > button {

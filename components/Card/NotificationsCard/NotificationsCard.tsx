@@ -72,7 +72,7 @@ export function NotificationsCard() {
         </div>
 
         <p>Subscription Details</p>
-        <h4>{subscription ? JSON.stringify(subscription.toJSON()) : ''}</h4>
+        <textarea disabled={!subscription} readOnly value={subscription ? JSON.stringify(subscription.toJSON()) : ''} />
 
         <button
           disabled={permissionState !== 'prompt'}
