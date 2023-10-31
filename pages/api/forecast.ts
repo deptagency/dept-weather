@@ -21,13 +21,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
 
     const points = await NwsHelper.getPoints(CoordinatesHelper.cityToStr(minimalQueriedCity));
+    LoggerHelper.getLogger(LOGGER_LABEL).info('1 - Got points');
     const timeZone = points.item.properties.timeZone;
     const forecasts = await Promise.all([NwsHelper.getSummaryForecast(points), NwsHelper.getForecastGridData(points)]);
+    LoggerHelper.getLogger(LOGGER_LABEL).info('2 - Got forecasts');
 
     const data: Forecast = {
       [DataSource.NATIONAL_WEATHER_SERVICE]: NwsMapHelper.mapForecastsToNwsForecast(...forecasts, timeZone, req.query),
       [DataSource.QUERIED_CITY]: queriedCity
     };
+    LoggerHelper.getLogger(LOGGER_LABEL).info('3 - Mapped data');
 
     const response: Response<Forecast> = {
       data,
@@ -43,6 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     res.status(response.latestReadTime ? 200 : 502).json(response);
   } catch (err) {
+    console.error(err);
     LoggerHelper.getLogger(LOGGER_LABEL).error(err);
     const errorResponse: Response<null> = {
       data: null,

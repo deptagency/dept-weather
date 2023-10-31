@@ -19,11 +19,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
 
     const alerts = await NwsHelper.getAlerts(minimalQueriedCity);
+    LoggerHelper.getLogger(LOGGER_LABEL).info('1 - Got alerts');
 
     const data: Alerts = {
       [DataSource.NATIONAL_WEATHER_SERVICE]: NwsMapHelper.mapAlertsToNwsAlerts(alerts, minimalQueriedCity.timeZone),
       [DataSource.QUERIED_CITY]: queriedCity
     };
+    LoggerHelper.getLogger(LOGGER_LABEL).info('2 - Mapped data');
 
     const response: Response<Alerts> = {
       data,
@@ -35,6 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(response.latestReadTime ? 200 : 502).json(response);
   } catch (err) {
+    console.error(err);
     LoggerHelper.getLogger(LOGGER_LABEL).error(err);
     const errorResponse: Response<null> = {
       data: null,
