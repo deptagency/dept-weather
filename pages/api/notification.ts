@@ -1,11 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { LoggerHelper } from 'helpers/api/logger-helper';
+import { APIRoute, getPath } from 'models/api/api-route.model';
 import { sendNotification } from 'web-push';
 
+const LOGGER_LABEL = getPath(APIRoute.HEALTH);
 export default async function notification(req: NextApiRequest, res: NextApiResponse) {
   if (req.method == 'POST') {
     const { subscription } = req.body;
-
     try {
+      LoggerHelper.getLogger(LOGGER_LABEL).info(`Calling sendNotification() for endpoint: ${subscription.endpoint}`);
       const notificationRes = await sendNotification(
         subscription,
         JSON.stringify({ title: 'Hello Web Push', message: 'Your web push notification is here!' }),
@@ -17,9 +20,14 @@ export default async function notification(req: NextApiRequest, res: NextApiResp
           }
         }
       );
-      res.writeHead(notificationRes.statusCode, notificationRes.headers).end(notificationRes.body);
-      //
+      LoggerHelper.getLogger(LOGGER_LABEL).info(`notificationRes status code: ${notificationRes.statusCode}`);
+
+      for (const headerName in notificationRes.headers) {
+        res.setHeader(headerName, notificationRes.headers[headerName]);
+      }
+      res.status(notificationRes.statusCode).send(notificationRes.body);
     } catch (err: any) {
+      LoggerHelper.getLogger(LOGGER_LABEL).error('Failed');
       if ('statusCode' in err) {
         res.writeHead(err.statusCode, err.headers).end(err.body);
       } else {
@@ -29,7 +37,7 @@ export default async function notification(req: NextApiRequest, res: NextApiResp
       }
     }
   } else {
-    res.statusCode = 405;
-    res.end();
+    LoggerHelper.getLogger(LOGGER_LABEL).info(`Method "${req.method}" not allowed!`);
+    res.status(405).end();
   }
 }

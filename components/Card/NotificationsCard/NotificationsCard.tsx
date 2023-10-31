@@ -88,7 +88,7 @@ export function NotificationsCard() {
           Request permission
         </button>
         <button
-          disabled={registration == null}
+          disabled={registration == null || permissionState !== 'granted'}
           onClick={async () => {
             setIsSubscribed(prev => !prev);
             if (!isSubscribed) {
@@ -99,7 +99,6 @@ export function NotificationsCard() {
               // TODO: you should call your API to save subscription data on server in order to send web push notification from server
               setSubscription(sub);
               setIsSubscribed(true);
-              console.log(sub);
             } else if (isSubscribed && subscription != null) {
               await subscription.unsubscribe();
               // TODO: you should call your API to delete or invalidate subscription data on server
