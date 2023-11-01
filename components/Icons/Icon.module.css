@@ -6,20 +6,12 @@
   visibility: hidden;
 }
 
-.icon path:not(.icon__path--stroke),
-.icon rect:not(.icon__path--stroke) {
+.icon path,
+.icon rect {
   fill: var(--black);
 }
 
-.icon .icon__path--stroke {
-  stroke: var(--black);
-}
-
-.icon--inverse-fill path:not(.icon__path--stroke),
-.icon--inverse-fill rect:not(.icon__path--stroke) {
+.icon--inverse-fill path,
+.icon--inverse-fill rect {
   fill: var(--white);
-}
-
-.icon--inverse-fill .icon__path--stroke {
-  stroke: var(--white);
 }
