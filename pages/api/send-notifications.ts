@@ -122,20 +122,19 @@ async function* notifications(domain: string, { cities, subscriptions }: Notific
   }
 }
 
-async function sendNotifications(domain: string, notificationInfo: NotificationInfo, authHeader: string) {
-  const iterator = notifications(domain, notificationInfo, authHeader);
-  const stream = new ReadableStream({
-    // pull() fires when data added to stream
-    async pull(controller) {
-      const { value, done } = await iterator.next();
-      done ? controller.close() : controller.enqueue(value);
-    }
-  });
+async function sendNotifications(stream: ReadableStream<any>) {
   const reader = stream.getReader();
   let readResult = await reader.read();
+  let didWait = false;
   while (!readResult.done) {
     console.log(readResult.value);
     readResult = await reader.read();
+    if (!didWait && process.env.NOTIFICATIONS_DELAY_SIMULATE_MS) {
+      // DEBUG Only
+      console.log(`Waiting for ${Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)}ms`);
+      await new Promise(resolve => setTimeout(resolve, Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)));
+    }
+    didWait = true;
   }
   console.info('Finished sending notifications');
 }
@@ -157,9 +156,18 @@ export default async function GET(req: NextRequest) {
   );
 
   const domain = req.url.slice(0, req.url.indexOf(getPath(APIRoute.SEND_NOTIFICATIONS)));
-  sendNotifications(domain, notificationInfo, authHeader);
 
-  return new Response(undefined, {
-    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+  const iterator = notifications(domain, notificationInfo, authHeader);
+  const stream = new ReadableStream({
+    // pull() fires when data added to stream
+    async pull(controller) {
+      const { value, done } = await iterator.next();
+      done ? controller.close() : controller.enqueue(value);
+    }
+  });
+  sendNotifications(stream);
+
+  return new Response(stream, {
+    headers: { 'Content-Type': 'text/event-stream', 'X-Content-Type-Options': 'nosniff' }
   });
 }
