@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { API_GEONAMEID_KEY } from 'constants/shared';
 import { Alerts, NwsAlert } from 'models/api/alerts.model';
 import { APIRoute, getPath } from 'models/api/api-route.model';
@@ -151,7 +151,7 @@ export default async function GET(req: NextRequest) {
   let authHeader = req.headers.get('authorization');
   if (process.env.CRON_SECRET) authHeader = `Bearer ${process.env.CRON_SECRET}`;
   else if (authHeader !== `Bearer ${process.env.NOTIFICATIONS_SECRET}`) {
-    return new Response(undefined, {
+    return new NextResponse(undefined, {
       status: 401
     });
   }
@@ -166,7 +166,5 @@ export default async function GET(req: NextRequest) {
   const domain = req.url.slice(0, req.url.indexOf(getPath(APIRoute.SEND_NOTIFICATIONS)));
   sendNotifications(domain, notificationInfo, authHeader);
 
-  return new Response(undefined, {
-    headers: { 'Content-Type': 'text/event-stream', 'X-Content-Type-Options': 'nosniff' }
-  });
+  return new NextResponse('Started');
 }
