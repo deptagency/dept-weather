@@ -26,13 +26,14 @@ self.addEventListener('push', event => {
       .has(alertCacheName)
       .then(async hasAlertCacheName => {
         if (!hasAlertCacheName) {
+          const severityFName = data.severity !== 'Unknown' ? data.severity : 'Minor';
           await self.registration.showNotification(
             `${data.title} for ${data.forCity.cityName}, ${data.forCity.stateCode}`,
             {
               tag: data.id,
               body: data.body,
-              icon: `/icons/Alert-${data.severity}-icon.svg`,
-              badge: `/icons/Alert-${data.severity}-badge.svg`,
+              icon: `/icons/Alert-${severityFName}-icon.svg`,
+              badge: `/icons/Alert-${severityFName}-badge.svg`,
               timestamp: data.onset
               // TODO - set vibrate
             }
