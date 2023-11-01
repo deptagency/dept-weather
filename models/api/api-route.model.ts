@@ -6,7 +6,8 @@ export enum APIRoute {
   CURRENT = 'current',
   FORECAST = 'forecast',
   HEALTH = 'health',
-  SEND_NOTIFICATIONS = 'send-notifications'
+  SEND_NOTIFICATIONS = 'send-notifications',
+  NOTIFY = 'notify'
 }
 
 export type QueryParams = Record<string, string | number> | undefined;

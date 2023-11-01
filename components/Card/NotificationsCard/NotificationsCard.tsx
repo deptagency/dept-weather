@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { CardHeader } from 'components/Card/CardHeader/CardHeader';
 import { NwsAlert } from 'models/api/alerts.model';
-import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
+import { APIRoute, getPath } from 'models/api/api-route.model';
 import { SearchResultCity } from 'models/cities/cities.model';
 import { Color } from 'models/color.enum';
 
@@ -24,11 +24,9 @@ const base64ToUint8Array = (base64: string) => {
 
 export function NotificationsCard({
   alerts,
-  queryParams,
   selectedCity
 }: {
   alerts: NwsAlert[];
-  queryParams: QueryParams;
   selectedCity: SearchResultCity | undefined;
 }) {
   const [permissionState, setPermissionState] = useState<PermissionState>();
@@ -152,14 +150,12 @@ export function NotificationsCard({
           {`${isSubscribed ? 'Uns' : 'S'}ubscribe`}
         </button>
 
-        <button
+        {/* <button
           disabled={!isSubscribed || subscription == null || selectedCity == null || isRequestingSend}
           onClick={async () => {
             try {
               setIsRequestingSend(true);
-              await fetch(getPath(APIRoute.SEND_NOTIFICATIONS, queryParams), {
-                method: 'POST'
-              });
+              await fetch(getPath(APIRoute.SEND_NOTIFICATIONS));
               setTimeout(checkCachedAlertIds, 1_000);
             } catch (err) {
               console.error(err);
@@ -169,8 +165,8 @@ export function NotificationsCard({
           }}
           type="button"
         >
-          {isRequestingSend ? 'Sending...' : `Trigger Notifications for ${selectedCity?.cityAndStateCode ?? '???'}`}
-        </button>
+          {isRequestingSend ? 'Sending...' : 'Trigger Send Notifications'}
+        </button> */}
       </div>
     </article>
   );

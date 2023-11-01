@@ -164,11 +164,7 @@ export function Main({
             lid={lid}
             periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
           />
-          <NotificationsCard
-            alerts={alerts?.data?.nws?.alerts ?? []}
-            queryParams={queryParams}
-            selectedCity={selectedCity}
-          />
+          <NotificationsCard alerts={alerts?.data?.nws?.alerts ?? []} selectedCity={selectedCity} />
         </>
       )}
     </main>
