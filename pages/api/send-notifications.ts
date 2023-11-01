@@ -90,6 +90,7 @@ async function* notifications(domain: string, { cities, subscriptions }: Notific
   const alertsForCityMap = new Map<string, Promise<[string, AlertsForCity]>>(
     cities.map(city => [city.geonameid, getAlertsForCity(domain, city).then(res => [city.geonameid, res])])
   );
+  let didWait = false;
   while (alertsForCityMap.size) {
     const [key, result] = await Promise.race(alertsForCityMap.values());
 
@@ -119,22 +120,29 @@ async function* notifications(domain: string, { cities, subscriptions }: Notific
     }
 
     alertsForCityMap.delete(key);
-  }
-}
-
-async function sendNotifications(stream: ReadableStream<any>) {
-  const reader = stream.getReader();
-  let readResult = await reader.read();
-  let didWait = false;
-  while (!readResult.done) {
-    console.log(readResult.value);
-    readResult = await reader.read();
-    if (!didWait && process.env.NOTIFICATIONS_DELAY_SIMULATE_MS) {
+    if (!didWait) {
       // DEBUG Only
       console.log(`Waiting for ${Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)}ms`);
       await new Promise(resolve => setTimeout(resolve, Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)));
     }
     didWait = true;
+  }
+}
+
+async function sendNotifications(domain: string, notificationInfo: NotificationInfo, authHeader: string) {
+  const iterator = notifications(domain, notificationInfo, authHeader);
+  const stream = new ReadableStream({
+    // pull() fires when data added to stream
+    async pull(controller) {
+      const { value, done } = await iterator.next();
+      done ? controller.close() : controller.enqueue(value);
+    }
+  });
+  const reader = stream.getReader();
+  let readResult = await reader.read();
+  while (!readResult.done) {
+    console.log(readResult.value);
+    readResult = await reader.read();
   }
   console.info('Finished sending notifications');
 }
@@ -156,18 +164,9 @@ export default async function GET(req: NextRequest) {
   );
 
   const domain = req.url.slice(0, req.url.indexOf(getPath(APIRoute.SEND_NOTIFICATIONS)));
+  sendNotifications(domain, notificationInfo, authHeader);
 
-  const iterator = notifications(domain, notificationInfo, authHeader);
-  const stream = new ReadableStream({
-    // pull() fires when data added to stream
-    async pull(controller) {
-      const { value, done } = await iterator.next();
-      done ? controller.close() : controller.enqueue(value);
-    }
-  });
-  sendNotifications(stream);
-
-  return new Response(stream, {
+  return new Response(undefined, {
     headers: { 'Content-Type': 'text/event-stream', 'X-Content-Type-Options': 'nosniff' }
   });
 }
