@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { API_GEONAMEID_KEY } from 'constants/shared';
 import { CitiesReqQueryHelper } from 'helpers/api/cities-req-query-helper';
 import { LoggerHelper } from 'helpers/api/logger-helper';
 import { NwsHelper } from 'helpers/api/nws/nws-helper';
@@ -21,15 +20,12 @@ export interface AlertNotification {
 }
 
 const LOGGER_LABEL = getPath(APIRoute.SEND_NOTIFICATIONS);
-export default async function sendNotifications(_: NextApiRequest, res: NextApiResponse) {
+export default async function sendNotifications(req: NextApiRequest, res: NextApiResponse) {
   try {
     const subscriptions: PushSubscription[] = JSON.parse(process.env.PRIVATE_SUBSCRIPTIONS!);
 
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const { minimalQueriedCity } = await CitiesReqQueryHelper.parseQueriedCity(
-      { [API_GEONAMEID_KEY]: process.env.PRIVATE_SUBSCRIPTION_GEONAMEID! },
-      getFormattedDuration
-    );
+    const { minimalQueriedCity } = await CitiesReqQueryHelper.parseQueriedCity(req.query, getFormattedDuration);
     const response = await NwsHelper.getAlerts(minimalQueriedCity);
     const alerts = NwsMapHelper.mapAlertsToNwsAlerts(response, minimalQueriedCity.timeZone);
 

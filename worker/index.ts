@@ -27,8 +27,8 @@ self.addEventListener('push', event => {
         await self.registration.showNotification(data.title, {
           body: data.body,
           // TODO - use data.severity
-          icon: `/icons/Alert-Severe-icon.png`,
-          badge: `/icons/Alert-Severe-icon.png`,
+          icon: `/icons/Alert-Moderate-icon.png`,
+          badge: `/icons/Alert-Severe-badge.png`,
           timestamp: data.onset,
           tag: data.id
           // TODO - set vibrate

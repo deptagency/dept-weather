@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { CardHeader } from 'components/Card/CardHeader/CardHeader';
-import { APIRoute, getPath } from 'models/api/api-route.model';
+import { NwsAlert } from 'models/api/alerts.model';
+import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
+import { SearchResultCity } from 'models/cities/cities.model';
 import { Color } from 'models/color.enum';
 
 import styles from './NotificationsCard.module.css';
@@ -20,10 +22,19 @@ const base64ToUint8Array = (base64: string) => {
   return outputArray;
 };
 
-export function NotificationsCard() {
+export function NotificationsCard({
+  alerts,
+  queryParams,
+  selectedCity
+}: {
+  alerts: NwsAlert[];
+  queryParams: QueryParams;
+  selectedCity: SearchResultCity | undefined;
+}) {
   const [permissionState, setPermissionState] = useState<PermissionState>();
-
   const [isSubscribed, setIsSubscribed] = useState<boolean>();
+  const [cachedAlertIds, setCachedAlertIds] = useState<string[]>([]);
+
   const [subscription, setSubscription] = useState<PushSubscription>();
   const [registration, setRegistration] = useState<ServiceWorkerRegistration>();
 
@@ -47,6 +58,9 @@ export function NotificationsCard() {
             setRegistration(reg);
           });
         }
+
+        const fullCachedAlertIds = (await caches.keys()).filter(key => key.startsWith('alert:'));
+        setCachedAlertIds(fullCachedAlertIds);
       }
     })();
   }, []);
@@ -69,6 +83,29 @@ export function NotificationsCard() {
           <h4>{(permissionState ?? '').toUpperCase()}</h4>
           <p>isSubscribed?</p>
           <h4>{isSubscribed ? 'YES' : 'NO'}</h4>
+          <p style={{ whiteSpace: 'nowrap' }}>Cached Alerts:</p>
+          {cachedAlertIds.map((cachedId, idx) => {
+            const matchingAlert = alerts.find(alert => alert.id.endsWith(cachedId.slice(6)));
+            return (
+              <>
+                {idx > 0 ? <div /> : <></>}
+                <h4>
+                  {cachedId.slice(-13)}
+                  {matchingAlert && ` (${matchingAlert.title})`}
+                  <span
+                    onClick={async () => {
+                      await caches.delete(cachedId);
+                      const fullCachedAlertIds = (await caches.keys()).filter(key => key.startsWith('alert:'));
+                      setCachedAlertIds(fullCachedAlertIds);
+                    }}
+                    style={{ padding: '0rem 0.5rem', cursor: 'pointer' }}
+                  >
+                    X
+                  </span>
+                </h4>
+              </>
+            );
+          })}
         </div>
 
         <p>Subscription Details</p>
@@ -99,7 +136,7 @@ export function NotificationsCard() {
               // TODO: you should call your API to save subscription data on server in order to send web push notification from server
               setSubscription(sub);
               setIsSubscribed(true);
-            } else if (isSubscribed && subscription != null) {
+            } else if (isSubscribed && subscription != null && confirm('Are you sure you want to unsubscribe?')) {
               await subscription.unsubscribe();
               // TODO: you should call your API to delete or invalidate subscription data on server
               setSubscription(undefined);
@@ -112,13 +149,17 @@ export function NotificationsCard() {
         </button>
 
         <button
-          disabled={!isSubscribed || subscription == null || isRequestingSend}
+          disabled={!isSubscribed || subscription == null || selectedCity == null || isRequestingSend}
           onClick={async () => {
             try {
               setIsRequestingSend(true);
-              await fetch(getPath(APIRoute.SEND_NOTIFICATIONS), {
+              await fetch(getPath(APIRoute.SEND_NOTIFICATIONS, queryParams), {
                 method: 'POST'
               });
+              setTimeout(async () => {
+                const fullCachedAlertIds = (await caches.keys()).filter(key => key.startsWith('alert:'));
+                setCachedAlertIds(fullCachedAlertIds);
+              }, 1_000);
             } catch (err) {
               console.error(err);
             }
@@ -127,7 +168,7 @@ export function NotificationsCard() {
           }}
           type="button"
         >
-          {isRequestingSend ? 'Sending...' : 'Send Notification'}
+          {isRequestingSend ? 'Sending...' : `Trigger Notifications for ${selectedCity?.cityAndStateCode ?? '???'}`}
         </button>
       </div>
     </article>
