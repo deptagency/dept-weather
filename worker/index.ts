@@ -20,24 +20,30 @@ declare let self: ServiceWorkerGlobalScope;
 self.addEventListener('push', event => {
   console.log('ON PUSH!');
   const data = JSON.parse(event?.data.text() || '{}');
+  const alertCacheName = `alert:${data.id}`;
   event?.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      // TODO - use data.severity
-      icon: `/icons/Alert-Severe-icon.svg`,
-      badge: `/icons/Alert-Severe-badge.svg`,
-      tag: data.id,
-      timestamp: data.onset
-      // TODO - set vibrate
+    caches.has(alertCacheName).then(async hasAlertCacheName => {
+      if (!hasAlertCacheName) {
+        await self.registration.showNotification(data.title, {
+          body: data.body,
+          // TODO - use data.severity
+          icon: `/icons/Alert-Severe-icon.png`,
+          badge: `/icons/Alert-Severe-icon.png`,
+          timestamp: data.onset,
+          tag: data.id
+          // TODO - set vibrate
+        });
+        await caches.open(alertCacheName);
+      }
     })
   );
 });
 
 self.addEventListener('notificationclick', event => {
-  console.log('ON NOTIFICATION CLICK!');
   event?.notification.close();
   event?.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      // TODO - navigate to correct city and expand alert
       if (clientList.length > 0) {
         let client = clientList[0];
         for (let i = 0; i < clientList.length; i++) {

@@ -56,8 +56,8 @@ export default async function sendNotifications(_: NextApiRequest, res: NextApiR
             title: alert.title,
             body,
             severity: alert.severity,
-            id: alert.id,
-            onset: alert.onset
+            onset: alert.onset,
+            id: alert.id
           }),
           {
             urgency:
