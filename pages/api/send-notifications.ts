@@ -123,11 +123,6 @@ async function* notifications(domain: string, { cities, subscriptions }: Notific
 }
 
 async function sendNotifications(domain: string, notificationInfo: NotificationInfo, authHeader: string) {
-  // DEBUG Only
-  if (process.env.NOTIFICATIONS_DELAY_SIMULATE_MS) {
-    await new Promise(resolve => setTimeout(resolve, Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)));
-  }
-
   const iterator = notifications(domain, notificationInfo, authHeader);
   const stream = new ReadableStream({
     // pull() fires when data added to stream
@@ -138,9 +133,16 @@ async function sendNotifications(domain: string, notificationInfo: NotificationI
   });
   const reader = stream.getReader();
   let readResult = await reader.read();
+  let didWait = false;
   while (!readResult.done) {
     console.log(readResult.value);
     readResult = await reader.read();
+    if (!didWait && process.env.NOTIFICATIONS_DELAY_SIMULATE_MS) {
+      // DEBUG Only
+      console.log(`Waiting for ${Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)}ms`);
+      await new Promise(resolve => setTimeout(resolve, Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)));
+    }
+    didWait = true;
   }
   console.info('Finished sending notifications');
 }
