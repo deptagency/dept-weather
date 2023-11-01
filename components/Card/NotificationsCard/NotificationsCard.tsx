@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { CardHeader } from 'components/Card/CardHeader/CardHeader';
 import { NwsAlert } from 'models/api/alerts.model';
 import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
@@ -35,6 +35,11 @@ export function NotificationsCard({
   const [isSubscribed, setIsSubscribed] = useState<boolean>();
   const [cachedAlertIds, setCachedAlertIds] = useState<string[]>([]);
 
+  const checkCachedAlertIds = useCallback(async () => {
+    const fullCachedAlertIds = (await caches.keys()).filter(key => key.startsWith('alert:'));
+    setCachedAlertIds(fullCachedAlertIds);
+  }, []);
+
   const [subscription, setSubscription] = useState<PushSubscription>();
   const [registration, setRegistration] = useState<ServiceWorkerRegistration>();
 
@@ -59,11 +64,11 @@ export function NotificationsCard({
           });
         }
 
-        const fullCachedAlertIds = (await caches.keys()).filter(key => key.startsWith('alert:'));
-        setCachedAlertIds(fullCachedAlertIds);
+        await checkCachedAlertIds();
+        window.addEventListener('focus', checkCachedAlertIds);
       }
     })();
-  }, []);
+  }, [checkCachedAlertIds]);
 
   const [isRequestingSend, setIsRequestingSend] = useState<boolean>(false);
 
@@ -87,7 +92,7 @@ export function NotificationsCard({
           {cachedAlertIds.map((cachedId, idx) => {
             const matchingAlert = alerts.find(alert => alert.id.endsWith(cachedId.slice(6)));
             return (
-              <>
+              <Fragment key={idx}>
                 {idx > 0 ? <div /> : <></>}
                 <h4>
                   {cachedId.slice(-13)}
@@ -95,15 +100,14 @@ export function NotificationsCard({
                   <span
                     onClick={async () => {
                       await caches.delete(cachedId);
-                      const fullCachedAlertIds = (await caches.keys()).filter(key => key.startsWith('alert:'));
-                      setCachedAlertIds(fullCachedAlertIds);
+                      await checkCachedAlertIds();
                     }}
                     style={{ padding: '0rem 0.5rem', cursor: 'pointer' }}
                   >
                     X
                   </span>
                 </h4>
-              </>
+              </Fragment>
             );
           })}
         </div>
@@ -156,10 +160,7 @@ export function NotificationsCard({
               await fetch(getPath(APIRoute.SEND_NOTIFICATIONS, queryParams), {
                 method: 'POST'
               });
-              setTimeout(async () => {
-                const fullCachedAlertIds = (await caches.keys()).filter(key => key.startsWith('alert:'));
-                setCachedAlertIds(fullCachedAlertIds);
-              }, 1_000);
+              setTimeout(checkCachedAlertIds, 1_000);
             } catch (err) {
               console.error(err);
             }

@@ -25,7 +25,10 @@ export default async function sendNotifications(req: NextApiRequest, res: NextAp
     const subscriptions: PushSubscription[] = JSON.parse(process.env.PRIVATE_SUBSCRIPTIONS!);
 
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const { minimalQueriedCity } = await CitiesReqQueryHelper.parseQueriedCity(req.query, getFormattedDuration);
+    const { queriedCity, minimalQueriedCity } = await CitiesReqQueryHelper.parseQueriedCity(
+      req.query,
+      getFormattedDuration
+    );
     const response = await NwsHelper.getAlerts(minimalQueriedCity);
     const alerts = NwsMapHelper.mapAlertsToNwsAlerts(response, minimalQueriedCity.timeZone);
 
@@ -35,32 +38,42 @@ export default async function sendNotifications(req: NextApiRequest, res: NextAp
     }
 
     const notificationResStatusCodes = new Set<number>();
-    for (const alert of alerts.alerts) {
-      const showOnset = new Date().getTime() / 1_000 < alert.onset;
-      const bodyPrefix = showOnset
-        ? `From ${alert.onsetLabel}${alert.onsetShortTz !== alert.endsShortTz ? ` ${alert.onsetShortTz}` : ''} to `
-        : `Until `;
-      const body = `${bodyPrefix}${alert.endsLabel} ${alert.endsShortTz}`;
-
-      LoggerHelper.getLogger(LOGGER_LABEL).info(
-        `Sending notifications to ${subscriptions.length} subscriptions for alert.id: ${alert.id}`
-      );
-      for (const subscription of subscriptions) {
-        const notificationRes = await sendNotification(
-          subscription,
-          JSON.stringify({
-            title: alert.title,
-            body,
-            severity: alert.severity,
-            onset: alert.onset,
-            id: alert.id
-          }),
-          {
-            urgency:
-              alert.severity === AlertSeverity.SEVERE || alert.severity === AlertSeverity.EXTREME ? 'high' : 'normal'
-          }
+    for (const subscription of subscriptions) {
+      for (const alert of alerts.alerts) {
+        LoggerHelper.getLogger(LOGGER_LABEL).info(
+          `Sending notification for alert.id: ${alert.id.slice(-13)} to ${subscription.endpoint.slice(-6)}`
         );
-        notificationResStatusCodes.add(notificationRes.statusCode);
+        try {
+          const notificationRes = await sendNotification(
+            subscription,
+            JSON.stringify({
+              id: alert.id,
+              title: alert.title,
+              body: `${
+                new Date().getTime() / 1_000 < alert.onset
+                  ? `From ${alert.onsetLabel}${
+                      alert.onsetShortTz !== alert.endsShortTz ? ` ${alert.onsetShortTz}` : ''
+                    } to `
+                  : `Until `
+              }${alert.endsLabel} ${alert.endsShortTz}`,
+              severity: alert.severity,
+              onset: alert.onset,
+              forCity: queriedCity
+            }),
+            {
+              urgency:
+                alert.severity === AlertSeverity.SEVERE || alert.severity === AlertSeverity.EXTREME ? 'high' : 'normal'
+            }
+          );
+          notificationResStatusCodes.add(notificationRes.statusCode);
+        } catch (err: any) {
+          if ('statusCode' in err) {
+            LoggerHelper.getLogger(LOGGER_LABEL).error(`${err.statusCode}: ${err.body?.trim()}`);
+          } else {
+            console.error(err);
+          }
+          break;
+        }
       }
     }
 

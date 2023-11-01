@@ -22,38 +22,61 @@ self.addEventListener('push', event => {
   const data = JSON.parse(event?.data.text() || '{}');
   const alertCacheName = `alert:${data.id}`;
   event?.waitUntil(
-    caches.has(alertCacheName).then(async hasAlertCacheName => {
-      if (!hasAlertCacheName) {
-        await self.registration.showNotification(data.title, {
-          body: data.body,
-          // TODO - use data.severity
-          icon: `/icons/Alert-Moderate-icon.png`,
-          badge: `/icons/Alert-Severe-badge.png`,
-          timestamp: data.onset,
-          tag: data.id
-          // TODO - set vibrate
-        });
-        await caches.open(alertCacheName);
-      }
-    })
+    caches
+      .has(alertCacheName)
+      .then(async hasAlertCacheName => {
+        if (!hasAlertCacheName) {
+          await self.registration.showNotification(
+            `${data.title} for ${data.forCity.cityName}, ${data.forCity.stateCode}`,
+            {
+              tag: data.id,
+              body: data.body,
+              icon: `/icons/Alert-${data.severity}-icon.svg`,
+              badge: `/icons/Alert-${data.severity}-badge.svg`,
+              timestamp: data.onset
+              // TODO - set vibrate
+            }
+          );
+          await caches.open(alertCacheName);
+        }
+      })
+      .then(async () => {
+        const currentNotifications = await self.registration.getNotifications();
+        navigator.setAppBadge(currentNotifications.length);
+      })
   );
 });
 
 self.addEventListener('notificationclick', event => {
   event?.notification.close();
   event?.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      // TODO - navigate to correct city and expand alert
-      if (clientList.length > 0) {
-        let client = clientList[0];
-        for (let i = 0; i < clientList.length; i++) {
-          if (clientList[i].focused) {
-            client = clientList[i];
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clientList => {
+        // TODO - navigate to correct city and expand alert
+        if (clientList.length > 0) {
+          let client = clientList[0];
+          for (let i = 0; i < clientList.length; i++) {
+            if (clientList[i].focused) {
+              client = clientList[i];
+            }
           }
+          return client.focus();
         }
-        return client.focus();
-      }
-      return self.clients.openWindow('/');
-    })
+        return self.clients.openWindow('/');
+      })
+      .then(async () => {
+        const currentNotifications = await self.registration.getNotifications();
+        navigator.setAppBadge(currentNotifications.length);
+      })
+  );
+});
+
+self.addEventListener('notificationclose', event => {
+  event?.notification.close();
+  event?.waitUntil(
+    self.registration
+      .getNotifications()
+      .then(async currentNotifications => navigator.setAppBadge(currentNotifications.length))
   );
 });
