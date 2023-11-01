@@ -22,7 +22,7 @@ export interface AlertNotification {
 const LOGGER_LABEL = getPath(APIRoute.SEND_NOTIFICATIONS);
 export default async function sendNotifications(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const subscriptions: PushSubscription[] = JSON.parse(process.env.PRIVATE_SUBSCRIPTIONS!);
+    const subscriptions: PushSubscription[] = await (await fetch(process.env.PRIVATE_SUBSCRIPTIONS_JSON!)).json();
 
     const getFormattedDuration = LoggerHelper.trackPerformance();
     const { queriedCity, minimalQueriedCity } = await CitiesReqQueryHelper.parseQueriedCity(
