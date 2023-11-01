@@ -139,8 +139,7 @@ async function sendNotifications(domain: string, notificationInfo: NotificationI
     readResult = await reader.read();
     if (!didWait && process.env.NOTIFICATIONS_DELAY_SIMULATE_MS) {
       // DEBUG Only
-      console.log(`Waiting for ${Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)}ms`);
-      await new Promise(resolve => setTimeout(resolve, Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)));
+      await new Promise(resolve => setTimeout(resolve, 10_000));
     }
     didWait = true;
   }
