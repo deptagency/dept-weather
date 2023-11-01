@@ -127,24 +127,8 @@ async function* notifications(domain: string, { cities, subscriptions }: Notific
     }
     didWait = true;
   }
-}
 
-async function sendNotifications(domain: string, notificationInfo: NotificationInfo, authHeader: string) {
-  const iterator = notifications(domain, notificationInfo, authHeader);
-  const stream = new ReadableStream({
-    // pull() fires when data added to stream
-    async pull(controller) {
-      const { value, done } = await iterator.next();
-      done ? controller.close() : controller.enqueue(value);
-    }
-  });
-  const reader = stream.getReader();
-  let readResult = await reader.read();
-  while (!readResult.done) {
-    console.log(readResult.value);
-    readResult = await reader.read();
-  }
-  console.info('Finished sending notifications');
+  yield 'Finished!';
 }
 
 export default async function GET(req: NextRequest) {
@@ -164,7 +148,20 @@ export default async function GET(req: NextRequest) {
   );
 
   const domain = req.url.slice(0, req.url.indexOf(getPath(APIRoute.SEND_NOTIFICATIONS)));
-  sendNotifications(domain, notificationInfo, authHeader);
+  const iterator = notifications(domain, notificationInfo, authHeader);
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode('Starting...\n'));
+    },
+    async pull(controller) {
+      const { value, done } = await iterator.next();
+      console.log(value);
+      done ? controller.close() : controller.enqueue(encoder.encode(`${value}\n`));
+    }
+  });
 
-  return new NextResponse('Started');
+  return new Response(stream, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+  });
 }
