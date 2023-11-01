@@ -1,8 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { CardHeader } from 'components/Card/CardHeader/CardHeader';
 import { NwsAlert } from 'models/api/alerts.model';
-import { APIRoute, getPath } from 'models/api/api-route.model';
-import { SearchResultCity } from 'models/cities/cities.model';
 import { Color } from 'models/color.enum';
 
 import styles from './NotificationsCard.module.css';
@@ -22,13 +20,7 @@ const base64ToUint8Array = (base64: string) => {
   return outputArray;
 };
 
-export function NotificationsCard({
-  alerts,
-  selectedCity
-}: {
-  alerts: NwsAlert[];
-  selectedCity: SearchResultCity | undefined;
-}) {
+export function NotificationsCard({ alerts }: { alerts: NwsAlert[] }) {
   const [permissionState, setPermissionState] = useState<PermissionState>();
   const [isSubscribed, setIsSubscribed] = useState<boolean>();
   const [cachedAlertIds, setCachedAlertIds] = useState<string[]>([]);
@@ -68,7 +60,7 @@ export function NotificationsCard({
     })();
   }, [checkCachedAlertIds]);
 
-  const [isRequestingSend, setIsRequestingSend] = useState<boolean>(false);
+  // const [isRequestingSend, setIsRequestingSend] = useState<boolean>(false);
 
   return (
     <article className={baseStyles.card}>

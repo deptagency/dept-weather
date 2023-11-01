@@ -20,24 +20,13 @@ declare let self: ServiceWorkerGlobalScope;
 self.addEventListener('push', event => {
   console.log('ON PUSH!');
   const data = JSON.parse(event?.data.text() || '{}');
-  const alertCacheName = `alert:${data.id}`;
+  const alertCacheName = `alert:${data.options.tag}`;
   event?.waitUntil(
     caches
       .has(alertCacheName)
       .then(async hasAlertCacheName => {
         if (!hasAlertCacheName) {
-          const severityFName = data.severity !== 'Unknown' ? data.severity : 'Minor';
-          await self.registration.showNotification(
-            `${data.title} for ${data.forCity.cityName}, ${data.forCity.stateCode}`,
-            {
-              tag: data.id,
-              body: data.body,
-              icon: `/icons/Alert-${severityFName}-icon.svg`,
-              badge: `/icons/Alert-${severityFName}-badge.svg`,
-              timestamp: data.onset
-              // TODO - set vibrate
-            }
-          );
+          await self.registration.showNotification(data.title, data.options);
           await caches.open(alertCacheName);
         }
       })

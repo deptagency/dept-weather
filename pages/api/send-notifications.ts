@@ -43,6 +43,7 @@ async function getAlertsForCity(domain: string, city: City) {
 async function notify(domain: string, subscription: SubscriptionInfo, city: City, alert: NwsAlert, authHeader: string) {
   let notifyResp: Response | undefined;
   try {
+    const severityFName = alert.severity !== 'Unknown' ? alert.severity : 'Minor';
     const notifyRequest: NotifyRequest = {
       subscription,
       title: `${alert.title} for ${city.cityName}, ${city.stateCode}`,
@@ -53,7 +54,9 @@ async function notify(domain: string, subscription: SubscriptionInfo, city: City
             ? `From ${alert.onsetLabel}${alert.onsetShortTz !== alert.endsShortTz ? ` ${alert.onsetShortTz}` : ''} to `
             : `Until `
         }${alert.endsLabel} ${alert.endsShortTz}`,
-        timestamp: alert.onset
+        timestamp: alert.onset,
+        icon: `/icons/Alert-${severityFName}-icon.svg`,
+        badge: `/icons/Alert-${severityFName}-badge.svg`
       },
       requestOptions: {
         urgency: alert.severity === AlertSeverity.SEVERE || alert.severity === AlertSeverity.EXTREME ? 'high' : 'normal'

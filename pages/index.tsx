@@ -223,7 +223,7 @@ export default function Home() {
         setShowSearchOverlay={setShowSearchOverlay}
         showSearchOverlay={showSearchOverlay}
       />
-      <Main queryParams={queryParams} selectedCity={selectedCity}>
+      <Main queryParams={queryParams}>
         {locateError != null ? <LocateError locateError={locateError} /> : undefined}
       </Main>
       <Footer />
