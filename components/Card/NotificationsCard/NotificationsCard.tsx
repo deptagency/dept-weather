@@ -136,7 +136,7 @@ export function NotificationsCard({
               // TODO: you should call your API to save subscription data on server in order to send web push notification from server
               setSubscription(sub);
               setIsSubscribed(true);
-            } else if (isSubscribed && subscription != null && confirm('Are you sure you want to unsubscribe?')) {
+            } else if (isSubscribed && subscription != null) {
               await subscription.unsubscribe();
               // TODO: you should call your API to delete or invalidate subscription data on server
               setSubscription(undefined);
