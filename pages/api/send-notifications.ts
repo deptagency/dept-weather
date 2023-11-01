@@ -133,15 +133,9 @@ async function sendNotifications(domain: string, notificationInfo: NotificationI
   });
   const reader = stream.getReader();
   let readResult = await reader.read();
-  let didWait = false;
   while (!readResult.done) {
     console.log(readResult.value);
     readResult = await reader.read();
-    if (!didWait && process.env.NOTIFICATIONS_DELAY_SIMULATE_MS) {
-      // DEBUG Only
-      await new Promise(resolve => setTimeout(resolve, 10_000));
-    }
-    didWait = true;
   }
   console.info('Finished sending notifications');
 }
