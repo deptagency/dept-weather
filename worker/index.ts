@@ -18,23 +18,28 @@ declare let self: ServiceWorkerGlobalScope;
 // });
 
 self.addEventListener('push', event => {
-  console.log('ON PUSH!');
-  const data = JSON.parse(event?.data.text() || '{}');
-  const alertCacheName = `alert:${data.options.tag}`;
-  event?.waitUntil(
-    caches
-      .has(alertCacheName)
-      .then(async hasAlertCacheName => {
-        if (!hasAlertCacheName) {
-          await self.registration.showNotification(data.title, data.options);
-          await caches.open(alertCacheName);
-        }
-      })
-      .then(async () => {
-        const currentNotifications = await self.registration.getNotifications();
-        navigator.setAppBadge(currentNotifications.length);
-      })
-  );
+  // https://developer.apple.com/documentation/usernotifications/sending_web_push_notifications_in_safari_and_other_browsers
+  // >> Safari doesn’t support invisible push notifications.
+  // >> Present push notifications to the user immediately after your service worker receives them.
+  // >> If you don’t, Safari revokes the push notification permission for your site.
+  event?.waitUntil(self.registration.showNotification(event.data.title, event.data.options));
+
+  // const data = JSON.parse(event?.data.text() || '{}');
+  // const alertCacheName = `alert:${data.options.tag}`;
+  // event?.waitUntil(
+  //   caches
+  //     .has(alertCacheName)
+  //     .then(async hasAlertCacheName => {
+  //       if (!hasAlertCacheName) {
+  //         await self.registration.showNotification(data.title, data.options);
+  //         await caches.open(alertCacheName);
+  //       }
+  //     })
+  //     .then(async () => {
+  //       const currentNotifications = await self.registration.getNotifications();
+  //       navigator.setAppBadge(currentNotifications.length);
+  //     })
+  // );
 });
 
 self.addEventListener('notificationclick', event => {
