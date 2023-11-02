@@ -11,6 +11,10 @@
     {
       "path": "/api/forecast?id=4560349",
       "schedule": "*/9 * * * *"
+    },
+    {
+      "path": "/api/send-notifications",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

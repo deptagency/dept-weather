@@ -119,18 +119,20 @@ async function* notifications(domain: string, { cities, subscriptions }: Notific
             const [key, result] = await Promise.race(notifyMap.values());
             if (result != null) yield prefixWithTime(result);
             notifyMap.delete(key);
+            if (!didWait) {
+              // DEBUG Only
+              console.log(`Waiting for ${Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)}ms`);
+              await new Promise(resolve =>
+                setTimeout(resolve, Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown))
+              );
+            }
+            didWait = true;
           }
         }
       }
     }
 
     alertsForCityMap.delete(key);
-    if (!didWait) {
-      // DEBUG Only
-      console.log(`Waiting for ${Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)}ms`);
-      await new Promise(resolve => setTimeout(resolve, Number(process.env.NOTIFICATIONS_DELAY_SIMULATE_MS as unknown)));
-    }
-    didWait = true;
   }
 
   yield prefixWithTime('Finished!');
