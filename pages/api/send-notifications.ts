@@ -25,6 +25,11 @@ interface AlertsForCity {
   alerts: NwsAlert[];
 }
 
+function prefixWithTime(str: string) {
+  const now = new Date();
+  return `${now.toTimeString().slice(0, 8)}.${String(now.getMilliseconds()).padStart(3, '0')} ${str}`;
+}
+
 async function getAlertsForCity(domain: string, city: City) {
   let alerts: NwsAlert[] = [];
 
@@ -112,7 +117,7 @@ async function* notifications(domain: string, { cities, subscriptions }: Notific
           );
           while (notifyMap.size) {
             const [key, result] = await Promise.race(notifyMap.values());
-            if (result != null) yield result;
+            if (result != null) yield prefixWithTime(result);
             notifyMap.delete(key);
           }
         }
@@ -128,7 +133,7 @@ async function* notifications(domain: string, { cities, subscriptions }: Notific
     didWait = true;
   }
 
-  yield 'Finished!';
+  yield prefixWithTime('Finished!');
 }
 
 export default async function GET(req: NextRequest) {
@@ -152,12 +157,16 @@ export default async function GET(req: NextRequest) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     start(controller) {
-      controller.enqueue(encoder.encode('Starting...\n'));
+      controller.enqueue(encoder.encode(prefixWithTime('Starting...\n')));
     },
     async pull(controller) {
       const { value, done } = await iterator.next();
-      console.log(value);
-      done ? controller.close() : controller.enqueue(encoder.encode(`${value}\n`));
+      if (done) {
+        controller.close();
+      } else {
+        console.log(value);
+        controller.enqueue(encoder.encode(`${value}\n`));
+      }
     }
   });
 
