@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@planetscale/database':
+    specifier: ~1.11.0
+    version: 1.11.0
   dayjs:
     specifier: ^1.11.10
     version: 1.11.10
@@ -17,6 +20,12 @@ dependencies:
   geodist:
     specifier: ^0.2.1
     version: 0.2.1
+  kysely:
+    specifier: ~0.26.3
+    version: 0.26.3
+  kysely-planetscale:
+    specifier: ~1.4.0
+    version: 1.4.0(@planetscale/database@1.11.0)(kysely@0.26.3)
   leven:
     specifier: ^4.0.0
     version: 4.0.0
@@ -70,6 +79,9 @@ devDependencies:
   '@typescript-eslint/eslint-plugin':
     specifier: ~6.9.0
     version: 6.9.0(@typescript-eslint/parser@6.9.0)(eslint@8.52.0)(typescript@5.2.2)
+  dotenv:
+    specifier: ~16.3.1
+    version: 16.3.1
   eslint:
     specifier: 8.52.0
     version: 8.52.0
@@ -1515,6 +1527,11 @@ packages:
       tslib: 2.6.2
     dev: true
 
+  /@planetscale/database@1.11.0:
+    resolution: {integrity: sha512-aWbU+D/IRHoDE9975y+Q4c+EwwAWxCPwFId+N1AhQVFXzbeJMkj6KN2iQtoi03elcLMRdfT+V3i9Z4WRw+/oIA==}
+    engines: {node: '>=16'}
+    dev: false
+
   /@rollup/plugin-babel@5.3.1(@babel/core@7.23.2)(rollup@2.79.1):
     resolution: {integrity: sha512-WFfdLWU/xVWKeRQnKmIAQULUI7Il0gZnBIH/ZFO069wYIfPu+8zrfp/KMW0atmELoRDq8FbiP3VCss9MhCut7Q==}
     engines: {node: '>= 10.0.0'}
@@ -2519,6 +2536,11 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       esutils: 2.0.3
+    dev: true
+
+  /dotenv@16.3.1:
+    resolution: {integrity: sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==}
+    engines: {node: '>=12'}
     dev: true
 
   /ejs@3.1.9:
@@ -3779,6 +3801,22 @@ packages:
 
   /kuler@2.0.0:
     resolution: {integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==}
+    dev: false
+
+  /kysely-planetscale@1.4.0(@planetscale/database@1.11.0)(kysely@0.26.3):
+    resolution: {integrity: sha512-dM2xgOM50+IiOIrSCEn/6lgXcE7J752oNpV6NcIYNgG/AfYGMtWm2ZK7PyeIPy5JG1jZvQvqwTFbGK4HGH/hJw==}
+    peerDependencies:
+      '@planetscale/database': '*'
+      kysely: '*'
+    dependencies:
+      '@planetscale/database': 1.11.0
+      date-fns: 2.30.0
+      kysely: 0.26.3
+    dev: false
+
+  /kysely@0.26.3:
+    resolution: {integrity: sha512-yWSgGi9bY13b/W06DD2OCDDHQmq1kwTGYlQ4wpZkMOJqMGCstVCFIvxCCVG4KfY1/3G0MhDAcZsip/Lw8/vJWw==}
+    engines: {node: '>=14.0.0'}
     dev: false
 
   /language-subtag-registry@0.3.22:

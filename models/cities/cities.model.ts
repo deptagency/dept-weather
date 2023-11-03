@@ -7,7 +7,7 @@ export interface FullCity {
   latitude: number;
   longitude: number;
   timeZone: string;
-  geonameid: string;
+  geonameid: number;
 }
 
 export interface ScoredCity extends FullCity {
@@ -17,6 +17,8 @@ export interface ScoredCity extends FullCity {
 export interface City
   extends Pick<FullCity, 'cityName' | 'stateCode' | 'latitude' | 'longitude' | 'timeZone' | 'geonameid'> {}
 
+export interface InputCity extends Omit<FullCity, 'cityAndStateCode' | 'cityAndStateCodeLower'> {}
+
 export interface ClosestCity extends City {
   distanceFromQueried: number;
 }
@@ -25,9 +27,6 @@ export interface SearchResultCity
   extends Pick<FullCity, 'geonameid'>,
     Partial<Pick<FullCity, 'cityName' | 'stateCode'>>,
     Partial<Pick<FullCity, 'cityAndStateCode'>> {}
-
-export type InputCitiesById = Record<string, [string, string, number, number, number, string]>;
-export type CitiesById = Record<string, FullCity>;
 
 export interface MinimalQueriedCity extends CityWithCoordinates, Pick<FullCity, 'timeZone'> {}
 export interface CityWithCoordinates extends Pick<FullCity, 'latitude' | 'longitude'> {}
