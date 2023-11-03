@@ -8,24 +8,11 @@
 //  How to use:
 //    1. Run "node .dev/update-db-cities.js" in the terminal from the root project directory
 
-import { config } from 'dotenv';
-import { resolve } from 'path';
-config({ path: resolve(process.cwd(), '.env.local') });
-
-import { Kysely } from 'kysely';
-import { PlanetScaleDialect } from 'kysely-planetscale';
 import { DOT_DATA_PATH } from './constants.js';
-import { read } from './utils.js';
+import { db, read } from './utils.js';
 
 const run = async () => {
   const cities = await read(`${DOT_DATA_PATH}cities.json`);
-  const db = new Kysely({
-    dialect: new PlanetScaleDialect({
-      host: process.env.DATABASE_HOST,
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD
-    })
-  });
   console.log('Adding/updating rows...');
   for (let i = 0; i < cities.length; ) {
     const end = Math.min(cities.length, i + 1000);
