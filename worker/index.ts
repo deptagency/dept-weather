@@ -22,8 +22,8 @@ self.addEventListener('push', event => {
   // >> Safari doesn’t support invisible push notifications.
   // >> Present push notifications to the user immediately after your service worker receives them.
   // >> If you don’t, Safari revokes the push notification permission for your site.
-  console.log(`event.data is: ${event?.data}`);
-  event?.waitUntil(self.registration.showNotification((event.data as any).title, (event.data as any).options));
+  const data = event?.data.json() ?? {};
+  event?.waitUntil(self.registration.showNotification(data.title, data.options));
 
   // const data = JSON.parse(event?.data.text() || '{}');
   // const alertCacheName = `alert:${data.options.tag}`;
@@ -63,7 +63,7 @@ self.addEventListener('notificationclick', event => {
       })
       .then(async () => {
         const currentNotifications = await self.registration.getNotifications();
-        navigator.setAppBadge(currentNotifications.length);
+        await navigator.setAppBadge(currentNotifications.length);
       })
   );
 });
