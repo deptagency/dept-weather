@@ -9,30 +9,18 @@ import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
 import dayjs from 'dayjs';
 import { readFile } from 'fs/promises';
 import { Cached } from 'helpers/api/cached';
+import { db } from 'helpers/api/database';
 import { LoggerHelper } from 'helpers/api/logger-helper';
 import { CoordinatesHelper } from 'helpers/coordinates-helper';
 import { NumberHelper } from 'helpers/number-helper';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
-import { Kysely, sql } from 'kysely';
-import { PlanetScaleDialect } from 'kysely-planetscale';
+import { sql } from 'kysely';
 import leven from 'leven';
 import { CitiesQueryCache, City, ClosestCity, FullCity, InputCity, ScoredCity } from 'models/cities/cities.model';
 import path from 'path';
 
-interface Database {
-  cities: FullCity;
-}
-
 export class CitiesHelper {
   private static readonly CLASS_NAME = 'CitiesHelper';
-
-  private static db = new Kysely<Database>({
-    dialect: new PlanetScaleDialect({
-      host: process.env.DATABASE_HOST,
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD
-    })
-  });
 
   private static sortByPopulation(a: FullCity, b: FullCity) {
     return b.population - a.population;
@@ -97,7 +85,7 @@ export class CitiesHelper {
     const item = queryCache[query];
     if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
       const getFormattedDuration = LoggerHelper.trackPerformance();
-      const unsortedResults = await this.db
+      const unsortedResults = await db
         .selectFrom('cities')
         // TODO - extract since this is used in multiple areas here
         .select(['cityName', 'stateCode', 'latitude', 'longitude', 'timeZone', 'geonameid'])
@@ -157,7 +145,7 @@ export class CitiesHelper {
     const getFormattedDuration = LoggerHelper.trackPerformance();
     if (!query.length) {
       const getFormattedDuration = LoggerHelper.trackPerformance();
-      const topCities = await this.db
+      const topCities = await db
         .selectFrom('cities')
         .select(['cityName', 'stateCode', 'latitude', 'longitude', 'timeZone', 'geonameid'])
         .orderBy('population', 'desc')
@@ -184,7 +172,7 @@ export class CitiesHelper {
     const geonameid = Number(geonameidStr);
     if (Number.isInteger(geonameid) && geonameid > 0) {
       const getFormattedDuration = LoggerHelper.trackPerformance();
-      const city = await this.db
+      const city = await db
         .selectFrom('cities')
         .select(['cityName', 'stateCode', 'latitude', 'longitude', 'timeZone', 'geonameid'])
         .where('geonameid', '=', geonameid)
@@ -199,7 +187,7 @@ export class CitiesHelper {
   private static readonly closestCity = new Cached<ClosestCity | undefined, number[]>(
     async (coordinatesNumArr: number[]) => {
       const getFormattedDuration = LoggerHelper.trackPerformance();
-      const closestCity = await this.db
+      const closestCity = await db
         .selectFrom('cities')
         .select(['cityName', 'stateCode', 'latitude', 'longitude', 'timeZone', 'geonameid'])
         .select(
