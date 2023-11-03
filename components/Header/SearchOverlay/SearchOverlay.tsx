@@ -66,13 +66,10 @@ export function SearchOverlay({
       // If query is in gidQueryCache...
       if (cachedQuery?.length) {
         // Map array of geonameids to array of objects, which also include the cityAndStateCode found in the gidCityAndStateCodeCache
-        const cachedResults = cachedQuery.map(geonameidNum => {
-          const geonameid = String(geonameidNum);
-          return {
-            cityAndStateCode: citiesCache.cityAndStateCodeCache[geonameid],
-            geonameid
-          };
-        });
+        const cachedResults = cachedQuery.map(geonameid => ({
+          cityAndStateCode: citiesCache.cityAndStateCodeCache[geonameid],
+          geonameid
+        }));
         abortSearchCallAndUse(cachedResults);
         return;
       }

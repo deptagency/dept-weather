@@ -20,17 +20,17 @@ import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
 import useSWRImmutable from 'swr/immutable';
 
 const getGeonameidFromUrl = (router: NextRouter) => {
-  const geonameid = router.query[API_GEONAMEID_KEY];
-  if (typeof geonameid === 'string' && geonameid.length) {
-    const geonameidNum = Number(geonameid);
-    if (Number.isInteger(geonameidNum) && geonameidNum >= 0) {
+  const geonameidStr = router.query[API_GEONAMEID_KEY];
+  if (typeof geonameidStr === 'string' && geonameidStr.length) {
+    const geonameid = Number(geonameidStr);
+    if (Number.isInteger(geonameid) && geonameid >= 0) {
       return geonameid;
     }
   }
   return undefined;
 };
 
-const getQueryParamsForGeonameid = (geonameid: string): QueryParams => ({
+const getQueryParamsForGeonameid = (geonameid: number): QueryParams => ({
   [API_GEONAMEID_KEY]: geonameid
 });
 
@@ -56,9 +56,9 @@ export default function Home() {
       const recentCitiesStr = localStorage.getItem(LOCAL_STORAGE_RECENT_CITIES_KEY);
       const parsedRecentCities = recentCitiesStr ? JSON.parse(recentCitiesStr) : [];
       for (const recentCity of parsedRecentCities) {
-        // Convert number-typed geoname ids to strings
-        if (typeof recentCity.geonameid === 'number') {
-          recentCity.geonameid = String(recentCity.geonameid);
+        // Convert string-typed geoname ids to numbers
+        if (typeof recentCity.geonameid === 'string') {
+          recentCity.geonameid = Number(recentCity.geonameid);
         }
       }
       return parsedRecentCities;
@@ -135,7 +135,7 @@ export default function Home() {
 
   const controllerRef = useRef<AbortController | undefined>();
   useEffect(() => {
-    const searchAndSetSelectedCity = async (searchGeonameid: string) => {
+    const searchAndSetSelectedCity = async (searchGeonameid: number) => {
       // Abort any pending search
       if (controllerRef.current) {
         controllerRef.current.abort();
