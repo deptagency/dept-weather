@@ -85,8 +85,12 @@ export class CitiesHelper {
   private static getTopCities() {
     if (this._topCitiesPromise == null) {
       this._topCitiesPromise = new Promise<FullCity[]>(resolve => {
+        const getFormattedDuration = LoggerHelper.trackPerformance();
         this.citiesPromise.then(cities => {
           const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
+          LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(
+            `For "", json took ${getFormattedDuration()}`
+          );
           resolve(topCities);
         });
       });
@@ -98,17 +102,28 @@ export class CitiesHelper {
   private static _queryCachePromise?: Promise<CitiesQueryCache>;
   private static getQueryCache() {
     if (this._queryCachePromise == null) {
-      this._queryCachePromise = this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
+      this._queryCachePromise = new Promise<CitiesQueryCache>(resolve => {
+        const getFormattedDuration = LoggerHelper.trackPerformance();
+        const queryCache = this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.getQueryCache()`).verbose(`Took ${getFormattedDuration()}`);
+        resolve(queryCache);
+      });
     }
 
     return this._queryCachePromise;
   }
 
   private static getFromCache = async (query: string) => {
+    const getFormattedDuration = LoggerHelper.trackPerformance();
     const [citiesById, queryCache] = await Promise.all([this.citiesByIdPromise, this.getQueryCache()]);
     const item = queryCache[query];
     if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
-      return item.map(geonameidNum => citiesById[String(geonameidNum)]).slice(0, CITY_SEARCH_RESULT_LIMIT);
+      const returnVal = item.map(geonameidNum => citiesById[String(geonameidNum)]).slice(0, CITY_SEARCH_RESULT_LIMIT);
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromCache()`).verbose(
+        `For "${query}", json took ${getFormattedDuration()}`
+      );
+
+      return returnVal;
     }
 
     return undefined;
@@ -174,9 +189,13 @@ export class CitiesHelper {
   static async getCityWithId(geonameid: string) {
     const geonameidNum = Number(geonameid);
     if (Number.isInteger(geonameidNum) && geonameidNum > 0) {
+      const getFormattedDuration = LoggerHelper.trackPerformance();
       const citiesById = await this.citiesByIdPromise;
       const match = citiesById[geonameid];
       if (match != null) {
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.getCityWithId()`).verbose(
+          `For ${geonameid}, json took ${getFormattedDuration()}`
+        );
         return this.mapToCity(match);
       }
     }
@@ -184,6 +203,7 @@ export class CitiesHelper {
 
   private static readonly closestCity = new Cached<ClosestCity | undefined, number[]>(
     async (coordinatesNumArr: number[]) => {
+      const getFormattedDuration = LoggerHelper.trackPerformance();
       const cities = await this.citiesPromise;
       let distanceToClosestCity = Number.MAX_SAFE_INTEGER;
       let closestCity: FullCity | undefined;
@@ -198,6 +218,9 @@ export class CitiesHelper {
           distanceToClosestCity = distance;
         }
       }
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.closestCity`).verbose(
+        `For ${coordinatesNumArr}, json took ${getFormattedDuration()}`
+      );
       return closestCity != null
         ? {
             ...this.mapToCity(closestCity),
