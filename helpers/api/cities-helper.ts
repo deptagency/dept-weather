@@ -66,25 +66,21 @@ export class CitiesHelper {
     return this._citiesFromFilePromise;
   }
 
-  private static _queryCachePromise?: Promise<CitiesQueryCache>;
-  private static getQueryCache() {
-    if (this._queryCachePromise == null) {
-      this._queryCachePromise = new Promise<CitiesQueryCache>(resolve => {
-        const getFormattedDuration = LoggerHelper.trackPerformance();
-        const queryCache = this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
-        LoggerHelper.getLogger(`${this.CLASS_NAME}.getQueryCache()`).verbose(`Took ${getFormattedDuration()}`);
-        resolve(queryCache);
-      });
-    }
-
-    return this._queryCachePromise;
-  }
-
   private static getFromCache = async (query: string) => {
-    const queryCache = await this.getQueryCache();
-    const item = queryCache[query];
-    if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
-      const getFormattedDuration = LoggerHelper.trackPerformance();
+    const getFormattedDuration = LoggerHelper.trackPerformance();
+    const itemFromDb = await db
+      .selectFrom('queryCache')
+      .select(['gid0', 'gid1', 'gid2', 'gid3', 'gid4'])
+      .where('query', '=', query)
+      .executeTakeFirst();
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromCache()`).verbose(
+      `For "${query}", db.queryCache took ${getFormattedDuration()}`
+    );
+    const item =
+      itemFromDb != null
+        ? [itemFromDb.gid0, itemFromDb.gid1, itemFromDb.gid2, itemFromDb.gid3, itemFromDb.gid4]
+        : undefined;
+    if (item != null) {
       const unsortedResults = await db
         .selectFrom('cities')
         // TODO - extract since this is used in multiple areas here
@@ -92,12 +88,10 @@ export class CitiesHelper {
         .where('geonameid', 'in', item)
         .execute();
       LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromCache()`).verbose(
-        `For "${query}", db took ${getFormattedDuration()}`
+        `For "${query}", db.cities took ${getFormattedDuration()}`
       );
       return unsortedResults.sort((a, b) => item.indexOf(a.geonameid) - item.indexOf(b.geonameid));
     }
-
-    return undefined;
   };
 
   private static getTopResults(results: ScoredCity[]) {
