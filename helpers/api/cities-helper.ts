@@ -2,7 +2,6 @@ import {
   CITY_SEARCH_CITIES_FILENAME,
   CITY_SEARCH_DATA_FOLDER,
   CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL,
-  CITY_SEARCH_QUERY_CACHE_FILENAME,
   CITY_SEARCH_RESULTS_MAX_AGE
 } from 'constants/server';
 import { CITY_SEARCH_RESULT_LIMIT } from 'constants/shared';
@@ -16,7 +15,7 @@ import { NumberHelper } from 'helpers/number-helper';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
 import { sql } from 'kysely';
 import leven from 'leven';
-import { CitiesQueryCache, City, ClosestCity, FullCity, InputCity, ScoredCity } from 'models/cities/cities.model';
+import { City, ClosestCity, FullCity, InputCity, ScoredCity } from 'models/cities/cities.model';
 import path from 'path';
 
 export class CitiesHelper {
@@ -30,8 +29,8 @@ export class CitiesHelper {
     return {
       cityName: extendedCity.cityName,
       stateCode: extendedCity.stateCode,
-      latitude: extendedCity.latitude,
-      longitude: extendedCity.longitude,
+      latitude: typeof extendedCity.latitude === 'string' ? Number(extendedCity.latitude) : extendedCity.latitude,
+      longitude: typeof extendedCity.longitude === 'string' ? Number(extendedCity.longitude) : extendedCity.longitude,
       timeZone: extendedCity.timeZone,
       geonameid: extendedCity.geonameid
     };
@@ -68,30 +67,27 @@ export class CitiesHelper {
 
   private static getFromCache = async (query: string) => {
     const getFormattedDuration = LoggerHelper.trackPerformance();
-    const itemFromDb = await db
-      .selectFrom('queryCache')
-      .select(['gid0', 'gid1', 'gid2', 'gid3', 'gid4'])
-      .where('query', '=', query)
-      .executeTakeFirst();
+
+    const results = await db
+      .selectFrom('queryCache as qc')
+      .where('qc.query', '=', query)
+      .innerJoin('cities as c', eb => eb.on('c.geonameid', 'in', sql`(qc.gid0, qc.gid1, qc.gid2, qc.gid3, qc.gid4)`))
+      .orderBy(
+        sql`CASE c.geonameid
+              WHEN qc.gid0 THEN 1
+              WHEN qc.gid1 THEN 2
+              WHEN qc.gid2 THEN 3
+              WHEN qc.gid3 THEN 4
+              WHEN qc.gid4 THEN 5
+            END;`
+      )
+      .select(['c.cityName', 'c.stateCode', 'c.latitude', 'c.longitude', 'c.timeZone', 'c.geonameid'])
+      .execute();
+
     LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromCache()`).verbose(
-      `For "${query}", db.queryCache took ${getFormattedDuration()}`
+      `For "${query}", db took ${getFormattedDuration()}`
     );
-    const item =
-      itemFromDb != null
-        ? [itemFromDb.gid0, itemFromDb.gid1, itemFromDb.gid2, itemFromDb.gid3, itemFromDb.gid4]
-        : undefined;
-    if (item != null) {
-      const unsortedResults = await db
-        .selectFrom('cities')
-        // TODO - extract since this is used in multiple areas here
-        .select(['cityName', 'stateCode', 'latitude', 'longitude', 'timeZone', 'geonameid'])
-        .where('geonameid', 'in', item)
-        .execute();
-      LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromCache()`).verbose(
-        `For "${query}", db.cities took ${getFormattedDuration()}`
-      );
-      return unsortedResults.sort((a, b) => item.indexOf(a.geonameid) - item.indexOf(b.geonameid));
-    }
+    return results?.length === CITY_SEARCH_RESULT_LIMIT ? results : undefined;
   };
 
   private static getTopResults(results: ScoredCity[]) {
@@ -146,7 +142,7 @@ export class CitiesHelper {
         .limit(CITY_SEARCH_RESULT_LIMIT)
         .execute();
       LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(`For "", db took ${getFormattedDuration()}`);
-      return topCities;
+      return topCities.map(this.mapToCity);
     }
 
     let topResults = await this.getFromCache(query);
