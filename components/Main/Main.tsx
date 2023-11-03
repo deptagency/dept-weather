@@ -155,7 +155,7 @@ export function Main({ queryParams, children }: { queryParams: QueryParams; chil
             lid={lid}
             periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
           />
-          <NotificationsCard alerts={alerts?.data?.nws?.alerts ?? []} />
+          <NotificationsCard />
         </>
       )}
     </main>

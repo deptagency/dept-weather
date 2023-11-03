@@ -24,23 +24,6 @@ self.addEventListener('push', event => {
   // >> If you don’t, Safari revokes the push notification permission for your site.
   const data = event?.data.json() ?? {};
   event?.waitUntil(self.registration.showNotification(data.title, data.options));
-
-  // const data = JSON.parse(event?.data.text() || '{}');
-  // const alertCacheName = `alert:${data.options.tag}`;
-  // event?.waitUntil(
-  //   caches
-  //     .has(alertCacheName)
-  //     .then(async hasAlertCacheName => {
-  //       if (!hasAlertCacheName) {
-  //         await self.registration.showNotification(data.title, data.options);
-  //         await caches.open(alertCacheName);
-  //       }
-  //     })
-  //     .then(async () => {
-  //       const currentNotifications = await self.registration.getNotifications();
-  //       navigator.setAppBadge(currentNotifications.length);
-  //     })
-  // );
 });
 
 self.addEventListener('notificationclick', event => {

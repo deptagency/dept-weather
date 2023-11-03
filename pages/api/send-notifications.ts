@@ -51,7 +51,7 @@ async function notify(domain: string, subscription: SubscriptionInfo, city: City
     const severityFName = alert.severity !== 'Unknown' ? alert.severity : 'Minor';
     const notifyRequest: NotifyRequest = {
       subscription,
-      title: `${alert.title} for ${city.cityName}, ${city.stateCode}`,
+      title: `${alert.title} – ${city.cityName}, ${city.stateCode}`,
       notificationOptions: {
         tag: alert.id,
         body: `${

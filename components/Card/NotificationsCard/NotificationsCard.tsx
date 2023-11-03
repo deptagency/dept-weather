@@ -1,6 +1,5 @@
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CardHeader } from 'components/Card/CardHeader/CardHeader';
-import { NwsAlert } from 'models/api/alerts.model';
 import { Color } from 'models/color.enum';
 
 import styles from './NotificationsCard.module.css';
@@ -20,15 +19,9 @@ const base64ToUint8Array = (base64: string) => {
   return outputArray;
 };
 
-export function NotificationsCard({ alerts }: { alerts: NwsAlert[] }) {
+export function NotificationsCard() {
   const [permissionState, setPermissionState] = useState<PermissionState>();
   const [isSubscribed, setIsSubscribed] = useState<boolean>();
-  const [cachedAlertIds, setCachedAlertIds] = useState<string[]>([]);
-
-  const checkCachedAlertIds = useCallback(async () => {
-    const fullCachedAlertIds = (await caches.keys()).filter(key => key.startsWith('alert:'));
-    setCachedAlertIds(fullCachedAlertIds);
-  }, []);
 
   const [subscription, setSubscription] = useState<PushSubscription>();
   const [registration, setRegistration] = useState<ServiceWorkerRegistration>();
@@ -53,14 +46,9 @@ export function NotificationsCard({ alerts }: { alerts: NwsAlert[] }) {
             setRegistration(reg);
           });
         }
-
-        await checkCachedAlertIds();
-        window.addEventListener('focus', checkCachedAlertIds);
       }
     })();
-  }, [checkCachedAlertIds]);
-
-  // const [isRequestingSend, setIsRequestingSend] = useState<boolean>(false);
+  }, []);
 
   return (
     <article className={baseStyles.card}>
@@ -78,28 +66,6 @@ export function NotificationsCard({ alerts }: { alerts: NwsAlert[] }) {
           <h4>{(permissionState ?? '').toUpperCase()}</h4>
           <p>isSubscribed?</p>
           <h4>{isSubscribed ? 'YES' : 'NO'}</h4>
-          <p style={{ whiteSpace: 'nowrap' }}>Cached Alerts:</p>
-          {cachedAlertIds.map((cachedId, idx) => {
-            const matchingAlert = alerts.find(alert => alert.id.endsWith(cachedId.slice(6)));
-            return (
-              <Fragment key={idx}>
-                {idx > 0 ? <div /> : <></>}
-                <h4>
-                  {cachedId.slice(-13)}
-                  {matchingAlert && ` (${matchingAlert.title})`}
-                  <span
-                    onClick={async () => {
-                      await caches.delete(cachedId);
-                      await checkCachedAlertIds();
-                    }}
-                    style={{ padding: '0rem 0.5rem', cursor: 'pointer' }}
-                  >
-                    X
-                  </span>
-                </h4>
-              </Fragment>
-            );
-          })}
         </div>
 
         <p>Subscription Details</p>
@@ -141,24 +107,6 @@ export function NotificationsCard({ alerts }: { alerts: NwsAlert[] }) {
         >
           {`${isSubscribed ? 'Uns' : 'S'}ubscribe`}
         </button>
-
-        {/* <button
-          disabled={!isSubscribed || subscription == null || selectedCity == null || isRequestingSend}
-          onClick={async () => {
-            try {
-              setIsRequestingSend(true);
-              await fetch(getPath(APIRoute.SEND_NOTIFICATIONS));
-              setTimeout(checkCachedAlertIds, 1_000);
-            } catch (err) {
-              console.error(err);
-            }
-
-            setIsRequestingSend(false);
-          }}
-          type="button"
-        >
-          {isRequestingSend ? 'Sending...' : 'Trigger Send Notifications'}
-        </button> */}
       </div>
     </article>
   );
