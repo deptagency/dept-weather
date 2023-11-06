@@ -9,7 +9,6 @@ import { CoordinatesHelper } from 'helpers/coordinates-helper';
 import { EpaHourlyForecast, EpaHourlyForecastItem } from 'models/api/observations.model';
 import { MinimalQueriedCity } from 'models/cities/cities.model';
 import { UVHourlyForecast, UVHourlyForecastItem } from 'models/epa/uv-hourly-forecast';
-import fetch from 'node-fetch';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);

@@ -11,7 +11,6 @@ import { ObservationResponse } from 'models/nws/observation.model';
 import { PointsResponse } from 'models/nws/points.model';
 import { StationsResponse } from 'models/nws/stations.model';
 import { SummaryForecastResponse } from 'models/nws/summary-forecast.model';
-import fetch, { HeadersInit } from 'node-fetch';
 
 export class NwsHelper {
   private static readonly CLASS_NAME = 'NwsHelper';
