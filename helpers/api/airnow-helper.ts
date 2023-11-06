@@ -9,7 +9,6 @@ import { CoordinatesHelper } from 'helpers/coordinates-helper';
 import { CurrentObservations } from 'models/airnow/current-observations';
 import { AirNowObservations } from 'models/api/observations.model';
 import { MinimalQueriedCity } from 'models/cities/cities.model';
-import fetch from 'node-fetch';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(timezone);

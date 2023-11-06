@@ -1,6 +1,5 @@
 import { createWriteStream } from 'fs';
 import { readFile, unlink, writeFile } from 'fs/promises';
-import fetch from 'node-fetch';
 import prettier from 'prettier';
 
 export const cityGeonameidSorter = (city1, city2) => city1.geonameid - city2.geonameid;
