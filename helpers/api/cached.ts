@@ -1,8 +1,8 @@
 import { LOG_TIMESTAMP_FORMAT } from 'constants/server';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import { Logger } from 'models/api/logger.model';
 import NodeCache from 'node-cache';
-import type { Logger } from 'winston';
 
 export interface CacheEntry<Item> {
   item: Item;
@@ -82,8 +82,7 @@ export class Cached<Item, Opts> {
       try {
         validUntil = item != null ? await this.calculateExpiration(key, item) : 0;
       } catch (err) {
-        this.logger?.error(`Couldn't calculate cachedItemExpiration due to an exception`);
-        console.error(err);
+        this.logger?.error(`Couldn't calculate cachedItemExpiration due to an exception`, err);
       }
       cacheEntry = { item, validUntil, key };
 

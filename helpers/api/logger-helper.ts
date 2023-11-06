@@ -1,61 +1,21 @@
-import {
-  LOG_LABEL_STR_PADDING,
-  LOG_LEVEL_STR_PADDING,
-  LOG_TIMESTAMP_FORMAT,
-  MIN_LOG_LEVEL_DEV,
-  MIN_LOG_LEVEL_PROD
-} from 'constants/server';
+/* eslint-disable no-console */
+import { LOG_TIMESTAMP_FORMAT, MIN_LOG_LEVEL_DEV, MIN_LOG_LEVEL_PROD } from 'constants/server';
+import dayjs from 'dayjs';
 import { NumberHelper } from 'helpers/number-helper';
-import type { Logger } from 'winston';
-import winston from 'winston';
+import { Logger, LogLevel } from 'models/api/logger.model';
+
+const MIN_LOG_LEVEL = process.env.NODE_ENV !== 'production' ? MIN_LOG_LEVEL_DEV : MIN_LOG_LEVEL_PROD;
 
 export class LoggerHelper {
-  private static readonly FORMAT_COLORIZE = winston.format.colorize({
-    level: true
-  });
-  private static readonly FORMAT_TIMESTAMP = winston.format.timestamp({
-    format: LOG_TIMESTAMP_FORMAT
-  });
-  private static readonly FORMAT_LEVEL = winston.format(info => {
-    info.level = `${info.level[0].toUpperCase()}${info.level.slice(1)}`.padEnd(LOG_LEVEL_STR_PADDING);
-    return info;
-  })();
-
-  private static loggers = new Map<string, Logger>();
-
-  private static getFormatLabel(label: string) {
-    return winston.format.label({
-      label: `[${label}]`.padEnd(LOG_LABEL_STR_PADDING)
-    });
-  }
-
-  static getLogger(label: string) {
-    if (!this.loggers.has(label)) {
-      this.loggers.set(
-        label,
-        winston.createLogger({
-          level: MIN_LOG_LEVEL_DEV,
-          transports: [
-            new winston.transports.Console({
-              format: winston.format.combine(
-                ...(process.env.NODE_ENV !== 'production' ? [this.FORMAT_LEVEL] : []),
-                this.getFormatLabel(label),
-                this.FORMAT_TIMESTAMP,
-                this.FORMAT_COLORIZE,
-                winston.format.printf(
-                  info =>
-                    `${info.timestamp}${process.env.NODE_ENV !== 'production' ? ` ${info.level}` : ''} ${info.label} ${
-                      info.message
-                    }`
-                )
-              ),
-              level: process.env.NODE_ENV !== 'production' ? MIN_LOG_LEVEL_DEV : MIN_LOG_LEVEL_PROD
-            })
-          ]
-        })
-      );
-    }
-    return this.loggers.get(label)!;
+  static getLogger(label: string): Logger {
+    const getPrefix = () => `${dayjs().format(LOG_TIMESTAMP_FORMAT)} ${label} `;
+    return {
+      debug: (...data: any[]) => (MIN_LOG_LEVEL <= LogLevel.debug ? console.debug(getPrefix(), ...data) : undefined),
+      log: (...data: any[]) => (MIN_LOG_LEVEL <= LogLevel.log ? console.log(getPrefix(), ...data) : undefined),
+      info: (...data: any[]) => (MIN_LOG_LEVEL <= LogLevel.info ? console.info(getPrefix(), ...data) : undefined),
+      warn: (...data: any[]) => (MIN_LOG_LEVEL <= LogLevel.warn ? console.warn(getPrefix(), ...data) : undefined),
+      error: (...data: any[]) => console.error(getPrefix(), ...data)
+    };
   }
 
   static trackPerformance() {

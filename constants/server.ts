@@ -1,4 +1,5 @@
 import { DEFAULT_UNITS } from 'constants/shared';
+import { LogLevel } from 'models/api/logger.model';
 import { Unit, UnitType } from 'models/unit.enum';
 
 export const AQ_COORDINATES_STR = '42.35826159869919,-71.05360507074275';
@@ -21,7 +22,5 @@ export const FEELS_UNITS: Record<UnitType, Unit> = {
 export const API_ROUTE_PATH = '/api';
 
 export const LOG_TIMESTAMP_FORMAT = 'HH:mm:ss.SSS';
-export const LOG_LEVEL_STR_PADDING = 7;
-export const LOG_LABEL_STR_PADDING = 22;
-export const MIN_LOG_LEVEL_DEV = 'verbose';
-export const MIN_LOG_LEVEL_PROD = 'verbose';
+export const MIN_LOG_LEVEL_DEV: LogLevel = LogLevel.debug;
+export const MIN_LOG_LEVEL_PROD: LogLevel = LogLevel.log;

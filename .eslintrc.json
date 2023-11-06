@@ -37,6 +37,7 @@
     "arrow-body-style": ["error", "as-needed"],
     "prefer-arrow-callback": "error",
     "object-curly-spacing": ["error", "always"],
+    "no-console": "error",
     "@typescript-eslint/no-non-null-assertion": "off",
     "react/jsx-sort-props": ["error"],
     "react/react-in-jsx-scope": "off",

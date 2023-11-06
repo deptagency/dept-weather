@@ -88,9 +88,7 @@ export class CitiesHelper {
         const getFormattedDuration = LoggerHelper.trackPerformance();
         this.citiesPromise.then(cities => {
           const topCities = [...cities].sort(this.sortByPopulation).slice(0, CITY_SEARCH_RESULT_LIMIT);
-          LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(
-            `For "", json took ${getFormattedDuration()}`
-          );
+          LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).log(`For "", json took ${getFormattedDuration()}`);
           resolve(topCities);
         });
       });
@@ -105,7 +103,7 @@ export class CitiesHelper {
       this._queryCachePromise = new Promise<CitiesQueryCache>(resolve => {
         const getFormattedDuration = LoggerHelper.trackPerformance();
         const queryCache = this.getFile<CitiesQueryCache>(CITY_SEARCH_QUERY_CACHE_FILENAME);
-        LoggerHelper.getLogger(`${this.CLASS_NAME}.getQueryCache()`).verbose(`Took ${getFormattedDuration()}`);
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.getQueryCache()`).log(`Took ${getFormattedDuration()}`);
         resolve(queryCache);
       });
     }
@@ -119,7 +117,7 @@ export class CitiesHelper {
     const item = queryCache[query];
     if (item?.length >= CITY_SEARCH_RESULT_LIMIT) {
       const returnVal = item.map(geonameidNum => citiesById[String(geonameidNum)]).slice(0, CITY_SEARCH_RESULT_LIMIT);
-      LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromCache()`).verbose(
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getFromCache()`).log(
         `For "${query}", json took ${getFormattedDuration()}`
       );
 
@@ -182,7 +180,7 @@ export class CitiesHelper {
       topResults = this.getTopResults(results);
     }
 
-    LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).verbose(`"${query}" took ${getFormattedDuration()}`);
+    LoggerHelper.getLogger(`${this.CLASS_NAME}.searchFor()`).log(`"${query}" took ${getFormattedDuration()}`);
     return topResults.map(this.mapToCity);
   }
 
@@ -193,7 +191,7 @@ export class CitiesHelper {
       const citiesById = await this.citiesByIdPromise;
       const match = citiesById[geonameid];
       if (match != null) {
-        LoggerHelper.getLogger(`${this.CLASS_NAME}.getCityWithId()`).verbose(
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.getCityWithId()`).log(
           `For ${geonameid}, json took ${getFormattedDuration()}`
         );
         return this.mapToCity(match);
@@ -218,7 +216,7 @@ export class CitiesHelper {
           distanceToClosestCity = distance;
         }
       }
-      LoggerHelper.getLogger(`${this.CLASS_NAME}.closestCity`).verbose(
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.closestCity`).log(
         `For ${coordinatesNumArr}, json took ${getFormattedDuration()}`
       );
       return closestCity != null

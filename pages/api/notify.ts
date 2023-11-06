@@ -34,7 +34,7 @@ export default async function notify(req: NextApiRequest, res: NextApiResponse) 
       if ('statusCode' in err) {
         res.writeHead(err.statusCode, err.headers).end(err.body);
       } else {
-        console.error(err);
+        LoggerHelper.getLogger(LOGGER_LABEL).error(err);
         res.status(500).end();
       }
     }

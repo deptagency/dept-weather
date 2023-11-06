@@ -71,7 +71,7 @@ export class NwsHelper {
     async (coordinatesStr: string) => {
       const getFormattedDuration = LoggerHelper.trackPerformance();
       const points = (await (await this.fetch(`${this.BASE_URL}points/${coordinatesStr}`)).json()) as PointsResponse;
-      LoggerHelper.getLogger(`${this.CLASS_NAME}.points`).verbose(
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.points`).log(
         `For "${coordinatesStr}", took ${getFormattedDuration()}`
       );
       return points;
@@ -87,9 +87,7 @@ export class NwsHelper {
     async (stationsUrl: string) => {
       const getFormattedDuration = LoggerHelper.trackPerformance();
       const stations = (await (await this.fetch(stationsUrl)).json()) as StationsResponse;
-      LoggerHelper.getLogger(`${this.CLASS_NAME}.stations`).verbose(
-        `For "${stationsUrl}", took ${getFormattedDuration()}`
-      );
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.stations`).log(`For "${stationsUrl}", took ${getFormattedDuration()}`);
       return stations;
     },
     async () => dayjs().add(1, 'week').unix(),

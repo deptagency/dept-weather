@@ -26,9 +26,9 @@ export class SunTimesHelper {
       return dayjs(sunFn(coordinatesNumArr[0], coordinatesNumArr[1], day.toDate()));
     } catch (err) {
       LoggerHelper.getLogger(`${this.CLASS_NAME}.getSun()`).error(
-        `Couldn't get sun${riseOrSet} for "${CoordinatesHelper.cityToStr(minQueriedCity)}"`
+        `Couldn't get sun${riseOrSet} for "${CoordinatesHelper.cityToStr(minQueriedCity)}"`,
+        err
       );
-      console.error(err);
     }
   }
 

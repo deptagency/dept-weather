@@ -66,11 +66,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.setHeader('Cache-Control', `public, stale-while-revalidate, max-age=${maxAge}`);
     }
 
-    console.log(`Response Time: ${getFormattedDuration()}`);
+    LoggerHelper.getLogger(LOGGER_LABEL).log(`Response Time: ${getFormattedDuration()}`);
     res.status(response.latestReadTime ? 200 : 502).json(response);
   } catch (err) {
-    LoggerHelper.getLogger(LOGGER_LABEL).error('Failed');
-    console.error(err);
+    LoggerHelper.getLogger(LOGGER_LABEL).error(err);
     const errorResponse: Response<null> = {
       data: null,
       warnings: [],
