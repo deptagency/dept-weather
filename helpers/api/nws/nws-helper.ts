@@ -68,8 +68,14 @@ export class NwsHelper {
   }
 
   private static readonly points = new Cached<PointsResponse, string>(
-    async (coordinatesStr: string) =>
-      (await this.fetch(`${this.BASE_URL}points/${coordinatesStr}`)).json() as Promise<PointsResponse>,
+    async (coordinatesStr: string) => {
+      const getFormattedDuration = LoggerHelper.trackPerformance();
+      const points = (await (await this.fetch(`${this.BASE_URL}points/${coordinatesStr}`)).json()) as PointsResponse;
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.points`).verbose(
+        `For "${coordinatesStr}", took ${getFormattedDuration()}`
+      );
+      return points;
+    },
     async () => dayjs().add(1, 'week').unix(),
     LoggerHelper.getLogger(`${this.CLASS_NAME}.points`)
   );
@@ -78,7 +84,14 @@ export class NwsHelper {
   }
 
   private static readonly stations = new Cached<StationsResponse, string>(
-    async (stationsUrl: string) => (await this.fetch(stationsUrl)).json() as Promise<StationsResponse>,
+    async (stationsUrl: string) => {
+      const getFormattedDuration = LoggerHelper.trackPerformance();
+      const stations = (await (await this.fetch(stationsUrl)).json()) as StationsResponse;
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.stations`).verbose(
+        `For "${stationsUrl}", took ${getFormattedDuration()}`
+      );
+      return stations;
+    },
     async () => dayjs().add(1, 'week').unix(),
     LoggerHelper.getLogger(`${this.CLASS_NAME}.stations`)
   );
