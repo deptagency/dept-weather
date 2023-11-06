@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import duration from 'dayjs/plugin/duration';
 import localeData from 'dayjs/plugin/localeData';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import { Database, db } from 'helpers/api/database';
 import { NwsHelper } from 'helpers/api/nws/nws-helper';
 import { DescriptionItem, NwsAlert } from 'models/api/alerts.model';
 import { APIRoute, getPath } from 'models/api/api-route.model';
@@ -26,82 +27,28 @@ interface SubscriptionInfo extends PushSubscription {
   note?: string;
   cities: number[];
 }
-
 interface NotificationInfo {
   subscriptions: SubscriptionInfo[];
 }
+type DbCity = Omit<
+  Database['cities'],
+  'cityName' | 'stateCode' | 'cityNameAndStateCodeLower' | 'population' | 'latitude' | 'longitude' | 'zonesLastUpdated'
+>;
+type TzIndependentAlert = { srcOnset: string; srcEnds: string } & Pick<
+  NwsAlert,
+  'severity' | 'senderName' | 'title' | 'description' | 'instruction' | 'id'
+>;
+
+const NWS_ALERTS_SYSTEM_CODE_REGEX = /^[A-Z]{3}$/;
+const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
+const NWS_ALERTS_BODY_REGEX = /(?<=\.{3})(.*)/m;
 
 function prefixWithTime(str: string) {
   const now = new Date();
   return `${now.toTimeString().slice(0, 8)}.${String(now.getMilliseconds()).padStart(3, '0')} ${str}`;
 }
 
-async function notify(
-  domain: string,
-  subscription: SubscriptionInfo,
-  alertId: NwsAlert['id'],
-  alert: Pick<NwsAlert, 'severity' | 'senderName' | 'title' | 'description' | 'instruction'>,
-  // city: QueriedCityInfo[DataSource.QUERIED_CITY] | undefined,
-  geonameid: number,
-  authHeader: string
-) {
-  const toStr = subscription.note ?? subscription.endpoint.slice(-6);
-  let notifyResp: Response | undefined;
-  try {
-    const severityFName = alert.severity !== 'Unknown' ? alert.severity : 'Minor';
-    const notifyRequest: NotifyRequest = {
-      subscription,
-      title: `${alert.title} – ${geonameid}`,
-      // title: city != null ? `${alert.title} – ${city.cityName}, ${city.stateCode}` : alert.title,
-      notificationOptions: {
-        tag: alertId,
-        // body: `${
-        //   new Date().getTime() / 1_000 < alert.onset
-        //     ? `From ${alert.onsetLabel}${alert.onsetShortTz !== alert.endsShortTz ? ` ${alert.onsetShortTz}` : ''} to `
-        //     : `Until `
-        // }${alert.endsLabel} ${alert.endsShortTz}`,
-        // timestamp: alert.onset,
-        icon: `/icons/Alert-${severityFName}-icon.svg`,
-        badge: `/icons/Alert-${severityFName}-badge.svg`
-      },
-      requestOptions: {
-        urgency: alert.severity === AlertSeverity.SEVERE || alert.severity === AlertSeverity.EXTREME ? 'high' : 'normal'
-      }
-    };
-    const wait = (ms = 1_000) => new Promise(resolve => setTimeout(resolve, ms));
-    await wait();
-
-    notifyResp = await fetch(`${domain}${getPath(APIRoute.NOTIFY)}`, {
-      method: 'POST',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(notifyRequest)
-    });
-    if (notifyResp.ok) {
-      return `Sent notification for ${geonameid} for alert.id: ${alertId.slice(-13)} to ${toStr} – ${
-        notifyResp.status
-      }`;
-    }
-  } catch {
-    /* empty */
-  }
-
-  console.error(
-    `Could not send notification for ${geonameid} for alert.id: ${alertId.slice(
-      -13
-    )} to ${toStr}  – ${notifyResp?.status}: ${(await notifyResp?.text())?.trim()}`
-  );
-}
-
-const NWS_ALERTS_SYSTEM_CODE_REGEX = /^[A-Z]{3}$/;
-const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
-const NWS_ALERTS_BODY_REGEX = /(?<=\.{3})(.*)/m;
-
-function mapAlertToNwsAlert(
-  alert: any
-): Pick<NwsAlert, 'severity' | 'senderName' | 'title' | 'description' | 'instruction'> {
+function mapAlertToTzIndependentAlert(alert: any): TzIndependentAlert {
   const rawDescription = alert.properties.description;
 
   // Split raw description on '\n\n' if present or '\n' if it has headings; otherwise, don't split
@@ -129,49 +76,74 @@ function mapAlertToNwsAlert(
     alert.properties.instruction?.split('\n\n')?.map((insParagraph: string) => insParagraph.replaceAll('\n', ' ')) ??
     [];
 
-  // const onsetDayjs = dayjs(alert.properties.onset ?? alert.properties.effective).tz(timeZone);
-  // const onsetIncludeDay = !onsetDayjs.isSame(now, 'day');
-  // const onsetFormatted = this.getFormatted(onsetIncludeDay, onsetDayjs);
-
-  // const endsDayjs = dayjs(alert.properties.ends ?? alert.properties.expires).tz(timeZone);
-  // const endsIncludeDay =
-  //   !endsDayjs.isSame(now, 'day') && !(endsDayjs.isSame(onsetDayjs, 'day') && onsetDayjs.isAfter(now));
-  // const endsFormatted = this.getFormatted(endsIncludeDay, endsDayjs);
-
   return {
-    // onset: onsetDayjs.unix(),
-    // onsetIsoTz: this.getIsoTzString(onsetDayjs),
-    // onsetLabel: onsetFormatted.label,
-    // onsetShortTz: onsetFormatted.shortTz,
-    // ends: endsDayjs.unix(),
-    // endsIsoTz: this.getIsoTzString(endsDayjs),
-    // endsLabel: endsFormatted.label,
-    // endsShortTz: endsFormatted.shortTz,
+    srcOnset: alert.properties.onset ?? alert.properties.effective,
+    srcEnds: alert.properties.ends ?? alert.properties.expires,
     severity: alert.properties.severity,
     senderName: alert.properties.senderName,
     title: alert.properties.event,
     description,
-    instruction
+    instruction,
+    id: alert.properties.id
   };
 }
 
-async function checkAlerts() {
-  // TODO: get from database
-  const zonesGidsMap = new Map<string, number[]>();
-  zonesGidsMap.set('COZ228', [5435464]);
-  zonesGidsMap.set('COZ229', [5442007]);
-  zonesGidsMap.set('CAZ073', [5330736, 5370006]);
-  zonesGidsMap.set('NVZ002', [5512994]);
+function mapTzIndependentAlertToNwsAlert(tzIndependentAlert: TzIndependentAlert, timeZone: string): NwsAlert {
+  const getDayjsFormatTemplate = (includeDay: boolean, time: Dayjs) =>
+    `${includeDay ? 'ddd ' : ''}h${time.minute() > 0 ? ':mm' : ''}a`;
+  const getFormatted = (includeDay: boolean, time: Dayjs) => ({
+    label: time.format(getDayjsFormatTemplate(includeDay, time)),
+    shortTz: time.format('z')
+  });
+  const getIsoTzString = (time: Dayjs) => time.format('YYYY-MM-DDTHH:mm:ssZ');
+
+  const now = dayjs();
+
+  const onsetDayjs = dayjs(tzIndependentAlert.srcOnset).tz(timeZone);
+  const onsetIncludeDay = !onsetDayjs.isSame(now, 'day');
+  const onsetFormatted = getFormatted(onsetIncludeDay, onsetDayjs);
+
+  const endsDayjs = dayjs(tzIndependentAlert.srcEnds).tz(timeZone);
+  const endsIncludeDay =
+    !endsDayjs.isSame(now, 'day') && !(endsDayjs.isSame(onsetDayjs, 'day') && onsetDayjs.isAfter(now));
+  const endsFormatted = getFormatted(endsIncludeDay, endsDayjs);
+
+  return {
+    onset: onsetDayjs.unix(),
+    onsetIsoTz: getIsoTzString(onsetDayjs),
+    onsetLabel: onsetFormatted.label,
+    onsetShortTz: onsetFormatted.shortTz,
+    ends: endsDayjs.unix(),
+    endsIsoTz: getIsoTzString(endsDayjs),
+    endsLabel: endsFormatted.label,
+    endsShortTz: endsFormatted.shortTz,
+    severity: tzIndependentAlert.severity,
+    senderName: tzIndependentAlert.senderName,
+    title: tzIndependentAlert.title,
+    description: tzIndependentAlert.description,
+    instruction: tzIndependentAlert.instruction,
+    id: tzIndependentAlert.id
+  };
+}
+
+async function getSubscribedAlerts(dbCities: DbCity[]) {
+  const zonesGidsMap = new Map<string, Set<number>>();
+  const addToZonesGidsMap = (geonameid: number, zone: string) => {
+    if (!zonesGidsMap.has(zone)) zonesGidsMap.set(zone, new Set<number>());
+    zonesGidsMap.get(zone)!.add(geonameid);
+  };
+  for (const dbCity of dbCities) {
+    addToZonesGidsMap(dbCity.geonameid, dbCity.forecastZone);
+    addToZonesGidsMap(dbCity.geonameid, dbCity.countyZone);
+    addToZonesGidsMap(dbCity.geonameid, dbCity.fireZone);
+  }
 
   const response = await NwsHelper.getAlerts();
 
   const gidsAlertIdsMap = new Map<number, Set<string>>();
 
   const now = dayjs();
-  const nwsAlerts: Record<
-    string,
-    Pick<NwsAlert, 'severity' | 'senderName' | 'title' | 'description' | 'instruction'>
-  > = {};
+  const tzIndependentAlerts: Record<string, TzIndependentAlert> = {};
 
   for (const alert of response.features as any) {
     if (
@@ -181,9 +153,9 @@ async function checkAlerts() {
     ) {
       for (const zone of alert.properties.geocode.UGC) {
         const gids = zonesGidsMap.get(zone);
-        if (gids?.length) {
-          if (!(alert.properties.id in nwsAlerts)) {
-            nwsAlerts[alert.properties.id] = mapAlertToNwsAlert(alert);
+        if (gids?.size) {
+          if (!(alert.properties.id in tzIndependentAlerts)) {
+            tzIndependentAlerts[alert.properties.id] = mapAlertToTzIndependentAlert(alert);
           }
           for (const gid of gids) {
             const alertIdsForGid = gidsAlertIdsMap.get(gid) ?? new Set<string>();
@@ -197,13 +169,83 @@ async function checkAlerts() {
 
   return {
     gidsAlertIdsMap,
-    nwsAlerts
+    tzIndependentAlerts
   };
 }
 
+async function notify(
+  domain: string,
+  subscription: SubscriptionInfo,
+  tzIndependentAlert: TzIndependentAlert,
+  dbCity: DbCity,
+  authHeader: string
+) {
+  const toStr = subscription.note ?? subscription.endpoint.slice(-6);
+  let notifyResp: Response | undefined;
+  try {
+    const alert = mapTzIndependentAlertToNwsAlert(tzIndependentAlert, dbCity.timeZone);
+    const severityFName = alert.severity !== 'Unknown' ? alert.severity : 'Minor';
+    const notifyRequest: NotifyRequest = {
+      subscription,
+      title: alert.title,
+      notificationOptions: {
+        tag: alert.id,
+        body: `${
+          new Date().getTime() / 1_000 < alert.onset
+            ? `From ${alert.onsetLabel}${alert.onsetShortTz !== alert.endsShortTz ? ` ${alert.onsetShortTz}` : ''} to `
+            : `Until `
+        }${alert.endsLabel} ${alert.endsShortTz} for ${dbCity.cityNameAndStateCode}`,
+        timestamp: alert.onset,
+        icon: `/icons/Alert-${severityFName}-icon.svg`,
+        badge: `/icons/Alert-${severityFName}-badge.svg`
+      },
+      requestOptions: {
+        urgency: alert.severity === AlertSeverity.SEVERE || alert.severity === AlertSeverity.EXTREME ? 'high' : 'normal'
+      }
+    };
+
+    notifyResp = await fetch(`${domain}${getPath(APIRoute.NOTIFY)}`, {
+      method: 'POST',
+      headers: {
+        Authorization: authHeader,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(notifyRequest)
+    });
+    if (notifyResp.ok) {
+      return `Sent notification for "${dbCity.cityNameAndStateCode}" / ${
+        dbCity.geonameid
+      } for alert.id: ${alert.id.slice(-13)} to ${toStr} – ${notifyResp.status}`;
+    }
+  } catch {
+    /* empty */
+  }
+
+  console.error(
+    `Could not send notification for "${dbCity.cityNameAndStateCode}" / ${
+      dbCity.geonameid
+    } for alert.id: ${tzIndependentAlert.id.slice(-13)} to ${toStr}  – ${notifyResp?.status}: ${(
+      await notifyResp?.text()
+    )?.trim()}`
+  );
+}
+
 async function* notifications(domain: string, { subscriptions }: NotificationInfo, authHeader: string) {
-  const { gidsAlertIdsMap, nwsAlerts } = await checkAlerts();
-  yield prefixWithTime(`Fetched, filtered, and processed ${Object.keys(nwsAlerts).length} alerts`);
+  const cityGidsSet = new Set<number>();
+  for (const subscription of subscriptions) {
+    for (const city of subscription.cities) {
+      cityGidsSet.add(city);
+    }
+  }
+  const dbCities = await db
+    .selectFrom('cities')
+    .select(['geonameid', 'cityNameAndStateCode', 'timeZone', 'forecastZone', 'countyZone', 'fireZone'])
+    .where('geonameid', 'in', Array.from(cityGidsSet))
+    .execute();
+  yield prefixWithTime(`Retrieved ${dbCities.length} cities from database`);
+
+  const { gidsAlertIdsMap, tzIndependentAlerts } = await getSubscribedAlerts(dbCities);
+  yield prefixWithTime(`Fetched, filtered, and processed ${Object.keys(tzIndependentAlerts).length} alerts`);
 
   const gidsSubIdxsMap = new Map<number, number[]>();
   for (let i = 0; i < subscriptions.length; i++) {
@@ -217,13 +259,14 @@ async function* notifications(domain: string, { subscriptions }: NotificationInf
 
   for (const [gid, alertIds] of gidsAlertIdsMap) {
     const subIdxs = gidsSubIdxsMap.get(gid)!;
-    console.info(`${alertIds.size} alerts & ${subIdxs.length} subscriptions for ${gid}`);
+    const dbCity = dbCities.find(city => city.geonameid === gid)!;
+    console.info(`${alertIds.size} alerts & ${subIdxs.length} subscriptions for ${dbCity.cityNameAndStateCode}`);
 
     for (const alertId of alertIds) {
       const notifyMap = new Map<number, Promise<[number, string | undefined]>>(
         subIdxs.map(idx => [
           idx,
-          notify(domain, subscriptions[idx], alertId, nwsAlerts[alertId], gid, authHeader).then(res => [idx, res])
+          notify(domain, subscriptions[idx], tzIndependentAlerts[alertId], dbCity, authHeader).then(res => [idx, res])
         ])
       );
       while (notifyMap.size) {

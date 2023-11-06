@@ -1,0 +1,23 @@
+import { Kysely } from 'kysely';
+import { PlanetScaleDialect } from 'kysely-planetscale';
+import { FullCity } from 'models/cities/cities.model';
+
+export interface Database {
+  cities: Omit<FullCity, 'geonameid' | 'cityAndStateCode' | 'cityAndStateCodeLower'> & {
+    cityNameAndStateCode: string;
+    cityNameAndStateCodeLower: string;
+    geonameid: number;
+    forecastZone: string;
+    countyZone: string;
+    fireZone: string;
+    zonesLastUpdated: string;
+  };
+}
+
+export const db = new Kysely<Database>({
+  dialect: new PlanetScaleDialect({
+    host: process.env.DATABASE_HOST,
+    username: process.env.DATABASE_USERNAME,
+    password: process.env.DATABASE_PASSWORD
+  })
+});
