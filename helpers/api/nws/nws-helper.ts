@@ -166,10 +166,12 @@ export class NwsHelper {
     return this.forecastGridData.get(forecastGridDataUrl, forecastGridDataUrl);
   }
 
-  static async getAlerts(minQueriedCity: MinimalQueriedCity): Promise<AlertsResponse> {
-    const coordinatesStr = CoordinatesHelper.cityToStr(minQueriedCity);
+  static async getAlerts(minQueriedCity?: MinimalQueriedCity): Promise<AlertsResponse> {
+    const coordinatesStr = minQueriedCity != null ? CoordinatesHelper.cityToStr(minQueriedCity) : '';
     return (await (
-      await this.fetch(`${this.BASE_URL}alerts/active${getQueryParamsStr({ point: coordinatesStr })}`)
+      await this.fetch(
+        `${this.BASE_URL}alerts/active${coordinatesStr ? getQueryParamsStr({ point: coordinatesStr }) : ''}`
+      )
     ).json()) as AlertsResponse;
   }
 }
