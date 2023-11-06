@@ -33,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       latestReadTime: data.nws!.readTime
     };
 
+    console.log(`Response Time: ${getFormattedDuration()}`);
     res.status(response.latestReadTime ? 200 : 502).json(response);
   } catch (err) {
     LoggerHelper.getLogger(LOGGER_LABEL).error('Failed');
