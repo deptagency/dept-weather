@@ -8,7 +8,7 @@ const MIN_LOG_LEVEL = process.env.NODE_ENV !== 'production' ? MIN_LOG_LEVEL_DEV 
 
 export class LoggerHelper {
   static getLogger(label: string): Logger {
-    const getPrefix = () => `${dayjs().format(LOG_TIMESTAMP_FORMAT)} ${label} `;
+    const getPrefix = () => `${dayjs().format(LOG_TIMESTAMP_FORMAT)} ${label} -`;
     return {
       debug: (...data: any[]) => (MIN_LOG_LEVEL <= LogLevel.debug ? console.debug(getPrefix(), ...data) : undefined),
       log: (...data: any[]) => (MIN_LOG_LEVEL <= LogLevel.log ? console.log(getPrefix(), ...data) : undefined),
