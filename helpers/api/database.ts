@@ -3,9 +3,7 @@ import { PlanetScaleDialect } from 'kysely-planetscale';
 import { FullCity } from 'models/cities/cities.model';
 
 export interface Database {
-  cities: Omit<FullCity, 'geonameid' | 'cityAndStateCode' | 'cityAndStateCodeLower'> & {
-    cityNameAndStateCode: string;
-    cityNameAndStateCodeLower: string;
+  cities: Omit<FullCity, 'geonameid'> & {
     geonameid: number;
     forecastZone: string;
     countyZone: string;

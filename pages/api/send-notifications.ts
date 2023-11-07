@@ -32,7 +32,7 @@ interface NotificationInfo {
 }
 type DbCity = Omit<
   Database['cities'],
-  'cityName' | 'stateCode' | 'cityNameAndStateCodeLower' | 'population' | 'latitude' | 'longitude' | 'zonesLastUpdated'
+  'cityName' | 'stateCode' | 'cityAndStateCodeLower' | 'population' | 'latitude' | 'longitude' | 'zonesLastUpdated'
 >;
 type TzIndependentAlert = { srcOnset: string; srcEnds: string } & Pick<
   NwsAlert,
@@ -194,7 +194,7 @@ async function notify(
           new Date().getTime() / 1_000 < alert.onset
             ? `From ${alert.onsetLabel}${alert.onsetShortTz !== alert.endsShortTz ? ` ${alert.onsetShortTz}` : ''} to `
             : `Until `
-        }${alert.endsLabel} ${alert.endsShortTz} for ${dbCity.cityNameAndStateCode}`,
+        }${alert.endsLabel} ${alert.endsShortTz} for ${dbCity.cityAndStateCode}`,
         timestamp: alert.onset,
         icon: `/icons/Alert-${severityFName}-icon.svg`,
         badge: `/icons/Alert-${severityFName}-badge.svg`
@@ -213,16 +213,16 @@ async function notify(
       body: JSON.stringify(notifyRequest)
     });
     if (notifyResp.ok) {
-      return `Sent notification for "${dbCity.cityNameAndStateCode}" / ${
-        dbCity.geonameid
-      } for alert.id: ${alert.id.slice(-13)} to ${toStr} – ${notifyResp.status}`;
+      return `Sent notification for "${dbCity.cityAndStateCode}" / ${dbCity.geonameid} for alert.id: ${alert.id.slice(
+        -13
+      )} to ${toStr} – ${notifyResp.status}`;
     }
   } catch {
     /* empty */
   }
 
   console.error(
-    `Could not send notification for "${dbCity.cityNameAndStateCode}" / ${
+    `Could not send notification for "${dbCity.cityAndStateCode}" / ${
       dbCity.geonameid
     } for alert.id: ${tzIndependentAlert.id.slice(-13)} to ${toStr}  – ${notifyResp?.status}: ${(
       await notifyResp?.text()
@@ -239,7 +239,7 @@ async function* notifications(domain: string, { subscriptions }: NotificationInf
   }
   const dbCities = await db
     .selectFrom('cities')
-    .select(['geonameid', 'cityNameAndStateCode', 'timeZone', 'forecastZone', 'countyZone', 'fireZone'])
+    .select(['geonameid', 'cityAndStateCode', 'timeZone', 'forecastZone', 'countyZone', 'fireZone'])
     .where('geonameid', 'in', Array.from(cityGidsSet))
     .execute();
   yield prefixWithTime(`Retrieved ${dbCities.length} cities from database`);
@@ -260,7 +260,7 @@ async function* notifications(domain: string, { subscriptions }: NotificationInf
   for (const [gid, alertIds] of gidsAlertIdsMap) {
     const subIdxs = gidsSubIdxsMap.get(gid)!;
     const dbCity = dbCities.find(city => city.geonameid === gid)!;
-    console.info(`${alertIds.size} alerts & ${subIdxs.length} subscriptions for ${dbCity.cityNameAndStateCode}`);
+    console.info(`${alertIds.size} alerts & ${subIdxs.length} subscriptions for ${dbCity.cityAndStateCode}`);
 
     for (const alertId of alertIds) {
       const notifyMap = new Map<number, Promise<[number, string | undefined]>>(
