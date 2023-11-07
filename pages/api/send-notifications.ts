@@ -244,6 +244,8 @@ async function* notifications(domain: string, authHeader: string) {
   const { gidsAlertIdsMap, tzIndependentAlerts } = await getSubscribedAlerts(dbCities);
   yield prefixWithTime(`Found ${Object.keys(tzIndependentAlerts).length} subscribed alerts`);
 
+  const pushedAlertIds = new Set<string>();
+
   for (const [gid, alertIds] of gidsAlertIdsMap) {
     const dbCity = dbCities.find(city => city.geonameid === gid)!;
     const subscriptions = (await db
@@ -270,20 +272,41 @@ async function* notifications(domain: string, authHeader: string) {
       `"${dbCity.cityAndStateCode}" / ${gid}: ${alertIds.size} alerts & ${subscriptions.length} subscriptions`
     );
 
+    const alertIdsPushedPreviously = (
+      await db.selectFrom('alertsPushHistory').selectAll().where('alertId', 'in', Array.from(alertIds)).execute()
+    ).map(row => row.alertId);
+
     for (const alertId of alertIds) {
-      yield prefixWithTime(`For ${alertId}...`);
-      const notifyMap = new Map<number, Promise<[number, string | undefined]>>(
-        subscriptions.map((subscription, idx) => [
-          idx,
-          notify(domain, subscription, tzIndependentAlerts[alertId], dbCity, authHeader).then(res => [idx, res])
-        ])
-      );
-      while (notifyMap.size) {
-        const [idx, result] = await Promise.race(notifyMap.values());
-        if (result != null) yield prefixWithTime(result);
-        notifyMap.delete(idx);
+      if (!alertIdsPushedPreviously.includes(alertId)) {
+        yield prefixWithTime(`For ${alertId}...`);
+        const notifyMap = new Map<number, Promise<[number, string | undefined]>>(
+          subscriptions.map((subscription, idx) => [
+            idx,
+            notify(domain, subscription, tzIndependentAlerts[alertId], dbCity, authHeader).then(res => [idx, res])
+          ])
+        );
+        while (notifyMap.size) {
+          const [idx, result] = await Promise.race(notifyMap.values());
+          if (result != null) yield prefixWithTime(result);
+          notifyMap.delete(idx);
+        }
+        pushedAlertIds.add(alertId);
+      } else {
+        yield prefixWithTime(`Skipped ${alertId}`);
       }
     }
+  }
+
+  if (pushedAlertIds.size) {
+    const updateResult = await db
+      .insertInto('alertsPushHistory')
+      .values(
+        Array.from(pushedAlertIds).map(alertId => ({
+          alertId
+        }))
+      )
+      .executeTakeFirst();
+    yield prefixWithTime(`Added ${updateResult.numInsertedOrUpdatedRows} rows to alertsPushHistory`);
   }
 
   yield prefixWithTime('Finished!');
