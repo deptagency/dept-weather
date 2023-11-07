@@ -181,8 +181,8 @@ export class CitiesHelper {
         .selectFrom('cities')
         .select(['cityName', 'stateCode', 'latitude', 'longitude', 'timeZone', 'geonameid'])
         .select(
-          // Calculates distance in meters
-          sql<number>`ST_Distance_Sphere(coordinates, point(${coordinatesNumArr[1]}, ${coordinatesNumArr[0]}))`.as(
+          // Calculates distance in miles by using haversine formula
+          sql<number>`3959 * ACOS(COS(RADIANS(${coordinatesNumArr[0]})) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(${coordinatesNumArr[1]})) + SIN(RADIANS(${coordinatesNumArr[0]})) * SIN(RADIANS(latitude)))`.as(
             'distanceFromQueried'
           )
         )
@@ -195,8 +195,7 @@ export class CitiesHelper {
 
       if (closestCity != null) {
         closestCity.distanceFromQueried = NumberHelper.round(
-          // Meters to miles
-          closestCity.distanceFromQueried / 1609,
+          closestCity.distanceFromQueried,
           CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL
         )!;
         return closestCity;
