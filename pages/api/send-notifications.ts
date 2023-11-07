@@ -12,7 +12,6 @@ import { DescriptionItem, NwsAlert } from 'models/api/alerts.model';
 import { APIRoute, getPath } from 'models/api/api-route.model';
 import { NotifyRequest } from 'models/api/notify.model';
 import { AlertSeverity, AlertStatus } from 'models/nws/alerts.model';
-import { PushSubscription } from 'web-push';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -23,21 +22,21 @@ dayjs.extend(localeData);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-interface SubscriptionInfo extends PushSubscription {
-  note?: string;
-  cities: number[];
+interface ValidPushSubscription
+  extends Required<Pick<Database['pushSubscriptions'], 'endpoint' | 'keyP256dh' | 'keyAuth'>> {
+  uuid: string;
 }
-interface NotificationInfo {
-  subscriptions: SubscriptionInfo[];
-}
+
 type DbCity = Omit<
   Database['cities'],
   'cityName' | 'stateCode' | 'cityAndStateCodeLower' | 'population' | 'latitude' | 'longitude' | 'zonesLastUpdated'
->;
-type TzIndependentAlert = { srcOnset: string; srcEnds: string } & Pick<
-  NwsAlert,
-  'severity' | 'senderName' | 'title' | 'description' | 'instruction' | 'id'
->;
+> &
+  Required<Pick<Database['cities'], 'forecastZone' | 'countyZone' | 'fireZone'>>;
+interface TzIndependentAlert
+  extends Pick<NwsAlert, 'severity' | 'senderName' | 'title' | 'description' | 'instruction' | 'id'> {
+  srcOnset: string;
+  srcEnds: string;
+}
 
 const NWS_ALERTS_SYSTEM_CODE_REGEX = /^[A-Z]{3}$/;
 const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
@@ -175,18 +174,23 @@ async function getSubscribedAlerts(dbCities: DbCity[]) {
 
 async function notify(
   domain: string,
-  subscription: SubscriptionInfo,
+  subscription: ValidPushSubscription,
   tzIndependentAlert: TzIndependentAlert,
   dbCity: DbCity,
   authHeader: string
 ) {
-  const toStr = subscription.note ?? subscription.endpoint.slice(-6);
   let notifyResp: Response | undefined;
   try {
     const alert = mapTzIndependentAlertToNwsAlert(tzIndependentAlert, dbCity.timeZone);
     const severityFName = alert.severity !== 'Unknown' ? alert.severity : 'Minor';
     const notifyRequest: NotifyRequest = {
-      subscription,
+      subscription: {
+        endpoint: subscription.endpoint,
+        keys: {
+          p256dh: subscription.keyP256dh,
+          auth: subscription.keyAuth
+        }
+      },
       title: alert.title,
       notificationOptions: {
         tag: alert.id,
@@ -213,60 +217,64 @@ async function notify(
       body: JSON.stringify(notifyRequest)
     });
     if (notifyResp.ok) {
-      return `Sent notification for "${dbCity.cityAndStateCode}" / ${dbCity.geonameid} for alert.id: ${alert.id.slice(
-        -13
-      )} to ${toStr} – ${notifyResp.status}`;
+      return `${notifyResp.status}: sent push to ${subscription.uuid}`;
     }
   } catch {
     /* empty */
   }
 
-  console.error(
-    `Could not send notification for "${dbCity.cityAndStateCode}" / ${
-      dbCity.geonameid
-    } for alert.id: ${tzIndependentAlert.id.slice(-13)} to ${toStr}  – ${notifyResp?.status}: ${(
-      await notifyResp?.text()
-    )?.trim()}`
-  );
+  return `${notifyResp?.status ?? 'ERROR'}: could not send push to ${subscription.uuid}${
+    notifyResp != null ? ` – ${(await notifyResp.text()).trim()}` : ''
+  }`;
 }
 
-async function* notifications(domain: string, { subscriptions }: NotificationInfo, authHeader: string) {
-  const cityGidsSet = new Set<number>();
-  for (const subscription of subscriptions) {
-    for (const city of subscription.cities) {
-      cityGidsSet.add(city);
-    }
-  }
-  const dbCities = await db
-    .selectFrom('cities')
-    .select(['geonameid', 'cityAndStateCode', 'timeZone', 'forecastZone', 'countyZone', 'fireZone'])
-    .where('geonameid', 'in', Array.from(cityGidsSet))
-    .execute();
+async function* notifications(domain: string, authHeader: string) {
+  const dbCities = (await db
+    .selectFrom('cities as c')
+    .select(['c.geonameid', 'c.cityAndStateCode', 'c.timeZone', 'c.forecastZone', 'c.countyZone', 'c.fireZone'])
+    .innerJoin(
+      eb => eb.selectFrom('alertCitySubscriptions as acs').select(['acs.geonameid']).distinct().as('acs'),
+      join => join.onRef('c.geonameid', '=', 'acs.geonameid')
+    )
+    // TODO - add WHERE statement to limit only to geonameids with active row in pushSubscriptions
+    .execute()) as DbCity[];
   yield prefixWithTime(`Retrieved ${dbCities.length} cities from database`);
 
   const { gidsAlertIdsMap, tzIndependentAlerts } = await getSubscribedAlerts(dbCities);
   yield prefixWithTime(`Fetched, filtered, and processed ${Object.keys(tzIndependentAlerts).length} alerts`);
 
-  const gidsSubIdxsMap = new Map<number, number[]>();
-  for (let i = 0; i < subscriptions.length; i++) {
-    for (const gid of subscriptions[i].cities) {
-      if (gidsAlertIdsMap.has(gid)) {
-        if (!gidsSubIdxsMap.has(gid)) gidsSubIdxsMap.set(gid, []);
-        gidsSubIdxsMap.get(gid)!.push(i);
-      }
-    }
-  }
-
   for (const [gid, alertIds] of gidsAlertIdsMap) {
-    const subIdxs = gidsSubIdxsMap.get(gid)!;
     const dbCity = dbCities.find(city => city.geonameid === gid)!;
-    console.info(`${alertIds.size} alerts & ${subIdxs.length} subscriptions for ${dbCity.cityAndStateCode}`);
+    const subscriptions = (await db
+      .selectFrom('pushSubscriptions as ps')
+      .select(eb => eb.fn<string>('BIN_TO_UUID', ['ps.id']).as('uuid'))
+      .select(['ps.endpoint', 'ps.keyP256dh', 'ps.keyAuth'])
+      .where(({ and, or, eb, fn }) =>
+        and([
+          eb('ps.endpoint', 'is not', null),
+          or([eb('ps.expirationTime', 'is', null), eb('ps.expirationTime', '>', fn('NOW', []))])
+        ])
+      )
+      .innerJoin(
+        eb =>
+          eb
+            .selectFrom('alertCitySubscriptions as acs')
+            .select(['acs.userId'])
+            .where('acs.geonameid', '=', gid)
+            .as('acs'),
+        join => join.onRef('ps.id', '=', 'acs.userId')
+      )
+      .execute()) as ValidPushSubscription[];
+    yield prefixWithTime(
+      `${alertIds.size} alerts & ${subscriptions.length} subscriptions for "${dbCity.cityAndStateCode}" / ${gid}`
+    );
 
     for (const alertId of alertIds) {
+      yield prefixWithTime(`For alert.id: "${alertId}"...`);
       const notifyMap = new Map<number, Promise<[number, string | undefined]>>(
-        subIdxs.map(idx => [
+        subscriptions.map((subscription, idx) => [
           idx,
-          notify(domain, subscriptions[idx], tzIndependentAlerts[alertId], dbCity, authHeader).then(res => [idx, res])
+          notify(domain, subscription, tzIndependentAlerts[alertId], dbCity, authHeader).then(res => [idx, res])
         ])
       );
       while (notifyMap.size) {
@@ -289,13 +297,8 @@ export default async function GET(req: NextRequest) {
     });
   }
 
-  const notificationInfo = (await (
-    await fetch(`${process.env.NOTIFICATIONS_INFO_URL!}?cache-bust=${new Date().getTime() / 1_000}`)
-  ).json()) as NotificationInfo;
-  console.info(`Retrieved info for ${notificationInfo.subscriptions.length} subscriptions`);
-
   const domain = req.url.slice(0, req.url.indexOf(getPath(APIRoute.SEND_NOTIFICATIONS)));
-  const iterator = notifications(domain, notificationInfo, authHeader);
+  const iterator = notifications(domain, authHeader);
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     start(controller) {
