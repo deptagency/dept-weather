@@ -12,6 +12,10 @@ import { DOT_DATA_PATH } from './constants.js';
 import { db, read } from './utils.js';
 
 const run = async () => {
+  // TODO - handle recently added columns!!!
+  console.error('NEED TO UPDATE BEFORE RUNNING!!!');
+  exit(1);
+
   const cities = await read(`${DOT_DATA_PATH}cities.json`);
   console.log('Adding/updating rows...');
   for (let i = 0; i < cities.length; ) {
