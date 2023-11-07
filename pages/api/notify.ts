@@ -16,9 +16,9 @@ export default async function notify(req: NextApiRequest, res: NextApiResponse) 
         return;
       }
 
-      const { subscription, title, notificationOptions, requestOptions }: NotifyRequest = req.body;
+      const { uuid, subscription, title, notificationOptions, requestOptions }: NotifyRequest = req.body;
       LoggerHelper.getLogger(LOGGER_LABEL).info(
-        `Sending notification for tag: ${notificationOptions?.tag} to ${subscription.endpoint.slice(-6)}...`
+        `Sending notification for tag: "${notificationOptions?.tag}" to ${uuid}...`
       );
 
       const sendResult = await sendNotification(subscription, JSON.stringify({ title, options: notificationOptions }), {

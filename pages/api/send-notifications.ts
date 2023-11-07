@@ -184,6 +184,7 @@ async function notify(
     const alert = mapTzIndependentAlertToNwsAlert(tzIndependentAlert, dbCity.timeZone);
     const severityFName = alert.severity !== 'Unknown' ? alert.severity : 'Minor';
     const notifyRequest: NotifyRequest = {
+      uuid: subscription.uuid,
       subscription: {
         endpoint: subscription.endpoint,
         keys: {
@@ -217,14 +218,14 @@ async function notify(
       body: JSON.stringify(notifyRequest)
     });
     if (notifyResp.ok) {
-      return `${notifyResp.status}: sent push to ${subscription.uuid}`;
+      return `Sent push to ${subscription.uuid} (${notifyResp.status})`;
     }
   } catch {
     /* empty */
   }
 
-  return `${notifyResp?.status ?? 'ERROR'}: could not send push to ${subscription.uuid}${
-    notifyResp != null ? ` – ${(await notifyResp.text()).trim()}` : ''
+  return `ERROR: could not send push to ${subscription.uuid}${
+    notifyResp != null ? ` (${notifyResp?.status} / ${(await notifyResp.text()).trim()})` : ''
   }`;
 }
 
@@ -241,7 +242,7 @@ async function* notifications(domain: string, authHeader: string) {
   yield prefixWithTime(`Retrieved ${dbCities.length} cities from database`);
 
   const { gidsAlertIdsMap, tzIndependentAlerts } = await getSubscribedAlerts(dbCities);
-  yield prefixWithTime(`Fetched, filtered, and processed ${Object.keys(tzIndependentAlerts).length} alerts`);
+  yield prefixWithTime(`Found ${Object.keys(tzIndependentAlerts).length} subscribed alerts`);
 
   for (const [gid, alertIds] of gidsAlertIdsMap) {
     const dbCity = dbCities.find(city => city.geonameid === gid)!;
@@ -266,11 +267,11 @@ async function* notifications(domain: string, authHeader: string) {
       )
       .execute()) as ValidPushSubscription[];
     yield prefixWithTime(
-      `${alertIds.size} alerts & ${subscriptions.length} subscriptions for "${dbCity.cityAndStateCode}" / ${gid}`
+      `"${dbCity.cityAndStateCode}" / ${gid}: ${alertIds.size} alerts & ${subscriptions.length} subscriptions`
     );
 
     for (const alertId of alertIds) {
-      yield prefixWithTime(`For alert.id: "${alertId}"...`);
+      yield prefixWithTime(`For ${alertId}...`);
       const notifyMap = new Map<number, Promise<[number, string | undefined]>>(
         subscriptions.map((subscription, idx) => [
           idx,
