@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from 'helpers/api/database';
+import { SubscribeRequest, SubscribeResponse } from 'models/api/push/subscribe.model';
 import { Response as ResponseModel } from 'models/api/response.model';
-import { SubscribeRequest, SubscribeResponse } from 'models/api/subscribe.model';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -149,7 +149,7 @@ export default async function subscribe(req: NextRequest) {
     return new NextResponse(JSON.stringify(response), { headers: RESP_JSON_CONTENT_HEADERS, status: 201 });
   } catch (err) {
     console.error(err);
-    response.errors.push('Failed to add subscription to database');
+    response.errors.push('Failed to add record to database');
     return new NextResponse(JSON.stringify(response), { headers: RESP_JSON_CONTENT_HEADERS, status: 500 });
   }
 }

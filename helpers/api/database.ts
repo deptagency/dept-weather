@@ -14,8 +14,8 @@ export interface Database {
     id: string;
     endpoint: string | null;
     expirationTime: Date | null;
-    keyP256dh: string;
-    keyAuth: string;
+    keyP256dh: string | null;
+    keyAuth: string | null;
     unSubscribedAt: Date | null;
   };
   alertCitySubscriptions: {
