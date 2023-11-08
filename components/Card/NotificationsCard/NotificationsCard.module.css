@@ -1,5 +1,30 @@
+.notifications-card > header {
+  padding: 0.5rem;
+}
+
+.notifications-card__contents {
+  padding-left: 0.5rem;
+}
+
+.notifications-card-header__contents__button {
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--corner-radius);
+}
+
+.notifications-card-header__contents__button:focus {
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+}
+
+.notifications-card-header__contents__button:disabled {
+  opacity: 50%;
+}
+
 .notifications-card-content {
-  padding: 1rem 1rem 0.5rem 1rem;
+  padding: 1rem;
 }
 
 .notifications-card-content > :first-child {
@@ -11,7 +36,6 @@
   grid-template-columns: min-content auto;
   column-gap: 1rem;
   row-gap: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .notifications-card-content p,
@@ -27,7 +51,7 @@
 }
 
 .notifications-card-content > button {
-  margin: 0.5rem 0.5rem 0.5rem 0rem;
+  margin: 1rem 0.5rem 1rem 0rem;
   padding: 0.5rem 0.75rem;
   font-weight: 700;
   background: #f2f2f2;

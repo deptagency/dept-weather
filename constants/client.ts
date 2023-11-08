@@ -16,6 +16,7 @@ export const CURRENT_LOCATION: SearchResultCity = {
 
 export const CITY_SEARCH_DEBOUNCE_MS = 250;
 
+export const LOCAL_STORAGE_UUID_KEY = 'uuid';
 export const LOCAL_STORAGE_RECENT_CITIES_KEY = 'recentCities';
 
 export const IME_UNSETTLED_KEY_CODE = '229';

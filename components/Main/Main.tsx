@@ -88,7 +88,15 @@ const ForecastCards = ({
   </>
 );
 
-export function Main({ queryParams, children }: { queryParams: QueryParams; children?: ReactNode }) {
+export function Main({
+  queryParams,
+  geonameid,
+  children
+}: {
+  queryParams: QueryParams;
+  geonameid: string | undefined;
+  children?: ReactNode;
+}) {
   const isOnline = useOnlineStatus();
   const { alerts, alertsIsError } = useAlerts(queryParams);
   const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);
@@ -143,6 +151,7 @@ export function Main({ queryParams, children }: { queryParams: QueryParams; chil
         <OfflineError />
       ) : (
         <>
+          <NotificationsCard geonameid={geonameid} />
           <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} lid={lid} />
           <ObservationsCard
             isLoading={observationsIsLoading}
@@ -155,7 +164,6 @@ export function Main({ queryParams, children }: { queryParams: QueryParams; chil
             lid={lid}
             periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
           />
-          <NotificationsCard />
         </>
       )}
     </main>

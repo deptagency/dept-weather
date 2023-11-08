@@ -223,7 +223,7 @@ export default function Home() {
         setShowSearchOverlay={setShowSearchOverlay}
         showSearchOverlay={showSearchOverlay}
       />
-      <Main queryParams={queryParams}>
+      <Main geonameid={geonameid} queryParams={queryParams}>
         {locateError != null ? <LocateError locateError={locateError} /> : undefined}
       </Main>
       <Footer />
