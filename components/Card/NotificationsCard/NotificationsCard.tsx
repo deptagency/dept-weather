@@ -190,12 +190,10 @@ export function NotificationsCard({ geonameid }: { geonameid: string | undefined
       />
       <div className={styles['notifications-card-content']}>
         <div className={styles['status-grid']}>
-          <p>Permission:</p>
-          <h4>{(permissionState ?? '').toUpperCase()}</h4>
-          <p>isSubscribed?</p>
-          <h4>{isSubscribed ? 'YES' : 'NO'}</h4>
           <h4>UUID:</h4>
           <p suppressHydrationWarning>{uuid ? uuid : 'undefined'}</p>
+          <h4>Permission:</h4>
+          <p>{(permissionState ?? '').toUpperCase()}</p>
         </div>
 
         <button
