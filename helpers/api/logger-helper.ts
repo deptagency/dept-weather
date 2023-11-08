@@ -19,9 +19,9 @@ export class LoggerHelper {
   }
 
   static trackPerformance() {
-    const perfStart = performance.now();
+    const perfStart = new Date().getTime();
     return () => {
-      const duration = performance.now() - perfStart;
+      const duration = new Date().getTime() - perfStart;
       const formattedDuration =
         duration < 1000 ? `${NumberHelper.round(duration, 0)}ms` : `${NumberHelper.round(duration / 1_000, 3)}s`;
       return formattedDuration;

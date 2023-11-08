@@ -92,7 +92,7 @@ export class Cached<Item, Opts> {
         this.nodeCache.set(key, cacheEntry, ttl);
         this.logger?.debug(`${expiresLogPrefix} has been cached and expires${this.formatForLog(validUntil)}`);
       } else {
-        this.logger?.info(`${expiresLogPrefix} has NOT been cached`);
+        this.logger?.debug(`${expiresLogPrefix} has NOT been cached`);
       }
     } else {
       this.logger?.debug(`Cache HIT for "${key}"`);

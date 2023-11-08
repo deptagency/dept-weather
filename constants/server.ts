@@ -22,5 +22,5 @@ export const FEELS_UNITS: Record<UnitType, Unit> = {
 export const API_ROUTE_PATH = '/api';
 
 export const LOG_TIMESTAMP_FORMAT = 'HH:mm:ss.SSS';
-export const MIN_LOG_LEVEL_DEV: LogLevel = LogLevel.debug;
+export const MIN_LOG_LEVEL_DEV: LogLevel = LogLevel.log;
 export const MIN_LOG_LEVEL_PROD: LogLevel = LogLevel.log;
