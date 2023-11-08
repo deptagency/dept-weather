@@ -27,6 +27,7 @@ const base64ToUint8Array = (base64: string) => {
 
 export function NotificationsCard({ geonameid }: { geonameid: string | undefined }) {
   const [isChangingSubscription, setIsChangingSubscription] = useState(false);
+  const [permissionState, setPermissionState] = useState<PermissionState>();
   const [isSubscribed, setIsSubscribed] = useState<boolean>();
 
   const [subscription, setSubscription] = useState<PushSubscription>();
@@ -57,6 +58,9 @@ export function NotificationsCard({ geonameid }: { geonameid: string | undefined
               setIsSubscribed(true);
             } else {
               setIsSubscribed(false);
+              if ('permissions' in navigator) {
+                navigator.permissions.query({ name: 'notifications' }).then(value => setPermissionState(value.state));
+              }
             }
           });
         });
@@ -104,11 +108,23 @@ export function NotificationsCard({ geonameid }: { geonameid: string | undefined
               onClick={async () => {
                 if (!isSubscribed) {
                   setIsChangingSubscription(true);
-
-                  const sub = await registration!.pushManager.subscribe({
+                  const pushOptions = {
                     userVisibleOnly: true,
                     applicationServerKey: base64ToUint8Array(process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!)
-                  });
+                  };
+
+                  let permissionState = await registration!.pushManager.permissionState(pushOptions);
+                  if (permissionState === 'prompt') {
+                    const newPermissionState = await Notification.requestPermission();
+                    permissionState = newPermissionState === 'denied' ? 'denied' : 'granted';
+                  }
+                  if (permissionState === 'denied') {
+                    setIsChangingSubscription(false);
+                    setIsSubscribed(false);
+                    return;
+                  }
+
+                  const sub = await registration!.pushManager.subscribe(pushOptions);
                   setSubscription(sub);
 
                   const res = await fetch(getPath(APIRoute.PUSH_SUBSCRIBE), {
@@ -174,10 +190,12 @@ export function NotificationsCard({ geonameid }: { geonameid: string | undefined
       />
       <div className={styles['notifications-card-content']}>
         <div className={styles['status-grid']}>
+          <p>Permission:</p>
+          <h4>{(permissionState ?? '').toUpperCase()}</h4>
+          <p>isSubscribed?</p>
+          <h4>{isSubscribed ? 'YES' : 'NO'}</h4>
           <h4>UUID:</h4>
           <p suppressHydrationWarning>{uuid ? uuid : 'undefined'}</p>
-          {/* <p>isSubscribed?</p>
-          <h4>{isSubscribed ? 'YES' : 'NO'}</h4> */}
         </div>
 
         <button
@@ -191,42 +209,6 @@ export function NotificationsCard({ geonameid }: { geonameid: string | undefined
           DELETE
         </button>
 
-        {/* <button
-          disabled={permissionState !== 'prompt'}
-          onClick={() => {
-            Notification.requestPermission().then(value => {
-              if (value === 'denied' || value === 'granted') {
-                setPermissionState(value);
-              }
-            });
-          }}
-          type="button"
-        >
-          Request permission
-        </button>
-        <button
-          disabled={registration == null || permissionState !== 'granted'}
-          onClick={async () => {
-            setIsSubscribed(prev => !prev);
-            if (!isSubscribed) {
-              const sub = await registration!.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: base64ToUint8Array(process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!)
-              });
-              // TODO: you should call your API to save subscription data on server in order to send web push notification from server
-              setSubscription(sub);
-              setIsSubscribed(true);
-            } else if (isSubscribed && subscription != null) {
-              await subscription.unsubscribe();
-              // TODO: you should call your API to delete or invalidate subscription data on server
-              setSubscription(undefined);
-              setIsSubscribed(false);
-            }
-          }}
-          type="button"
-        >
-          {`${isSubscribed ? 'Uns' : 'S'}ubscribe`}
-        </button> */}
         {subscribedCities.length > 0 && (
           <>
             <h4 style={{ marginBottom: '0.5rem' }}>/city-alerts response:</h4>
