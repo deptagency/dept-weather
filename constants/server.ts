@@ -19,6 +19,11 @@ export const FEELS_UNITS: Record<UnitType, Unit> = {
   [UnitType.wind]: Unit.METERS
 };
 
+export const PUSH_UUID_V1_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+export const PUSH_URL_REGEX =
+  /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+export const PUSH_RESP_JSON_CONTENT_HEADERS: HeadersInit = { 'content-type': 'application/json' };
+
 export const API_ROUTE_PATH = '/api';
 
 export const LOG_TIMESTAMP_FORMAT = 'HH:mm:ss.SSS';
