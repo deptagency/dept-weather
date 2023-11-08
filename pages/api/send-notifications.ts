@@ -22,16 +22,22 @@ dayjs.extend(localeData);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-interface ValidPushSubscription
-  extends Required<Pick<Database['pushSubscriptions'], 'endpoint' | 'keyP256dh' | 'keyAuth'>> {
+interface ValidPushSubscription {
   uuid: string;
+  endpoint: NonNullable<Database['pushSubscriptions']['endpoint']>;
+  keyP256dh: NonNullable<Database['pushSubscriptions']['keyP256dh']>;
+  keyAuth: NonNullable<Database['pushSubscriptions']['keyAuth']>;
 }
 
-type DbCity = Omit<
-  Database['cities'],
-  'cityName' | 'stateCode' | 'cityAndStateCodeLower' | 'population' | 'latitude' | 'longitude' | 'zonesLastUpdated'
-> &
-  Required<Pick<Database['cities'], 'forecastZone' | 'countyZone' | 'fireZone'>>;
+interface DbCity
+  extends Omit<
+    Database['cities'],
+    'cityName' | 'stateCode' | 'cityAndStateCodeLower' | 'population' | 'latitude' | 'longitude' | 'zonesLastUpdated'
+  > {
+  forecastZone: NonNullable<Database['cities']['forecastZone']>;
+  countyZone: NonNullable<Database['cities']['countyZone']>;
+  fireZone: NonNullable<Database['cities']['fireZone']>;
+}
 interface TzIndependentAlert
   extends Pick<NwsAlert, 'severity' | 'senderName' | 'title' | 'description' | 'instruction' | 'id'> {
   srcOnset: string;
