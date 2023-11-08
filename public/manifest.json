@@ -1,6 +1,6 @@
 {
-  "name": "DEPT\u00ae Weather",
-  "short_name": "Weather",
+  "name": "EXP DEPT\u00ae Weather",
+  "short_name": "EXP Weather",
   "description": "The DEPT\u00ae Weather app provides up-to-date weather observations, daily & hourly forecasts, and alerts for locations across the U.S.",
   "categories": ["weather"],
   "icons": [
