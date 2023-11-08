@@ -5,18 +5,18 @@ import { FullCity } from 'models/cities/cities.model';
 export interface Database {
   cities: Omit<FullCity, 'geonameid'> & {
     geonameid: number;
-    forecastZone?: string;
-    countyZone?: string;
-    fireZone?: string;
-    zonesLastUpdated?: string;
+    forecastZone: string | null;
+    countyZone: string | null;
+    fireZone: string | null;
+    zonesLastUpdated: string | null;
   };
   pushSubscriptions: {
     id: string;
-    endpoint?: string;
-    expirationTime?: Date;
-    keyP256dh?: string;
-    keyAuth?: string;
-    unSubscribedAt?: Date;
+    endpoint: string | null;
+    expirationTime: Date | null;
+    keyP256dh: string;
+    keyAuth: string;
+    unSubscribedAt: Date | null;
   };
   alertCitySubscriptions: {
     id: number;

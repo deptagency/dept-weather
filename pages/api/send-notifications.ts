@@ -250,8 +250,12 @@ async function* notifications(domain: string, authHeader: string) {
     const dbCity = dbCities.find(city => city.geonameid === gid)!;
     const subscriptions = (await db
       .selectFrom('pushSubscriptions as ps')
-      .select(eb => eb.fn<string>('BIN_TO_UUID', ['ps.id']).as('uuid'))
-      .select(['ps.endpoint', 'ps.keyP256dh', 'ps.keyAuth'])
+      .select(({ fn }) => [
+        fn<string>('BIN_TO_UUID', ['ps.id']).as('uuid'),
+        'ps.endpoint',
+        'ps.keyP256dh',
+        'ps.keyAuth'
+      ])
       .where(({ and, or, eb, fn }) =>
         and([
           eb('ps.endpoint', 'is not', null),
@@ -298,7 +302,7 @@ async function* notifications(domain: string, authHeader: string) {
   }
 
   if (pushedAlertIds.size) {
-    const updateResult = await db
+    const insertResult = await db
       .insertInto('alertsPushHistory')
       .values(
         Array.from(pushedAlertIds).map(alertId => ({
@@ -306,7 +310,7 @@ async function* notifications(domain: string, authHeader: string) {
         }))
       )
       .executeTakeFirst();
-    yield prefixWithTime(`Added ${updateResult.numInsertedOrUpdatedRows} rows to alertsPushHistory`);
+    yield prefixWithTime(`Added ${insertResult.numInsertedOrUpdatedRows} rows to alertsPushHistory`);
   }
 
   yield prefixWithTime('Finished!');
@@ -339,7 +343,7 @@ export default async function GET(req: NextRequest) {
     }
   });
 
-  return new Response(stream, {
+  return new NextResponse(stream, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' }
   });
 }
