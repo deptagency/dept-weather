@@ -11,7 +11,7 @@ import { NwsHelper } from 'helpers/api/nws/nws-helper';
 import { DescriptionItem, NwsAlert } from 'models/api/alerts.model';
 import { APIRoute, getPath } from 'models/api/api-route.model';
 import { NotifyRequest } from 'models/api/notify.model';
-import { AlertSeverity, AlertStatus, AlertsFeature } from 'models/nws/alerts.model';
+import { AlertSeverity, AlertsFeature, AlertStatus } from 'models/nws/alerts.model';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
