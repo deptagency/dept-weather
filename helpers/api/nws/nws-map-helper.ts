@@ -462,12 +462,12 @@ export class NwsMapHelper {
     const now = dayjs().tz(timeZone);
     const alerts = response.features
       .filter(
-        (alert: any) =>
+        alert =>
           alert.properties.status === AlertStatus.ACTUAL &&
           (alert.properties.ends ? dayjs(alert.properties.ends).isAfter(now) : true) &&
           dayjs(alert.properties.expires).isAfter(now)
       )
-      .map((alert: any): NwsAlert => {
+      .map((alert): NwsAlert => {
         const rawDescription = alert.properties.description;
 
         // Split raw description on '\n\n' if present or '\n' if it has headings; otherwise, don't split
@@ -522,10 +522,7 @@ export class NwsMapHelper {
           id: alert.properties.id
         };
       })
-      .sort(
-        (alert1: any, alert2: any) =>
-          this.getNumericSeverity(alert2.severity) - this.getNumericSeverity(alert1.severity)
-      );
+      .sort((alert1, alert2) => this.getNumericSeverity(alert2.severity) - this.getNumericSeverity(alert1.severity));
 
     return {
       readTime: response.updated ? dayjs(response.updated).unix() : 0,
