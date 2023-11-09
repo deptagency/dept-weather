@@ -11,7 +11,7 @@ import { NwsHelper } from 'helpers/api/nws/nws-helper';
 import { DescriptionItem, NwsAlert } from 'models/api/alerts.model';
 import { APIRoute, getPath } from 'models/api/api-route.model';
 import { NotifyRequest } from 'models/api/notify.model';
-import { AlertSeverity, AlertStatus } from 'models/nws/alerts.model';
+import { AlertSeverity, AlertStatus, AlertsFeature } from 'models/nws/alerts.model';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -53,7 +53,7 @@ function prefixWithTime(str: string) {
   return `${now.toTimeString().slice(0, 8)}.${String(now.getMilliseconds()).padStart(3, '0')} ${str}`;
 }
 
-function mapAlertToTzIndependentAlert(alert: any): TzIndependentAlert {
+function mapAlertToTzIndependentAlert(alert: AlertsFeature): TzIndependentAlert {
   const rawDescription = alert.properties.description;
 
   // Split raw description on '\n\n' if present or '\n' if it has headings; otherwise, don't split
