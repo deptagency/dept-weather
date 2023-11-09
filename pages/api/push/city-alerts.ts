@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import { PUSH_RESP_JSON_CONTENT_HEADERS, PUSH_UUID_V1_REGEX } from 'constants/server';
+import { API_GEONAMEID_KEY, API_UUID_KEY } from 'constants/shared';
 import { Database, db } from 'helpers/api/database';
 import { NwsHelper } from 'helpers/api/nws/nws-helper';
 import { CoordinatesHelper } from 'helpers/coordinates-helper';
-import { CityAlertsRequest, CityAlertsResponse } from 'models/api/push/city-alerts.model';
+import { CityAlertsResponse } from 'models/api/push/city-alerts.model';
 import { Response as ResponseModel } from 'models/api/response.model';
 
 export const runtime = 'edge';
@@ -16,36 +17,31 @@ export default async function cityAlerts(req: NextRequest) {
     warnings: [],
     errors: []
   };
-  if (req.method !== 'PATCH' && req.method !== 'DELETE') {
+  if (req.method !== 'GET' && req.method !== 'PATCH' && req.method !== 'DELETE') {
     response.errors.push(`${req.method} is not supported`);
     console.error(response.errors[0]);
     return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 405 });
   }
 
-  let caReq: CityAlertsRequest;
-  try {
-    caReq = await req.json();
-  } catch {
-    response.errors.push('Invalid request body');
-    console.error(response.errors[0]);
-    return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 400 });
-  }
+  const reqStr = JSON.stringify(Object.fromEntries(req.nextUrl.searchParams.entries()));
+  const uuid = req.nextUrl.searchParams.get(API_UUID_KEY);
+  const geonameidStr = req.nextUrl.searchParams.get(API_GEONAMEID_KEY);
+
   // Validate request
-  if (typeof caReq.uuid !== 'string' || !PUSH_UUID_V1_REGEX.test(caReq.uuid)) {
-    response.errors.push('req.uuid is not a valid UUID');
+  if (typeof uuid !== 'string' || !PUSH_UUID_V1_REGEX.test(uuid)) {
+    response.errors.push('uuid is not a valid UUID');
   }
-  if (typeof caReq.geonameid !== 'string' && typeof caReq.geonameid !== 'number') {
-    response.errors.push('req.geonameid is not a string or number');
-  } else if (!Number.isInteger(Number(caReq.geonameid)) || Number(caReq.geonameid) <= 0) {
-    response.errors.push('req.geonameid is not a valid number');
+  if (req.method !== 'GET') {
+    if (typeof geonameidStr !== 'string') {
+      response.errors.push('id is not a string');
+    } else if (!Number.isInteger(Number(geonameidStr)) || Number(geonameidStr) <= 0) {
+      response.errors.push('id is not a valid number');
+    }
   }
   if (response.errors.length > 0) {
-    console.error(`Request validation failed for: ${JSON.stringify(caReq)}`);
+    console.error(`Request validation failed for: ${reqStr}`);
     return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 400 });
   }
-
-  const uuid = caReq.uuid;
-  const geonameid = Number(caReq.geonameid);
 
   try {
     // Check subscription record
@@ -56,7 +52,7 @@ export default async function cityAlerts(req: NextRequest) {
       .executeTakeFirst();
     if (existingSubscriptionRecord == null) {
       response.errors.push('Could not locate record in pushSubcriptions for uuid');
-      console.error(`${response.errors[0]}: ${JSON.stringify(caReq)}`);
+      console.error(`${response.errors[0]}: ${reqStr}`);
       return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 404 });
     }
 
@@ -80,13 +76,18 @@ export default async function cityAlerts(req: NextRequest) {
       c.longitude = Number(c.longitude);
     }
 
+    if (req.method === 'GET') {
+      return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 200 });
+    }
+
+    const geonameid = Number(geonameidStr);
     if (req.method === 'PATCH') {
       // Prevent adding alertCitySubscriptions records when user is unsubscribed
       if (existingSubscriptionRecord.unSubscribedAt != null) {
         response.errors.push(
           `Cannot PATCH since the user unsubscribed from all pushes at ${existingSubscriptionRecord.unSubscribedAt.toISOString()}`
         );
-        console.error(`${response.errors[0]}: ${JSON.stringify(caReq)}`);
+        console.error(`${response.errors[0]}: ${reqStr}`);
         return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 403 });
       }
 
@@ -106,14 +107,14 @@ export default async function cityAlerts(req: NextRequest) {
 
       if (cityToPatch == null) {
         response.errors.push('req.geonameid has no matching city');
-        console.error(`${response.errors[0]}: ${JSON.stringify(caReq)}`);
+        console.error(`${response.errors[0]}: ${reqStr}`);
         return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 400 });
       }
 
       // Fetch the city's NWS zones and update the cities table before adding subscription
       if (cityToPatch.forecastZone == null || cityToPatch.countyZone == null || cityToPatch.fireZone == null) {
         console.log(
-          `Calling NWS API since one or more zones is nullish for "${cityToPatch.cityAndStateCode}" / ${geonameid}...`
+          `Calling NWS API since one or more zones is nullish for "${cityToPatch.cityAndStateCode}" / ${geonameidStr}...`
         );
         try {
           const points = await NwsHelper.getPoints(CoordinatesHelper.cityToStr(cityToPatch));
@@ -145,7 +146,7 @@ export default async function cityAlerts(req: NextRequest) {
           ({ fn, val }) =>
             ({
               userId: fn('UUID_TO_BIN', [val(uuid)]),
-              geonameid
+              geonameid: geonameidStr
             }) as unknown as Database['alertCitySubscriptions']
         )
         .executeTakeFirst();
@@ -158,6 +159,7 @@ export default async function cityAlerts(req: NextRequest) {
           timeZone: cityToPatch.timeZone,
           geonameid: cityToPatch.geonameid
         });
+        response.data.sort((a, b) => a.geonameid - b.geonameid);
         return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 201 });
       }
       response.errors.push('Record could not be created in alertCitySubscriptions');
@@ -181,7 +183,8 @@ export default async function cityAlerts(req: NextRequest) {
       }
       response.errors.push('Record could not be deleted from alertCitySubscriptions');
     }
-    console.error(`${response.errors[0]}: ${JSON.stringify(caReq)}`);
+
+    console.error(`${response.errors[0]}: ${reqStr}`);
     return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 500 });
   } catch (err) {
     console.error(err);

@@ -1,10 +1,11 @@
-.notifications-card > header {
-  padding: 0.5rem;
+.notifications-card > button {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
-.notifications-card__contents {
+/* .notifications-card__contents {
   padding-left: 0.5rem;
-}
+} */
 
 .notifications-card-header__contents__button {
   font-weight: 700;
@@ -38,6 +39,13 @@
   row-gap: 0.5rem;
 }
 
+.subscribed-cities-grid {
+  display: grid;
+  grid-template-columns: min-content auto;
+  column-gap: 0.25rem;
+  row-gap: 0.25rem;
+}
+
 .notifications-card-content p,
 .notifications-card-content h4 {
   margin: 0;
@@ -55,6 +63,8 @@
   padding: 0.5rem 0.75rem;
   font-weight: 700;
   background: #f2f2f2;
+  outline-color: var(--black);
+  border-radius: var(--corner-radius);
 }
 
 .notifications-card-content > button:last-of-type {

@@ -10,6 +10,7 @@ import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
 import { Forecast, NwsPeriod } from 'models/api/forecast.model';
 import { Observations } from 'models/api/observations.model';
 import { Response } from 'models/api/response.model';
+import { SearchResultCity } from 'models/cities/cities.model';
 import useSWR from 'swr';
 
 import homeStyles from 'styles/Home.module.css';
@@ -90,11 +91,11 @@ const ForecastCards = ({
 
 export function Main({
   queryParams,
-  geonameid,
+  selectedCity,
   children
 }: {
   queryParams: QueryParams;
-  geonameid: string | undefined;
+  selectedCity: SearchResultCity | undefined;
   children?: ReactNode;
 }) {
   const isOnline = useOnlineStatus();
@@ -151,7 +152,7 @@ export function Main({
         <OfflineError />
       ) : (
         <>
-          <NotificationsCard geonameid={geonameid} />
+          <NotificationsCard selectedCity={selectedCity} />
           <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} lid={lid} />
           <ObservationsCard
             isLoading={observationsIsLoading}

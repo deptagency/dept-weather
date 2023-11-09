@@ -25,3 +25,4 @@ export const DEFAULT_UNITS: Record<UnitType, Unit> = {
 export const API_SEARCH_QUERY_KEY = 'query';
 export const API_COORDINATES_KEY = 'coordinates';
 export const API_GEONAMEID_KEY = 'id';
+export const API_UUID_KEY = 'uuid';
