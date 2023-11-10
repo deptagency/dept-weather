@@ -24,6 +24,7 @@ dayjs.extend(utc);
 
 interface ValidPushSubscription {
   uuid: string;
+  geonameid: number;
   endpoint: NonNullable<Database['pushSubscriptions']['endpoint']>;
   keyP256dh: NonNullable<Database['pushSubscriptions']['keyP256dh']>;
   keyAuth: NonNullable<Database['pushSubscriptions']['keyAuth']>;
@@ -43,10 +44,15 @@ interface TzIndependentAlert
   srcOnset: string;
   srcEnds: string;
 }
+interface NotifyResult {
+  success: boolean;
+  message: string;
+}
 
 const NWS_ALERTS_SYSTEM_CODE_REGEX = /^[A-Z]{3}$/;
 const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
 const NWS_ALERTS_BODY_REGEX = /(?<=\.{3})(.*)/m;
+const INDENT_WIDTH = 2;
 
 function prefixWithTime(str: string) {
   const now = new Date();
@@ -145,12 +151,12 @@ async function getSubscribedAlerts(dbCities: DbCity[]) {
 
   const response = await NwsHelper.getAlerts();
 
-  const gidsAlertIdsMap = new Map<number, Set<string>>();
+  const alertIdsGidsMap = new Map<string, Set<number>>();
 
   const now = dayjs();
   const tzIndependentAlerts: Record<string, TzIndependentAlert> = {};
 
-  for (const alert of response.features as any) {
+  for (const alert of response.features) {
     if (
       alert.properties.status === AlertStatus.ACTUAL &&
       (!alert.properties.ends || dayjs(alert.properties.ends).isAfter(now)) &&
@@ -162,18 +168,16 @@ async function getSubscribedAlerts(dbCities: DbCity[]) {
           if (!(alert.properties.id in tzIndependentAlerts)) {
             tzIndependentAlerts[alert.properties.id] = mapAlertToTzIndependentAlert(alert);
           }
-          for (const gid of gids) {
-            const alertIdsForGid = gidsAlertIdsMap.get(gid) ?? new Set<string>();
-            alertIdsForGid.add(alert.properties.id);
-            gidsAlertIdsMap.set(gid, alertIdsForGid);
-          }
+          const affectedGids = alertIdsGidsMap.get(alert.properties.id) ?? new Set<number>();
+          gids.forEach(gid => affectedGids.add(gid));
+          alertIdsGidsMap.set(alert.properties.id, affectedGids);
         }
       }
     }
   }
 
   return {
-    gidsAlertIdsMap,
+    alertIdsGidsMap,
     tzIndependentAlerts
   };
 }
@@ -184,8 +188,9 @@ async function notify(
   tzIndependentAlert: TzIndependentAlert,
   dbCity: DbCity,
   authHeader: string
-) {
+): Promise<NotifyResult> {
   let notifyResp: Response | undefined;
+  let notifyErr: any;
   try {
     const alert = mapTzIndependentAlertToNwsAlert(tzIndependentAlert, dbCity.timeZone);
     const severityFName = alert.severity !== 'Unknown' ? alert.severity : 'Minor';
@@ -208,7 +213,7 @@ async function notify(
         }${alert.endsLabel} ${alert.endsShortTz} for ${dbCity.cityAndStateCode}`,
         timestamp: alert.onset,
         icon: `/icons/Alert-${severityFName}-icon.svg`,
-        badge: `/icons/Alert-${severityFName}-badge.svg`
+        badge: `/icons/icon.svg`
       },
       requestOptions: {
         urgency: alert.severity === AlertSeverity.SEVERE || alert.severity === AlertSeverity.EXTREME ? 'high' : 'normal'
@@ -224,102 +229,145 @@ async function notify(
       body: JSON.stringify(notifyRequest)
     });
     if (notifyResp.ok) {
-      return `Sent push to ${subscription.uuid} (${notifyResp.status})`;
+      return {
+        success: true,
+        message: `${' '.repeat(2 * INDENT_WIDTH)}Sent push to ${subscription.uuid} (${notifyResp.status})`
+      };
     }
-  } catch {
-    /* empty */
+  } catch (err: any) {
+    notifyErr = err;
   }
 
-  return `ERROR: could not send push to ${subscription.uuid}${
-    notifyResp != null ? ` (${notifyResp?.status} / ${(await notifyResp.text()).trim()})` : ''
-  }`;
+  let notifyRespInfo = '';
+  if (notifyResp != null) {
+    if (notifyResp.status != null) notifyRespInfo += `(${notifyResp.status})`;
+    const notifyRespText = (await notifyResp.text()).trim();
+    if (notifyRespText) notifyRespInfo += `Response: ${notifyRespText}`;
+  }
+  return {
+    success: false,
+    message: `${'!'.repeat(2 * INDENT_WIDTH - 1)} ERROR: could not send push to ${subscription.uuid}${notifyRespInfo}${
+      notifyErr != null ? `\nError: ${notifyErr}` : ''
+    }`
+  };
 }
 
 async function* notifications(domain: string, authHeader: string) {
+  // Select cities with active subscriptions
   const dbCities = (await db
     .selectFrom('cities as c')
     .select(['c.geonameid', 'c.cityAndStateCode', 'c.timeZone', 'c.forecastZone', 'c.countyZone', 'c.fireZone'])
     .innerJoin(
-      eb => eb.selectFrom('alertCitySubscriptions as acs').select(['acs.geonameid']).distinct().as('acs'),
+      eb =>
+        eb
+          .selectFrom('alertCitySubscriptions as acs')
+          .select(['acs.geonameid'])
+          .where(
+            qb =>
+              qb.selectFrom('pushSubscriptions as ps').select('ps.unSubscribedAt').whereRef('ps.id', '=', 'acs.userId'),
+            'is',
+            null
+          )
+          .distinct()
+          .as('acs'),
       join => join.onRef('c.geonameid', '=', 'acs.geonameid')
     )
-    // TODO - add WHERE statement to limit only to geonameids with active row in pushSubscriptions
     .execute()) as DbCity[];
-  yield prefixWithTime(`Retrieved ${dbCities.length} cities from database`);
+  yield prefixWithTime(
+    `${dbCities.length} cities retrieved from database: ${dbCities.map(dbc => dbc.cityAndStateCode).join(' + ')}`
+  );
 
-  const { gidsAlertIdsMap, tzIndependentAlerts } = await getSubscribedAlerts(dbCities);
-  yield prefixWithTime(`Found ${Object.keys(tzIndependentAlerts).length} subscribed alerts`);
+  const { alertIdsGidsMap, tzIndependentAlerts } = await getSubscribedAlerts(dbCities);
+  yield prefixWithTime(`${Object.keys(tzIndependentAlerts).length} alerts with subscriptions\n`);
 
-  const pushedAlertIds = new Set<string>();
+  for (const [alertId, gids] of alertIdsGidsMap) {
+    yield prefixWithTime(`For alert "${alertId}"...`);
 
-  for (const [gid, alertIds] of gidsAlertIdsMap) {
-    const dbCity = dbCities.find(city => city.geonameid === gid)!;
-    const subscriptions = (await db
-      .selectFrom('pushSubscriptions as ps')
-      .select(({ fn }) => [
-        fn<string>('BIN_TO_UUID', ['ps.id']).as('uuid'),
-        'ps.endpoint',
-        'ps.keyP256dh',
-        'ps.keyAuth'
-      ])
-      .where(({ and, or, eb, fn }) =>
-        and([
-          eb('ps.endpoint', 'is not', null),
-          or([eb('ps.expirationTime', 'is', null), eb('ps.expirationTime', '>', fn('NOW', []))])
+    const pushHistoryRecordForAlertId = await db
+      .selectFrom('alertsPushHistory')
+      .selectAll()
+      .where('alertId', '=', alertId)
+      .executeTakeFirst();
+
+    // Skip if this alert was already pushed
+    if (pushHistoryRecordForAlertId != null) {
+      yield prefixWithTime(`Already sent at ${pushHistoryRecordForAlertId.sentAt.toISOString()}\n`);
+    } else {
+      // Get subscriptions for the cities affected by this alert
+      const subscriptions = (await db
+        .selectFrom('pushSubscriptions as ps')
+        .select(({ fn }) => [
+          fn<string>('BIN_TO_UUID', ['ps.id']).as('uuid'),
+          'ps.endpoint',
+          'ps.keyP256dh',
+          'ps.keyAuth'
         ])
-      )
-      .innerJoin(
-        eb =>
-          eb
-            .selectFrom('alertCitySubscriptions as acs')
-            .select(['acs.userId'])
-            .where('acs.geonameid', '=', gid)
-            .as('acs'),
-        join => join.onRef('ps.id', '=', 'acs.userId')
-      )
-      .execute()) as ValidPushSubscription[];
-    yield prefixWithTime(
-      `"${dbCity.cityAndStateCode}" / ${gid}: ${alertIds.size} alerts & ${subscriptions.length} subscriptions`
-    );
-
-    const alertIdsPushedPreviously = (
-      await db.selectFrom('alertsPushHistory').selectAll().where('alertId', 'in', Array.from(alertIds)).execute()
-    ).map(row => row.alertId);
-
-    for (const alertId of alertIds) {
-      if (!alertIdsPushedPreviously.includes(alertId)) {
-        yield prefixWithTime(`For ${alertId}...`);
-        const notifyMap = new Map<number, Promise<[number, string | undefined]>>(
-          subscriptions.map((subscription, idx) => [
-            idx,
-            notify(domain, subscription, tzIndependentAlerts[alertId], dbCity, authHeader).then(res => [idx, res])
+        .where(({ and, or, eb, fn }) =>
+          and([
+            // eb('ps.unSubscribedAt', 'is', null),
+            eb('ps.endpoint', 'is not', null),
+            eb('ps.keyP256dh', 'is not', null),
+            eb('ps.keyAuth', 'is not', null),
+            or([eb('ps.expirationTime', 'is', null), eb('ps.expirationTime', '>', fn('NOW', []))])
           ])
+        )
+        .innerJoin(
+          eb =>
+            eb
+              .selectFrom('alertCitySubscriptions as acs')
+              .select(['acs.userId', 'acs.geonameid'])
+              .where('acs.geonameid', 'in', Array.from(gids))
+              .as('acs'),
+          join => join.onRef('ps.id', '=', 'acs.userId')
+        )
+        .select('acs.geonameid')
+        .execute()) as ValidPushSubscription[];
+      yield prefixWithTime(`${subscriptions.length} subscriptions & ${gids.size} affected subscribed cities`);
+
+      // For each affected city, send a notification to each user subscribed for that city
+      let [notifySuccessCount, totalNotifyCount] = [0, 0];
+      for (const gid of gids) {
+        const dbCity = dbCities.find(city => city.geonameid === gid)!;
+        yield prefixWithTime(`${' '.repeat(INDENT_WIDTH)}For city "${dbCity.cityAndStateCode}" / ${gid}...`);
+        const notifyMap = new Map<number, Promise<[number, NotifyResult]>>(
+          subscriptions
+            .filter(subscription => subscription.geonameid === gid)
+            .map((subscription, idx) => [
+              idx,
+              notify(domain, subscription, tzIndependentAlerts[alertId], dbCity, authHeader).then(res => [idx, res])
+            ])
         );
         while (notifyMap.size) {
           const [idx, result] = await Promise.race(notifyMap.values());
-          if (result != null) yield prefixWithTime(result);
+          totalNotifyCount++;
+          if (result.success) notifySuccessCount++;
+          yield prefixWithTime(result.message);
           notifyMap.delete(idx);
         }
-        pushedAlertIds.add(alertId);
+      }
+
+      yield prefixWithTime(`${notifySuccessCount} of ${totalNotifyCount} pushes succeeded`);
+      if (notifySuccessCount > 0) {
+        const failureMsg = `Failed to add row to alertsPushHistory`;
+        try {
+          const insertResult = await db
+            .insertInto('alertsPushHistory')
+            .values(({ fn }) => ({
+              alertId,
+              sentAt: fn('NOW', [])
+            }))
+            .executeTakeFirst();
+          yield prefixWithTime(
+            `${insertResult.numInsertedOrUpdatedRows ? `Added row to alertsPushHistory` : failureMsg}\n`
+          );
+        } catch (err) {
+          yield prefixWithTime(`${failureMsg}\nError: ${err}\n`);
+        }
       } else {
-        yield prefixWithTime(`Skipped ${alertId}`);
+        yield prefixWithTime(`Skipped adding row to alertsPushHistory\n`);
       }
     }
   }
-
-  if (pushedAlertIds.size) {
-    const insertResult = await db
-      .insertInto('alertsPushHistory')
-      .values(({ fn }) =>
-        Array.from(pushedAlertIds).map(alertId => ({
-          alertId,
-          sentAt: fn('NOW', [])
-        }))
-      )
-      .executeTakeFirst();
-    yield prefixWithTime(`Added ${insertResult.numInsertedOrUpdatedRows} rows to alertsPushHistory`);
-  }
-
   yield prefixWithTime('Finished!');
 }
 

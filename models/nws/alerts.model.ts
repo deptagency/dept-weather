@@ -14,6 +14,7 @@ export interface AlertsFeature {
 export interface AlertProperties {
   id: string;
   areaDesc: string;
+  geocode: AlertGeocode;
   affectedZones: string[];
   sent: string;
   effective: string;
@@ -33,6 +34,11 @@ export interface AlertProperties {
   description: string;
   instruction?: string;
   response: AlertResponse;
+}
+
+export interface AlertGeocode {
+  SAME: string[];
+  UGC: string[];
 }
 
 export enum AlertStatus {
