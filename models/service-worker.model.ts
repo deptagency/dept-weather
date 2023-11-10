@@ -122,9 +122,9 @@ export interface ServiceWorkerGlobalScope {
   addEventListener(event: 'message', fn: (event?: ExtendableMessageEvent) => any): void;
   addEventListener(event: 'fetch', fn: (event?: FetchEvent) => any): void;
   addEventListener(event: 'install', fn: (event?: ExtendableEvent) => any): void;
-  addEventListener(event: 'push', fn: (event?: PushEvent) => any): void;
-  addEventListener(event: 'notificationclick', fn: (event?: NotificationEvent) => any): void;
-  addEventListener(event: 'notificationclose', fn: (event?: NotificationEvent) => any): void;
+  addEventListener(event: 'push', fn: (event: PushEvent) => any): void;
+  addEventListener(event: 'notificationclick', fn: (event: NotificationEvent) => any): void;
+  addEventListener(event: 'notificationclose', fn: (event: NotificationEvent) => any): void;
   addEventListener(event: 'sync', fn: (event?: SyncEvent) => any): void;
 
   fetch(request: Request | string): Promise<Response>;
