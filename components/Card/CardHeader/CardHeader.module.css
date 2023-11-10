@@ -14,7 +14,7 @@
   border-top-left-radius: var(--corner-radius);
   border-top-right-radius: var(--corner-radius);
 
-  color: var(--foreground-color-inverse);
+  color: var(--card-foreground-color);
   background-color: var(--card-background-color);
 }
 
@@ -62,7 +62,7 @@
 }
 
 .card-header__contents *::selection {
-  background-color: var(--foreground-color-inverse);
+  background-color: var(--card-foreground-color);
   color: var(--card-background-color);
 }
 

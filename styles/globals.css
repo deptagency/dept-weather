@@ -1,6 +1,7 @@
 :root {
   --white: #fff;
   --black: #000;
+  --platinum: #f2f2f2;
   --onyx: #121212;
   --indigo: #5115f7;
 
@@ -10,13 +11,23 @@
   --alert-minor: #006161;
   --alert-unknown: var(--alert-minor);
 
-  --foreground-color-inverse: var(--white);
+  --background: var(--white);
+  --foreground: var(--black);
+  --foreground-light: var(--onyx);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--black);
+    --foreground: var(--white);
+    --foreground-light: var(--platinum);
+  }
 }
 
 html,
 body {
-  background: var(--white);
-  color: var(--onyx);
+  background: var(--background);
+  color: var(--foreground);
   padding: 0;
   margin: 0;
 }

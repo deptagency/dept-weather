@@ -4,6 +4,10 @@ export enum Color {
   ONYX = 'onyx',
   INDIGO = 'indigo',
 
+  BACKGROUND = 'background',
+  FOREGROUND = 'foreground',
+  FOREGROUND_LIGHT = 'foreground-light',
+
   ALERT_EXTREME = 'alert-extreme',
   ALERT_SEVERE = 'alert-severe',
   ALERT_MODERATE = 'alert-moderate',

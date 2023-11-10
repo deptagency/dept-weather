@@ -9,6 +9,7 @@ export function StandardCardHeader({
   label,
   secondaryLabel,
   backgroundColor,
+  foregroundColor,
   isExpanded,
   setIsExpanded,
   ariaControls,
@@ -19,6 +20,7 @@ export function StandardCardHeader({
   label: string;
   secondaryLabel?: string;
   backgroundColor: Color;
+  foregroundColor: Color;
   isExpanded?: boolean;
   setIsExpanded?: Dispatch<SetStateAction<boolean>>;
   ariaControls?: string;
@@ -44,6 +46,7 @@ export function StandardCardHeader({
       backgroundColor={backgroundColor}
       contents={contents}
       disabledExpand={disabledExpand}
+      foregroundColor={foregroundColor}
       isExpanded={isExpanded}
       setIsExpanded={setIsExpanded}
     />

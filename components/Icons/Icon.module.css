@@ -6,12 +6,20 @@
   visibility: hidden;
 }
 
-.icon path,
-.icon rect {
-  fill: var(--black);
+.icon path:not(.icon__path--stroke),
+.icon rect:not(.icon__path--stroke) {
+  fill: var(--foreground);
 }
 
-.icon--inverse-fill path,
-.icon--inverse-fill rect {
-  fill: var(--white);
+.icon .icon__path--stroke {
+  stroke: var(--foreground);
+}
+
+.icon--custom-fill path:not(.icon__path--stroke),
+.icon--custom-fill rect:not(.icon__path--stroke) {
+  fill: var(--icon-fill-color);
+}
+
+.icon--custom-fill .icon__path--stroke {
+  stroke: var(--icon-fill-color);
 }

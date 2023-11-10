@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
+import { CSSProperties, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import { ArrowIcon } from 'components/Icons/ArrowIcon';
 import { Color } from 'models/color.enum';
 
@@ -8,6 +8,7 @@ export function CardHeader({
   preContents,
   contents,
   backgroundColor,
+  foregroundColor,
   roundBottomCornersWhenCollapsed,
   isExpanded,
   setIsExpanded,
@@ -17,6 +18,7 @@ export function CardHeader({
   preContents?: ReactNode;
   contents: ReactNode;
   backgroundColor: Color;
+  foregroundColor: Color;
   roundBottomCornersWhenCollapsed?: boolean;
   isExpanded?: boolean;
   setIsExpanded?: Dispatch<SetStateAction<boolean>>;
@@ -28,6 +30,11 @@ export function CardHeader({
     () => setCanExpand(isExpanded != null && setIsExpanded != null && Boolean(ariaControls)),
     [isExpanded, setIsExpanded, ariaControls]
   );
+
+  const style = {
+    '--card-background-color': `var(--${backgroundColor})`,
+    '--card-foreground-color': `var(--${foregroundColor})`
+  } as CSSProperties;
 
   return canExpand ? (
     <button
@@ -41,17 +48,16 @@ export function CardHeader({
         e.preventDefault();
         setIsExpanded!(!isExpanded!);
       }}
-      style={{ '--card-background-color': `var(--${backgroundColor})` } as React.CSSProperties}
+      style={style}
     >
       {preContents}
       {contents}
-      {disabledExpand ? undefined : <ArrowIcon animationState={isExpanded ? 'end' : 'start'} useInverseFill={true} />}
+      {disabledExpand ? undefined : (
+        <ArrowIcon animationState={isExpanded ? 'end' : 'start'} fillColor={foregroundColor} />
+      )}
     </button>
   ) : (
-    <header
-      className={styles['card-header']}
-      style={{ '--card-background-color': `var(--${backgroundColor})` } as React.CSSProperties}
-    >
+    <header className={styles['card-header']} style={style}>
       {preContents}
       {contents}
     </header>

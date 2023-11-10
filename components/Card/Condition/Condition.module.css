@@ -18,6 +18,12 @@
   width: 2rem;
 }
 
+@media (prefers-color-scheme: dark) {
+  .condition__icon {
+    filter: invert(1);
+  }
+}
+
 .condition__icon--small {
   height: 1.5rem;
   width: 1.5rem;
