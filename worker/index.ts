@@ -43,28 +43,26 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientListIn => {
-      const [geonameid, alertId] = event.notification.tag.split('-');
-      const href = `/?id=${geonameid}&alertId=${encodeURIComponent(alertId)}`;
+  // event.waitUntil(
+  // self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientListIn => {
+  const [geonameid, alertId] = event.notification.tag.split('-');
+  const href = `/?id=${geonameid}&alertId=${encodeURIComponent(alertId)}`;
 
-      // Sort so the focused clients are first
-      const clientList = (clientListIn as unknown as WindowClient[]).sort(
-        (a, b) => Number(b.focused) - Number(a.focused)
-      );
+  // Sort so the focused clients are first
+  // const clientList = (clientListIn as unknown as WindowClient[]).sort((a, b) => Number(b.focused) - Number(a.focused));
 
-      // Preference: focused open client for city > open client for city > open client
-      let clientToFocus = clientList.find(client => getQueryParamsFromUrl(client.url)['id'] === geonameid);
-      if (clientToFocus == null && clientList.length > 0) clientToFocus = clientList[0];
-      if (clientToFocus != null) {
-        // Open preferred existing window
-        return clientToFocus!.focus().then(() => clientToFocus!.navigate(href));
-      }
+  // Preference: focused open client for city > open client for city > open client
+  // let clientToFocus = clientList.find(client => getQueryParamsFromUrl(client.url)['id'] === geonameid);
+  // if (clientToFocus == null && clientList.length > 0) clientToFocus = clientList[0];
+  // if (clientToFocus != null) {
+  //   // Open preferred existing window
+  //   return clientToFocus!.focus().then(() => clientToFocus!.navigate(href));
+  // }
 
-      // Open new window
-      return self.clients.openWindow(href);
-    })
-  );
+  // Open new window
+  return self.clients.openWindow(href);
+  // })
+  // );
 });
 
 self.addEventListener('notificationclose', event => {
