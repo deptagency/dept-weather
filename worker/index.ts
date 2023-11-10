@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { ServiceWorkerGlobalScope, WindowClient } from 'models/service-worker.model';
+import { ServiceWorkerGlobalScope } from 'models/service-worker.model';
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -18,20 +18,6 @@ declare let self: ServiceWorkerGlobalScope;
 //   console.log(event.data);
 // });
 
-const getQueryParamsFromUrl = (url: string) => {
-  let queryParams: Record<string, string> = {};
-
-  const idxOfQuery = url.indexOf('?');
-  const idxOfFragment = url.indexOf('#');
-  if (idxOfQuery > -1) {
-    const fullQueryStr = url.slice(idxOfQuery + 1, idxOfFragment > idxOfQuery + 1 ? idxOfFragment : undefined);
-    const queryStrs = fullQueryStr.split('&').filter(q => q.indexOf('=') > 0 && q.indexOf('=') < q.length);
-    queryParams = Object.fromEntries(queryStrs.map(qStr => qStr.split('=')));
-  }
-
-  return queryParams;
-};
-
 self.addEventListener('push', event => {
   // https://developer.apple.com/documentation/usernotifications/sending_web_push_notifications_in_safari_and_other_browsers
   // >> Safari doesn’t support invisible push notifications.
@@ -46,23 +32,7 @@ self.addEventListener('notificationclick', event => {
 
   const [geonameid, alertId] = event.notification.tag.split('-');
   const href = `/?id=${geonameid}&alertId=${encodeURIComponent(alertId)}`;
-  event.waitUntil(
-    // self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientListIn => {
-    // Sort so the focused clients are first
-    // const clientList = (clientListIn as unknown as WindowClient[]).sort((a, b) => Number(b.focused) - Number(a.focused));
-
-    // Preference: focused open client for city > open client for city > open client
-    // let clientToFocus = clientList.find(client => getQueryParamsFromUrl(client.url)['id'] === geonameid);
-    // if (clientToFocus == null && clientList.length > 0) clientToFocus = clientList[0];
-    // if (clientToFocus != null) {
-    //   // Open preferred existing window
-    //   return clientToFocus!.focus().then(() => clientToFocus!.navigate(href));
-    // }
-
-    // Open new window
-    self.clients.openWindow(href)
-    // })
-  );
+  event.waitUntil(self.clients.openWindow(href));
 });
 
 self.addEventListener('notificationclose', event => {
