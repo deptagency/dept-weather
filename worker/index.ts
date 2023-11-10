@@ -41,7 +41,7 @@ self.addEventListener('push', event => {
   event.waitUntil(self.registration.showNotification(data.title, data.options));
 });
 
-self.addEventListener('notificationclick', async event => {
+self.addEventListener('notificationclick', event => {
   event.notification.close();
   // const clientListIn = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
   const [geonameid, alertId] = event.notification.tag.split('-');
@@ -59,7 +59,7 @@ self.addEventListener('notificationclick', async event => {
   // }
 
   // Open new window
-  return self.clients.openWindow(href);
+  event.waitUntil(self.clients.openWindow(href));
 });
 
 self.addEventListener('notificationclose', event => {
