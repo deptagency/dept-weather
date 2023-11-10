@@ -3,6 +3,7 @@ import AnimateHeight from 'react-animate-height';
 import { CardHeader } from 'components/Card/CardHeader/CardHeader';
 import { LOCAL_STORAGE_UUID_KEY, UI_ANIMATION_DURATION } from 'constants/client';
 import { API_GEONAMEID_KEY, API_UUID_KEY } from 'constants/shared';
+import { SearchQueryHelper } from 'helpers/search-query-helper';
 import { useShouldContinueRendering } from 'hooks/use-should-continue-rendering';
 import { APIRoute, getPath } from 'models/api/api-route.model';
 import { CityAlertsResponse } from 'models/api/push/city-alerts.model';
@@ -287,7 +288,7 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
                 onClick={() => onPatchDeleteClick('PATCH')}
                 type="button"
               >
-                PATCH{selectedCity ? ` ${selectedCity.geonameid} ${selectedCity.cityAndStateCode}` : ''}
+                PATCH{selectedCity ? ` ${SearchQueryHelper.getCityAndStateCode(selectedCity)}` : ''}
               </button>
             ) : (
               <button
@@ -295,7 +296,7 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
                 onClick={() => onPatchDeleteClick('DELETE')}
                 type="button"
               >
-                DELETE{selectedCity ? ` ${selectedCity.geonameid} ${selectedCity.cityAndStateCode}` : ''}
+                DELETE{selectedCity ? ` ${SearchQueryHelper.getCityAndStateCode(selectedCity)}` : ''}
               </button>
             )}
 
