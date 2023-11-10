@@ -10,8 +10,16 @@ import styles from './AlertCard.module.css';
 
 const ANIMATED_CONTENTS_WRAPPER_ID = 'AlertCardAccordianContentsWrapper';
 
-export function AlertCard({ alert, _key }: { alert: NwsAlert; _key: string }) {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+export function AlertCard({
+  alert,
+  isExpandedByUrl,
+  _key
+}: {
+  alert: NwsAlert;
+  isExpandedByUrl: boolean;
+  _key: string;
+}) {
+  const [isExpanded, setIsExpanded] = useState<boolean>(isExpandedByUrl);
   const shouldContinueRendering = useShouldContinueRendering(isExpanded);
 
   const [animatedContentsWrapperId, setAnimatedContentsWrapperId] = useState<string>(ANIMATED_CONTENTS_WRAPPER_ID);

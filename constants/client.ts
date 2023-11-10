@@ -20,3 +20,5 @@ export const LOCAL_STORAGE_UUID_KEY = 'uuid';
 export const LOCAL_STORAGE_RECENT_CITIES_KEY = 'recentCities';
 
 export const IME_UNSETTLED_KEY_CODE = '229';
+
+export const QUERY_EXPANDED_ALERT_ID_KEY = 'alertId';

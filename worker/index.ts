@@ -23,7 +23,16 @@ self.addEventListener('push', event => {
   // >> Present push notifications to the user immediately after your service worker receives them.
   // >> If you don’t, Safari revokes the push notification permission for your site.
   const data = event?.data.json() ?? {};
-  event?.waitUntil(self.registration.showNotification(data.title, data.options));
+  event?.waitUntil(
+    self.registration
+      .showNotification(data.title, data.options)
+      // TODO - test on iOS
+      .then(() =>
+        self.registration
+          .getNotifications()
+          .then(currentNotifications => navigator.setAppBadge(currentNotifications.length))
+      )
+  );
 });
 
 self.addEventListener('notificationclick', event => {
@@ -32,7 +41,6 @@ self.addEventListener('notificationclick', event => {
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then(clientList => {
-        // TODO - navigate to correct city and expand alert
         if (clientList.length > 0) {
           let client = clientList[0];
           for (let i = 0; i < clientList.length; i++) {
@@ -42,12 +50,15 @@ self.addEventListener('notificationclick', event => {
           }
           return client.focus();
         }
-        return self.clients.openWindow('/');
+        const [geonameid, alertId] = event.notification.tag.split('-');
+        return self.clients.openWindow(`/?id=${geonameid}&alertId=${encodeURIComponent(alertId)}`);
       })
-      .then(async () => {
-        const currentNotifications = await self.registration.getNotifications();
-        await navigator.setAppBadge(currentNotifications.length);
-      })
+      // TODO - test on iOS
+      .then(() =>
+        self.registration
+          .getNotifications()
+          .then(currentNotifications => navigator.setAppBadge(currentNotifications.length))
+      )
   );
 });
 
@@ -56,6 +67,7 @@ self.addEventListener('notificationclose', event => {
   event?.waitUntil(
     self.registration
       .getNotifications()
-      .then(async currentNotifications => navigator.setAppBadge(currentNotifications.length))
+      // TODO - test on iOS
+      .then(currentNotifications => navigator.setAppBadge(currentNotifications.length))
   );
 });

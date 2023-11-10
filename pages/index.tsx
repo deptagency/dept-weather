@@ -10,6 +10,7 @@ import {
   CITIES_CACHE_FILENAME,
   CURRENT_LOCATION,
   LOCAL_STORAGE_RECENT_CITIES_KEY,
+  QUERY_EXPANDED_ALERT_ID_KEY,
   UI_ANIMATION_DURATION
 } from 'constants/client';
 import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY } from 'constants/shared';
@@ -19,8 +20,8 @@ import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
 import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
 import useSWRImmutable from 'swr/immutable';
 
-const getGeonameidFromUrl = (router: NextRouter) => {
-  const geonameid = router.query[API_GEONAMEID_KEY];
+const getGeonameidFromUrl = (routerQuery: NextRouter['query']) => {
+  const geonameid = routerQuery[API_GEONAMEID_KEY];
   if (typeof geonameid === 'string' && geonameid.length) {
     const geonameidNum = Number(geonameid);
     if (Number.isInteger(geonameidNum) && geonameidNum >= 0) {
@@ -28,6 +29,11 @@ const getGeonameidFromUrl = (router: NextRouter) => {
     }
   }
   return undefined;
+};
+
+const getExpandedAlertIdFromUrl = (routerQuery: NextRouter['query']) => {
+  const expandedAlertId = routerQuery[QUERY_EXPANDED_ALERT_ID_KEY];
+  return typeof expandedAlertId === 'string' && expandedAlertId.length ? expandedAlertId : undefined;
 };
 
 const getQueryParamsForGeonameid = (geonameid: string): QueryParams => ({
@@ -43,7 +49,8 @@ const useCitiesCache = (): CitiesCache | undefined => {
 
 export default function Home() {
   const router = useRouter();
-  const geonameid = getGeonameidFromUrl(router);
+  const geonameid = getGeonameidFromUrl(router.query);
+  const expandedAlertId = getExpandedAlertIdFromUrl(router.query);
   const [selectedCity, setSelectedCity] = useState<SearchResultCity | undefined>(undefined);
   const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
   const [locateError, setLocateError] = useState<number | undefined>(undefined);
@@ -223,7 +230,7 @@ export default function Home() {
         setShowSearchOverlay={setShowSearchOverlay}
         showSearchOverlay={showSearchOverlay}
       />
-      <Main queryParams={queryParams} selectedCity={selectedCity}>
+      <Main expandedAlertId={expandedAlertId} queryParams={queryParams} selectedCity={selectedCity}>
         {locateError != null ? <LocateError locateError={locateError} /> : undefined}
       </Main>
       <Footer />

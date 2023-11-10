@@ -21,7 +21,7 @@ export const getPath = (route: APIRoute, queryParams?: QueryParams) =>
 export const getQueryParamsStr = (queryParams?: QueryParams) => {
   let queryParamsStr = '';
   if (queryParams != null && Object.keys(queryParams).length > 0) {
-    const formattedQueryParams = Object.keys(queryParams).map(key => `${key}=${queryParams[key]}`);
+    const formattedQueryParams = Object.keys(queryParams).map(key => `${key}=${encodeURIComponent(queryParams[key])}`);
     queryParamsStr += `?${formattedQueryParams.join('&')}`;
   }
   return queryParamsStr;

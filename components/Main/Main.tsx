@@ -59,11 +59,19 @@ const useForecast = (
   };
 };
 
-const AlertCards = ({ alerts, lid }: { alerts: NwsAlert[]; lid: string }) => (
+const AlertCards = ({
+  alerts,
+  expandedAlertId,
+  lid
+}: {
+  alerts: NwsAlert[];
+  expandedAlertId: string | undefined;
+  lid: string;
+}) => (
   <>
     {alerts.map((alert, i) => {
       const key = `${lid}-${i}`;
-      return <AlertCard _key={key} alert={alert} key={key} />;
+      return <AlertCard _key={key} alert={alert} isExpandedByUrl={expandedAlertId === alert.id} key={key} />;
     })}
   </>
 );
@@ -92,10 +100,12 @@ const ForecastCards = ({
 export function Main({
   queryParams,
   selectedCity,
+  expandedAlertId,
   children
 }: {
   queryParams: QueryParams;
   selectedCity: SearchResultCity | undefined;
+  expandedAlertId: string | undefined;
   children?: ReactNode;
 }) {
   const isOnline = useOnlineStatus();
@@ -153,7 +163,7 @@ export function Main({
       ) : (
         <>
           <NotificationsCard selectedCity={selectedCity} />
-          <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} lid={lid} />
+          <AlertCards alerts={alerts?.data?.nws?.alerts ?? []} expandedAlertId={expandedAlertId} lid={lid} />
           <ObservationsCard
             isLoading={observationsIsLoading}
             latestReadTime={observationsLatestReadTime}

@@ -205,7 +205,7 @@ async function notify(
       },
       title: alert.title,
       notificationOptions: {
-        tag: alert.id,
+        tag: `${dbCity.geonameid}-${alert.id}`,
         body: `${
           new Date().getTime() / 1_000 < alert.onset
             ? `From ${alert.onsetLabel}${alert.onsetShortTz !== alert.endsShortTz ? ` ${alert.onsetShortTz}` : ''} to `
