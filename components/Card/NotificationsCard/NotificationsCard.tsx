@@ -170,7 +170,7 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
     <article className={`${baseStyles.card} ${styles['notifications-card']}`}>
       <CardHeader
         ariaControls={animatedContentsWrapperId}
-        backgroundColor={Color.ONYX}
+        backgroundColor={Color.FOREGROUND_LIGHT}
         contents={
           <div className={`${cardHeaderStyles['card-header__contents']}  ${styles['notifications-card__contents']}`}>
             <h2 className={cardHeaderStyles['card-header__contents__title']}>Notifications</h2>
@@ -268,6 +268,7 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
             </button>
           </div>
         }
+        foregroundColor={Color.BACKGROUND}
         isExpanded={isExpanded}
         roundBottomCornersWhenCollapsed
         setIsExpanded={setIsExpanded}
