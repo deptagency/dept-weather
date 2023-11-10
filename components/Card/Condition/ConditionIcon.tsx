@@ -57,6 +57,8 @@ export function ConditionIcon({
     if (condition) {
       const newIconSrc = getWeatherIconSrc(condition, isNight);
       setIconSrc(newIconSrc);
+    } else {
+      setIconSrc(undefined);
     }
   }, [condition, isNight]);
 
