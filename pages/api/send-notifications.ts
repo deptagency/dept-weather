@@ -310,9 +310,10 @@ async function* notifications(domain: string, authHeader: string) {
   if (pushedAlertIds.size) {
     const insertResult = await db
       .insertInto('alertsPushHistory')
-      .values(
+      .values(({ fn }) =>
         Array.from(pushedAlertIds).map(alertId => ({
-          alertId
+          alertId,
+          sentAt: fn('NOW', [])
         }))
       )
       .executeTakeFirst();

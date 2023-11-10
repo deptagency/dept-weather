@@ -25,6 +25,7 @@ export interface Database {
   };
   alertsPushHistory: {
     alertId: string;
+    sentAt: Date | null;
   };
 }
 
