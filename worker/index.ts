@@ -1,4 +1,5 @@
-import { ServiceWorkerGlobalScope } from 'models/service-worker.model';
+/* eslint-disable no-console */
+import { ServiceWorkerGlobalScope, WindowClient } from 'models/service-worker.model';
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -16,6 +17,20 @@ declare let self: ServiceWorkerGlobalScope;
 //   //     window.workbox.messageSW({command: 'log', message: 'hello world'})
 //   console.log(event?.data);
 // });
+
+const getQueryParamsFromUrl = (url: string) => {
+  let queryParams: Record<string, string> = {};
+
+  const idxOfQuery = url.indexOf('?');
+  const idxOfFragment = url.indexOf('#');
+  if (idxOfQuery > -1) {
+    const fullQueryStr = url.slice(idxOfQuery + 1, idxOfFragment > idxOfQuery + 1 ? idxOfFragment : undefined);
+    const queryStrs = fullQueryStr.split('&').filter(q => q.indexOf('=') > 0 && q.indexOf('=') < q.length);
+    queryParams = Object.fromEntries(queryStrs.map(qStr => qStr.split('=')));
+  }
+
+  return queryParams;
+};
 
 self.addEventListener('push', event => {
   // https://developer.apple.com/documentation/usernotifications/sending_web_push_notifications_in_safari_and_other_browsers
@@ -40,18 +55,25 @@ self.addEventListener('notificationclick', event => {
   event?.waitUntil(
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
-      .then(clientList => {
-        if (clientList.length > 0) {
-          let client = clientList[0];
-          for (let i = 0; i < clientList.length; i++) {
-            if (clientList[i].focused) {
-              client = clientList[i];
-            }
-          }
-          return client.focus();
-        }
+      .then(async clientListIn => {
         const [geonameid, alertId] = event.notification.tag.split('-');
-        return self.clients.openWindow(`/?id=${geonameid}&alertId=${encodeURIComponent(alertId)}`);
+        const href = `/?id=${geonameid}&alertId=${encodeURIComponent(alertId)}`;
+
+        // Sort so the focused clients are first
+        const clientList = (clientListIn as unknown as WindowClient[]).sort(
+          (a, b) => Number(b.focused) - Number(a.focused)
+        );
+
+        // Preference: focused open client for city > open client for city > open client
+        let clientToFocus = clientList.find(client => getQueryParamsFromUrl(client.url)['id'] === geonameid);
+        if (clientToFocus == null && clientList.length > 0) clientToFocus = clientList[0];
+        if (clientToFocus != null) {
+          // Open preferred existing window
+          return clientToFocus!.focus().then(() => clientToFocus!.navigate(href));
+        }
+
+        // Open new window
+        return self.clients.openWindow(href);
       })
       // TODO - test on iOS
       .then(() =>

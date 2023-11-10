@@ -54,7 +54,7 @@ interface ClientMatchOptions {
   type?: ClientMatchTypes;
 }
 
-interface WindowClient {
+export interface WindowClient extends Client {
   focused: boolean;
   visibilityState: WindowClientState;
   focus(): Promise<WindowClient>;
