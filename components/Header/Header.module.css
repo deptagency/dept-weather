@@ -1,7 +1,7 @@
 .header__container {
   position: sticky;
   top: 0;
-  background: var(--white);
+  background: var(--background);
   z-index: 99;
 }
 
@@ -74,6 +74,8 @@
 }
 
 .header__location__input {
+  background-color: var(--background);
+  color: var(--foreground);
   padding: 0.5rem 0.25rem 0.5rem 0rem;
   width: 100%;
   text-align: right;

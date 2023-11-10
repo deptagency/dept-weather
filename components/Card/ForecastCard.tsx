@@ -34,8 +34,9 @@ export function ForecastCard({
     <article className={styles.card}>
       <StandardCardHeader
         ariaControls={animatedContentsWrapperIds.join(',')}
-        backgroundColor={Color.ONYX}
+        backgroundColor={Color.FOREGROUND_LIGHT}
         disabledExpand={!period.dayHourlyForecasts?.length && !period.nightHourlyForecasts?.length}
+        foregroundColor={Color.BACKGROUND}
         isExpanded={isExpanded}
         isLoading={isLoading}
         label={period.dayName}

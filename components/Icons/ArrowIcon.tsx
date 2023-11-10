@@ -1,24 +1,24 @@
+import { iconStyle, WithCustomizableFillColor } from 'components/Icons/iconStyle';
+
 import arrowIconStyles from './ArrowIcon.module.css';
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/52-Arrows-Diagrams/01-Arrows/arrow-down-1.svg
 export function ArrowIcon({
-  useInverseFill,
-  animationState
-}: {
-  useInverseFill?: boolean;
-  animationState?: 'start' | 'end';
-}) {
+  animationState,
+  fillColor
+}: { animationState?: 'start' | 'end' } & WithCustomizableFillColor) {
   return (
     <svg
       aria-hidden="true"
-      className={`${styles.icon} ${useInverseFill ? styles['icon--inverse-fill'] : ''} ${
+      className={`${styles.icon} ${styles['icon--custom-fill']} ${
         animationState
           ? `animated ${arrowIconStyles['icon__arrow__animated']} ${
               animationState === 'end' ? arrowIconStyles['icon__arrow__animated--end'] : ''
             }`
           : ''
       }`}
+      style={iconStyle(fillColor)}
       viewBox="0 0 16 16"
       xmlns="http://www.w3.org/2000/svg"
     >

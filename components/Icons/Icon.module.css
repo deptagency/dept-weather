@@ -8,18 +8,18 @@
 
 .icon path:not(.icon__path--stroke),
 .icon rect:not(.icon__path--stroke) {
-  fill: var(--black);
+  fill: var(--foreground);
 }
 
 .icon .icon__path--stroke {
-  stroke: var(--black);
+  stroke: var(--foreground);
 }
 
-.icon--inverse-fill path:not(.icon__path--stroke),
-.icon--inverse-fill rect:not(.icon__path--stroke) {
-  fill: var(--white);
+.icon--custom-fill path:not(.icon__path--stroke),
+.icon--custom-fill rect:not(.icon__path--stroke) {
+  fill: var(--icon-fill-color);
 }
 
-.icon--inverse-fill .icon__path--stroke {
-  stroke: var(--white);
+.icon--custom-fill .icon__path--stroke {
+  stroke: var(--icon-fill-color);
 }

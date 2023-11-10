@@ -1,11 +1,14 @@
+import { iconStyle, WithCustomizableFillColor } from 'components/Icons/iconStyle';
+
 import styles from './Icon.module.css';
 
 // Source: Dept Icon Kit/SVG/01-Interface Essential/14-Alerts/alert-triangle.svg
-export function AlertTriangleIcon({ useInverseFill }: { useInverseFill?: boolean }) {
+export function AlertTriangleIcon({ fillColor }: WithCustomizableFillColor) {
   return (
     <svg
       aria-hidden="true"
-      className={`${styles.icon} ${useInverseFill ? styles['icon--inverse-fill'] : ''}`}
+      className={`${styles.icon} ${styles['icon--custom-fill']}`}
+      style={iconStyle(fillColor)}
       viewBox="0 0 16 16"
       xmlns="http://www.w3.org/2000/svg"
     >

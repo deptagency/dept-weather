@@ -5,6 +5,7 @@ import { AlertCircleIcon } from 'components/Icons/AlertCircleIcon';
 import { AlertDiamondIcon } from 'components/Icons/AlertDiamondIcon';
 import { AlertHexagonIcon } from 'components/Icons/AlertHexagonIcon';
 import { AlertTriangleIcon } from 'components/Icons/AlertTriangleIcon';
+import { WithCustomizableFillColor } from 'components/Icons/iconStyle';
 import { NwsAlert } from 'models/api/alerts.model';
 import { Color } from 'models/color.enum';
 import { AlertSeverity } from 'models/nws/alerts.model';
@@ -24,13 +25,13 @@ export function AlertCardHeader({
 }) {
   const [alertIcon, setAlertIcon] = useState<ReactElement>(<></>);
   useEffect(() => {
-    let newAlertIconType: (props: { useInverseFill?: boolean | undefined }) => ReactElement;
+    let newAlertIconType: (props: WithCustomizableFillColor) => ReactElement;
     if (alert.severity === AlertSeverity.EXTREME) newAlertIconType = AlertHexagonIcon;
     else if (alert.severity === AlertSeverity.SEVERE) newAlertIconType = AlertDiamondIcon;
     else if (alert.severity === AlertSeverity.MODERATE) newAlertIconType = AlertTriangleIcon;
     else newAlertIconType = AlertCircleIcon;
 
-    setAlertIcon(newAlertIconType({ useInverseFill: true }));
+    setAlertIcon(newAlertIconType({ fillColor: Color.WHITE }));
   }, [alert.severity]);
 
   return (
@@ -38,6 +39,7 @@ export function AlertCardHeader({
       ariaControls={ariaControls}
       backgroundColor={`alert-${alert.severity.toLowerCase()}` as Color}
       contents={<AlertCardHeaderContents alert={alert} />}
+      foregroundColor={Color.WHITE}
       isExpanded={isExpanded}
       preContents={<div className={styles['card-header__pre-icon']}>{alertIcon}</div>}
       roundBottomCornersWhenCollapsed={true}

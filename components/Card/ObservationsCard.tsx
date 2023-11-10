@@ -36,6 +36,7 @@ export function ObservationsCard({
     <article className={styles.card}>
       <StandardCardHeader
         backgroundColor={Color.INDIGO}
+        foregroundColor={Color.WHITE}
         isLoading={isLoading}
         label="Now"
         lastUpdatedTime={latestReadTime}

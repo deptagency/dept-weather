@@ -1,5 +1,5 @@
 import { Head, Html, Main, NextScript } from 'next/document';
-import { APP_DESCRIPTION, APP_MASK_ICON_COLOR, APP_THEME_COLOR, APP_TITLE, APP_URL } from 'constants/client';
+import { APP_DESCRIPTION, APP_MASK_ICON_COLOR, APP_TITLE, APP_URL } from 'constants/client';
 
 const AppleSplashLink = ({
   width,
@@ -49,11 +49,13 @@ export default function Document() {
       <Head>
         <meta content={APP_TITLE} name="application-name" />
         <meta content="yes" name="apple-mobile-web-app-capable" />
-        <meta content="default" name="apple-mobile-web-app-status-bar-style" />
+        <meta content="white" media="(prefers-color-scheme: light)" name="apple-mobile-web-app-status-bar-style" />
+        <meta content="black" media="(prefers-color-scheme: dark)" name="apple-mobile-web-app-status-bar-style" />
         <meta content={APP_TITLE} name="apple-mobile-web-app-title" />
         <meta content={APP_DESCRIPTION} name="description" />
         <meta content="yes" name="mobile-web-app-capable" />
-        <meta content={APP_THEME_COLOR} name="theme-color" />
+        <meta content="#fff" media="(prefers-color-scheme: light)" name="theme-color" />
+        <meta content="#000" media="(prefers-color-scheme: dark)" name="theme-color" />
 
         <link href="/manifest.json" rel="manifest" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
