@@ -38,58 +38,35 @@ self.addEventListener('push', event => {
   // >> Present push notifications to the user immediately after your service worker receives them.
   // >> If you don’t, Safari revokes the push notification permission for your site.
   const data = event?.data.json() ?? {};
-  event?.waitUntil(
-    self.registration
-      .showNotification(data.title, data.options)
-      // TODO - test on iOS
-      .then(() =>
-        self.registration
-          .getNotifications()
-          .then(currentNotifications => navigator.setAppBadge(currentNotifications.length))
-      )
-  );
+  event?.waitUntil(self.registration.showNotification(data.title, data.options));
 });
 
 self.addEventListener('notificationclick', event => {
   event?.notification.close();
   event?.waitUntil(
-    self.clients
-      .matchAll({ type: 'window', includeUncontrolled: true })
-      .then(async clientListIn => {
-        const [geonameid, alertId] = event.notification.tag.split('-');
-        const href = `/?id=${geonameid}&alertId=${encodeURIComponent(alertId)}`;
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientListIn => {
+      const [geonameid, alertId] = event.notification.tag.split('-');
+      const href = `/?id=${geonameid}&alertId=${encodeURIComponent(alertId)}`;
 
-        // Sort so the focused clients are first
-        const clientList = (clientListIn as unknown as WindowClient[]).sort(
-          (a, b) => Number(b.focused) - Number(a.focused)
-        );
+      // Sort so the focused clients are first
+      const clientList = (clientListIn as unknown as WindowClient[]).sort(
+        (a, b) => Number(b.focused) - Number(a.focused)
+      );
 
-        // Preference: focused open client for city > open client for city > open client
-        let clientToFocus = clientList.find(client => getQueryParamsFromUrl(client.url)['id'] === geonameid);
-        if (clientToFocus == null && clientList.length > 0) clientToFocus = clientList[0];
-        if (clientToFocus != null) {
-          // Open preferred existing window
-          return clientToFocus!.focus().then(() => clientToFocus!.navigate(href));
-        }
+      // Preference: focused open client for city > open client for city > open client
+      let clientToFocus = clientList.find(client => getQueryParamsFromUrl(client.url)['id'] === geonameid);
+      if (clientToFocus == null && clientList.length > 0) clientToFocus = clientList[0];
+      if (clientToFocus != null) {
+        // Open preferred existing window
+        return clientToFocus!.focus().then(() => clientToFocus!.navigate(href));
+      }
 
-        // Open new window
-        return self.clients.openWindow(href);
-      })
-      // TODO - test on iOS
-      .then(() =>
-        self.registration
-          .getNotifications()
-          .then(currentNotifications => navigator.setAppBadge(currentNotifications.length))
-      )
+      // Open new window
+      return self.clients.openWindow(href);
+    })
   );
 });
 
 self.addEventListener('notificationclose', event => {
   event?.notification.close();
-  event?.waitUntil(
-    self.registration
-      .getNotifications()
-      // TODO - test on iOS
-      .then(currentNotifications => navigator.setAppBadge(currentNotifications.length))
-  );
 });
