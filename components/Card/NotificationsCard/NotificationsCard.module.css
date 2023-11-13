@@ -3,16 +3,18 @@
   padding-bottom: 0.5rem;
 }
 
-/* .notifications-card__contents {
-  padding-left: 0.5rem;
-} */
-
 .notifications-card-header__contents__button {
   font-weight: 700;
   text-transform: uppercase;
   padding: 0.75rem;
   background: rgba(255, 255, 255, 0.1);
   border-radius: var(--corner-radius);
+}
+
+@media (prefers-color-scheme: dark) {
+  .notifications-card-header__contents__button {
+    background: rgba(0, 0, 0, 0.1);
+  }
 }
 
 .notifications-card-header__contents__button:focus {
@@ -62,9 +64,9 @@
   margin: 1rem 0.5rem 1rem 0rem;
   padding: 0.5rem 0.75rem;
   font-weight: 700;
-  background: #f2f2f2;
+  background: var(--platinum);
+  color: var(--black);
   outline-color: var(--black);
-  border-radius: var(--corner-radius);
 }
 
 .notifications-card-content > button:last-of-type {
@@ -72,5 +74,5 @@
 }
 
 .notifications-card-content > button:disabled {
-  color: #c4c4c4;
+  opacity: 0.75;
 }

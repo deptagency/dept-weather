@@ -193,17 +193,6 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
                     setPermissionState(newPermissionState === 'denied' ? 'denied' : 'granted');
                   }
 
-                  // let permissionState = await registration!.pushManager.permissionState(pushOptions);
-                  // if (permissionState === 'prompt') {
-                  //   const newPermissionState = await Notification.requestPermission();
-                  //   permissionState = newPermissionState === 'denied' ? 'denied' : 'granted';
-                  // }
-                  // if (permissionState === 'denied') {
-                  //   setIsChangingSubscription(false);
-                  //   setIsSubscribed(false);
-                  //   return;
-                  // }
-
                   const sub = await registration!.pushManager.subscribe(pushOptions);
                   setSubscription(sub);
 
