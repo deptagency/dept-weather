@@ -1,4 +1,5 @@
 import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, useState } from 'react';
+import { ShowOverlayType } from 'components/Header/Header.types';
 import { SearchOverlay } from 'components/Header/SearchOverlay/SearchOverlay';
 import { ArrowIcon } from 'components/Icons/ArrowIcon';
 import { DEPTLogoIcon } from 'components/Icons/DEPTLogoIcon';
@@ -11,15 +12,15 @@ import styles from './Header.module.css';
 import homeStyles from 'styles/Home.module.css';
 
 export function Header({
-  showSearchOverlay,
-  setShowSearchOverlay,
+  showOverlay,
+  setShowOverlay,
   selectedCity,
   setSelectedCity,
   recentCities,
   citiesCache
 }: {
-  showSearchOverlay: boolean;
-  setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
+  showOverlay: ShowOverlayType;
+  setShowOverlay: Dispatch<SetStateAction<ShowOverlayType>>;
   selectedCity: SearchResultCity | undefined;
   setSelectedCity: Dispatch<SetStateAction<SearchResultCity | undefined>>;
   recentCities: SearchResultCity[];
@@ -46,9 +47,9 @@ export function Header({
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = event => {
     // Show search overlay on keydown, since input would be focused here
-    if (!showSearchOverlay && event.key !== 'Tab') {
+    if (!showOverlay && event.key !== 'Tab') {
       setRawSearchQuery('');
-      setShowSearchOverlay(true);
+      setShowOverlay('search');
       return;
     }
 
@@ -67,7 +68,7 @@ export function Header({
         if (results.length) {
           setSelectedCity(results[highlightedIndex]);
         }
-        setShowSearchOverlay(false);
+        setShowOverlay(false);
         inputRef?.current?.blur();
       } else if (event.key === 'Escape' || event.key === 'Tab') {
         if (event.key === 'Escape') {
@@ -76,7 +77,7 @@ export function Header({
           // Avoid the Modal to handle the event.
           event.stopPropagation();
         }
-        setShowSearchOverlay(false);
+        setShowOverlay(false);
         if (event.key === 'Escape') {
           inputRef?.current?.blur();
         }
@@ -89,8 +90,8 @@ export function Header({
       <div
         className={styles.header__container}
         onClick={e => {
-          if (!e.defaultPrevented) {
-            setShowSearchOverlay(false);
+          if (!e.defaultPrevented && showOverlay === 'search') {
+            setShowOverlay(false);
           }
         }}
       >
@@ -101,27 +102,27 @@ export function Header({
               Weather
             </span>
           </h1>
-          <div className={styles.header__configure}>
-            <div
-              className={`animated ${styles.header__location} ${
-                showSearchOverlay ? styles['header__location--end'] : ''
-              }`}
-            >
+          <div
+            className={`${styles.header__configure} ${
+              showOverlay ? styles[`header__configure--show-${showOverlay}`] : ''
+            }`}
+          >
+            <div className={`animated ${styles.header__location}`}>
               <input
                 aria-activedescendant={results.length ? `SearchResult${highlightedIndex}` : undefined}
                 aria-autocomplete="list"
                 aria-controls="SearchResultsList"
-                aria-expanded={showSearchOverlay}
+                aria-expanded={showOverlay === 'search'}
                 aria-haspopup="listbox"
                 aria-label={'Search City, State'}
                 autoComplete="off"
-                className={`${styles.header__text} ${styles.header__location__input}`}
+                className={`animated ${styles.header__text} ${styles.header__location__input}`}
                 onChange={e => setRawSearchQuery(e.target.value)}
                 onClick={e => {
                   e.preventDefault();
-                  if (!showSearchOverlay) {
+                  if (showOverlay !== 'search') {
                     setRawSearchQuery('');
-                    setShowSearchOverlay(true);
+                    setShowOverlay('search');
                   }
                 }}
                 onKeyDown={handleKeyDown}
@@ -130,7 +131,7 @@ export function Header({
                 role="combobox"
                 type="text"
                 value={
-                  showSearchOverlay
+                  showOverlay === 'search'
                     ? rawSearchQuery
                     : selectedCity != null
                     ? SearchQueryHelper.getCityAndStateCode(selectedCity)
@@ -139,28 +140,30 @@ export function Header({
               />
               <button
                 aria-controls="SearchResultsList"
-                aria-expanded={showSearchOverlay}
+                aria-expanded={showOverlay === 'search'}
                 aria-label={'Location search panel'}
-                className={`${styles.header__configure__button} ${styles['header__location__button-arrow']}`}
+                className={`animated ${styles.header__configure__button} ${styles['header__location__button-arrow']}`}
                 onClick={e => {
                   e.preventDefault();
-                  if (showSearchOverlay) {
-                    setShowSearchOverlay(false);
+                  if (showOverlay) {
+                    setShowOverlay(false);
                   } else {
                     inputRef?.current?.click();
                     inputRef?.current?.focus();
                   }
                 }}
+                tabIndex={showOverlay === 'settings' ? -1 : 0}
               >
-                <ArrowIcon animationState={showSearchOverlay ? 'end' : 'start'} />
+                <ArrowIcon animationState={showOverlay ? 'end' : 'start'} />
               </button>
             </div>
             <button
-              // TODO
               aria-label="Settings"
-              className={`animated ${styles.header__configure__button} ${
-                styles['header__configure__button-settings']
-              } ${showSearchOverlay ? styles['header__configure__button-settings--hidden'] : ''}`}
+              className={`animated ${styles.header__configure__button} ${styles['header__configure__button-settings']}`}
+              onClick={e => {
+                e.preventDefault();
+                setShowOverlay(showOverlay === 'settings' ? false : 'settings');
+              }}
             >
               <SettingsIcon />
             </button>
@@ -177,8 +180,8 @@ export function Header({
         setHighlightedIndexDistance={setHighlightedIndexDistance}
         setResults={setResults}
         setSelectedCity={setSelectedCity}
-        setShowSearchOverlay={setShowSearchOverlay}
-        showSearchOverlay={showSearchOverlay}
+        setShowOverlay={setShowOverlay}
+        showOverlay={showOverlay}
       />
     </>
   );

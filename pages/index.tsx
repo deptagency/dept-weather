@@ -4,6 +4,7 @@ import { NextRouter, useRouter } from 'next/router';
 import { LocateError } from 'components/Errors/LocateError/LocateError';
 import { Footer } from 'components/Footer/Footer';
 import { Header } from 'components/Header/Header';
+import { ShowOverlayType } from 'components/Header/Header.types';
 import { Main } from 'components/Main/Main';
 import {
   APP_TITLE,
@@ -209,11 +210,11 @@ export default function Home() {
     }
   }, [geonameid, selectedCity, router, isPopState]);
 
-  const [showSearchOverlay, setShowSearchOverlay] = useState<boolean>(false);
+  const [showOverlay, setShowOverlay] = useState<ShowOverlayType>(false);
   useEffect(() => {
     const className = 'body--disable-scroll';
-    showSearchOverlay ? document.body.classList.add(className) : document.body.classList.remove(className);
-  }, [showSearchOverlay]);
+    showOverlay ? document.body.classList.add(className) : document.body.classList.remove(className);
+  }, [showOverlay]);
 
   return (
     <>
@@ -227,8 +228,8 @@ export default function Home() {
         recentCities={recentCities}
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
-        setShowSearchOverlay={setShowSearchOverlay}
-        showSearchOverlay={showSearchOverlay}
+        setShowOverlay={setShowOverlay}
+        showOverlay={showOverlay}
       />
       <Main expandedAlertId={expandedAlertId} queryParams={queryParams} selectedCity={selectedCity}>
         {locateError != null ? <LocateError locateError={locateError} /> : undefined}

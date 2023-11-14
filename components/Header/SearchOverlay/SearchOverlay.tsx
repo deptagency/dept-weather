@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import { ShowOverlayType } from 'components/Header/Header.types';
 import { LocateIcon } from 'components/Icons/LocateIcon';
 import { RecentIcon } from 'components/Icons/RecentIcon';
 import { CITY_SEARCH_DEBOUNCE_MS, CURRENT_LOCATION } from 'constants/client';
@@ -13,8 +14,8 @@ import homeStyles from 'styles/Home.module.css';
 
 export function SearchOverlay({
   rawSearchQuery,
-  showSearchOverlay,
-  setShowSearchOverlay,
+  showOverlay,
+  setShowOverlay,
   results,
   setResults,
   setHighlightedIndexDistance,
@@ -24,8 +25,8 @@ export function SearchOverlay({
   citiesCache
 }: {
   rawSearchQuery: string;
-  showSearchOverlay: boolean;
-  setShowSearchOverlay: Dispatch<SetStateAction<boolean>>;
+  showOverlay: ShowOverlayType;
+  setShowOverlay: Dispatch<SetStateAction<ShowOverlayType>>;
   results: SearchResultCity[];
   setResults: Dispatch<SetStateAction<SearchResultCity[]>>;
   setHighlightedIndexDistance: Dispatch<SetStateAction<number>>;
@@ -140,18 +141,18 @@ export function SearchOverlay({
   return (
     <div
       className={`animated ${styles['search-overlay']} ${
-        showSearchOverlay ? styles['search-overlay--visible'] : styles['search-overlay--hidden']
+        showOverlay ? styles['search-overlay--visible'] : styles['search-overlay--hidden']
       }`}
       onClick={e => {
         if (!e.defaultPrevented) {
-          setShowSearchOverlay(false);
+          setShowOverlay(false);
         }
       }}
     >
       <div className={`${styles['search-overlay__inner']} ${homeStyles['container__content--no-padding']}`}>
         <ul
           className={`animated ${styles['search-overlay__results-list']} ${
-            showSearchOverlay ? styles['search-overlay__results-list--end'] : ''
+            showOverlay === 'search' ? styles['search-overlay__results-list--end'] : ''
           }`}
           id="SearchResultsList"
           role="listbox"
@@ -175,7 +176,7 @@ export function SearchOverlay({
                 onClick={e => {
                   e.preventDefault();
                   setSelectedCity(results[highlightedIndex]);
-                  setShowSearchOverlay(false);
+                  setShowOverlay(false);
                 }}
                 onFocus={() => setHighlightedIndexDistance(idx)}
                 onMouseEnter={() => setHighlightedIndexDistance(idx)}
