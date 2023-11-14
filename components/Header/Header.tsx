@@ -2,6 +2,7 @@ import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, u
 import { SearchOverlay } from 'components/Header/SearchOverlay/SearchOverlay';
 import { ArrowIcon } from 'components/Icons/ArrowIcon';
 import { DEPTLogoIcon } from 'components/Icons/DEPTLogoIcon';
+import { SettingsIcon } from 'components/Icons/SettingsIcon';
 import { IME_UNSETTLED_KEY_CODE } from 'constants/client';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
 import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
@@ -100,53 +101,68 @@ export function Header({
               Weather
             </span>
           </h1>
-          <div className={styles.header__location}>
-            <input
-              aria-activedescendant={results.length ? `SearchResult${highlightedIndex}` : undefined}
-              aria-autocomplete="list"
-              aria-controls="SearchResultsList"
-              aria-expanded={showSearchOverlay}
-              aria-haspopup="listbox"
-              aria-label={'Search City, State'}
-              autoComplete="off"
-              className={`${styles.header__text} ${styles.header__location__input}`}
-              onChange={e => setRawSearchQuery(e.target.value)}
-              onClick={e => {
-                e.preventDefault();
-                if (!showSearchOverlay) {
-                  setRawSearchQuery('');
-                  setShowSearchOverlay(true);
-                }
-              }}
-              onKeyDown={handleKeyDown}
-              placeholder={selectedCity != null ? 'City, State' : ''}
-              ref={inputRef}
-              role="combobox"
-              type="text"
-              value={
-                showSearchOverlay
-                  ? rawSearchQuery
-                  : selectedCity != null
-                  ? SearchQueryHelper.getCityAndStateCode(selectedCity)
-                  : ''
-              }
-            />
-            <button
-              aria-controls="SearchResultsList"
-              aria-expanded={showSearchOverlay}
-              aria-label={'Location search panel'}
-              className={styles.header__location__arrow}
-              onClick={e => {
-                e.preventDefault();
-                if (showSearchOverlay) {
-                  setShowSearchOverlay(false);
-                } else {
-                  inputRef?.current?.click();
-                  inputRef?.current?.focus();
-                }
-              }}
+          <div className={styles.header__configure}>
+            <div
+              className={`animated ${styles.header__location} ${
+                showSearchOverlay ? styles['header__location--end'] : ''
+              }`}
             >
-              <ArrowIcon animationState={showSearchOverlay ? 'end' : 'start'} />
+              <input
+                aria-activedescendant={results.length ? `SearchResult${highlightedIndex}` : undefined}
+                aria-autocomplete="list"
+                aria-controls="SearchResultsList"
+                aria-expanded={showSearchOverlay}
+                aria-haspopup="listbox"
+                aria-label={'Search City, State'}
+                autoComplete="off"
+                className={`${styles.header__text} ${styles.header__location__input}`}
+                onChange={e => setRawSearchQuery(e.target.value)}
+                onClick={e => {
+                  e.preventDefault();
+                  if (!showSearchOverlay) {
+                    setRawSearchQuery('');
+                    setShowSearchOverlay(true);
+                  }
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder={selectedCity != null ? 'City, State' : ''}
+                ref={inputRef}
+                role="combobox"
+                type="text"
+                value={
+                  showSearchOverlay
+                    ? rawSearchQuery
+                    : selectedCity != null
+                    ? SearchQueryHelper.getCityAndStateCode(selectedCity)
+                    : ''
+                }
+              />
+              <button
+                aria-controls="SearchResultsList"
+                aria-expanded={showSearchOverlay}
+                aria-label={'Location search panel'}
+                className={`${styles.header__configure__button} ${styles['header__location__button-arrow']}`}
+                onClick={e => {
+                  e.preventDefault();
+                  if (showSearchOverlay) {
+                    setShowSearchOverlay(false);
+                  } else {
+                    inputRef?.current?.click();
+                    inputRef?.current?.focus();
+                  }
+                }}
+              >
+                <ArrowIcon animationState={showSearchOverlay ? 'end' : 'start'} />
+              </button>
+            </div>
+            <button
+              // TODO
+              aria-label="Settings"
+              className={`animated ${styles.header__configure__button} ${
+                styles['header__configure__button-settings']
+              } ${showSearchOverlay ? styles['header__configure__button-settings--hidden'] : ''}`}
+            >
+              <SettingsIcon />
             </button>
           </div>
         </header>

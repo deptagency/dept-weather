@@ -14,6 +14,8 @@
   --background: var(--white);
   --foreground: var(--black);
   --foreground-light: var(--onyx);
+
+  --transition-duration: 300ms;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,6 +23,12 @@
     --background: var(--black);
     --foreground: var(--white);
     --foreground-light: var(--platinum);
+  }
+}
+
+@media (prefers-reduced-motion) {
+  :root {
+    --transition-duration: 0ms;
   }
 }
 
@@ -62,14 +70,8 @@ a {
 }
 
 .animated {
-  transition-duration: 300ms;
+  transition-duration: var(--transition-duration);
   transition-timing-function: ease;
-}
-
-@media (prefers-reduced-motion) {
-  .animated {
-    transition-duration: 0s;
-  }
 }
 
 * {

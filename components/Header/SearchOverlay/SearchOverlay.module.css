@@ -49,6 +49,15 @@
   text-align: right;
   margin: 0rem;
   padding: 0rem;
+
+  opacity: 0;
+  transform: translateY(0.5rem);
+  transition-property: opacity, transform;
+}
+
+.search-overlay__results-list--end {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .search-overlay__result {

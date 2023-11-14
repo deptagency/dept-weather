@@ -149,7 +149,13 @@ export function SearchOverlay({
       }}
     >
       <div className={`${styles['search-overlay__inner']} ${homeStyles['container__content--no-padding']}`}>
-        <ul className={styles['search-overlay__results-list']} id="SearchResultsList" role="listbox">
+        <ul
+          className={`animated ${styles['search-overlay__results-list']} ${
+            showSearchOverlay ? styles['search-overlay__results-list--end'] : ''
+          }`}
+          id="SearchResultsList"
+          role="listbox"
+        >
           {results.map((result, idx) => {
             const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(result);
             const isCurrentLocation = result?.geonameid === CURRENT_LOCATION.geonameid;
