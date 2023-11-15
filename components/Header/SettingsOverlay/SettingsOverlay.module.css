@@ -1,0 +1,4 @@
+.settings-overlay__inner {
+  display: flex;
+  justify-content: flex-end;
+}

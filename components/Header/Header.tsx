@@ -1,6 +1,7 @@
 import { createRef, Dispatch, KeyboardEventHandler, SetStateAction, useEffect, useState } from 'react';
 import { ShowOverlayType } from 'components/Header/Header.types';
 import { SearchOverlay } from 'components/Header/SearchOverlay/SearchOverlay';
+import { SettingsOverlay } from 'components/Header/SettingsOverlay/SettingsOverlay';
 import { ArrowIcon } from 'components/Icons/ArrowIcon';
 import { DEPTLogoIcon } from 'components/Icons/DEPTLogoIcon';
 import { SettingsIcon } from 'components/Icons/SettingsIcon';
@@ -170,9 +171,9 @@ export function Header({
           </div>
         </header>
       </div>
-
       <SearchOverlay
         citiesCache={citiesCache}
+        closeOverlay={() => setShowOverlay(false)}
         highlightedIndex={highlightedIndex}
         rawSearchQuery={rawSearchQuery}
         recentCities={recentCities}
@@ -180,9 +181,9 @@ export function Header({
         setHighlightedIndexDistance={setHighlightedIndexDistance}
         setResults={setResults}
         setSelectedCity={setSelectedCity}
-        setShowOverlay={setShowOverlay}
-        showOverlay={showOverlay}
+        showOverlay={showOverlay === 'search'}
       />
+      <SettingsOverlay showOverlay={showOverlay === 'settings'} />
     </>
   );
 }

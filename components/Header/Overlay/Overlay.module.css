@@ -1,0 +1,40 @@
+.overlay {
+  position: fixed;
+  inset: 4rem 0 0;
+  z-index: 1;
+
+  transition-property: opacity, visibility;
+}
+
+@media screen and (max-width: 576px) {
+  .overlay {
+    top: 2.75rem;
+  }
+}
+
+@media screen and (max-width: 460px) {
+  .overlay {
+    top: 4.25rem;
+  }
+}
+
+.overlay--hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.overlay--visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+.overlay__inner {
+  height: 100%;
+  background: linear-gradient(235deg, var(--white), rgba(255, 255, 255, 0.97));
+}
+
+@media (prefers-color-scheme: dark) {
+  .overlay__inner {
+    background: linear-gradient(235deg, var(--black), rgba(0, 0, 0, 0.97));
+  }
+}

@@ -1,47 +1,6 @@
-.search-overlay {
-  position: fixed;
-  top: 4rem;
-  right: 0rem;
-  bottom: 0rem;
-  left: 0rem;
-
-  z-index: 1;
-  transition-property: opacity, visibility;
-}
-
-@media screen and (max-width: 576px) {
-  .search-overlay {
-    top: 2.75rem;
-  }
-}
-
-@media screen and (max-width: 460px) {
-  .search-overlay {
-    top: 4.25rem;
-  }
-}
-
-.search-overlay--hidden {
-  visibility: hidden;
-  opacity: 0;
-}
-
-.search-overlay--visible {
-  visibility: visible;
-  opacity: 1;
-}
-
 .search-overlay__inner {
   display: flex;
   justify-content: flex-end;
-  height: 100%;
-  background: linear-gradient(235deg, var(--white), rgba(255, 255, 255, 0.97));
-}
-
-@media (prefers-color-scheme: dark) {
-  .search-overlay__inner {
-    background: linear-gradient(235deg, var(--black), rgba(0, 0, 0, 0.97));
-  }
 }
 
 .search-overlay__results-list {

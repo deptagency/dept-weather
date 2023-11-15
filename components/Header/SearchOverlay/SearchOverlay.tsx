@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { ShowOverlayType } from 'components/Header/Header.types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Overlay } from 'components/Header/Overlay/Overlay';
+import { SearchOverlayProps } from 'components/Header/SearchOverlay/SearchOverlay.types';
 import { LocateIcon } from 'components/Icons/LocateIcon';
 import { RecentIcon } from 'components/Icons/RecentIcon';
 import { CITY_SEARCH_DEBOUNCE_MS, CURRENT_LOCATION } from 'constants/client';
@@ -7,7 +8,7 @@ import { API_SEARCH_QUERY_KEY, CITY_SEARCH_RESULT_LIMIT } from 'constants/shared
 import { SearchQueryHelper } from 'helpers/search-query-helper';
 import { useDebounce } from 'hooks/use-debounce';
 import { APIRoute, getPath } from 'models/api/api-route.model';
-import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
+import { SearchResultCity } from 'models/cities/cities.model';
 
 import styles from './SearchOverlay.module.css';
 import homeStyles from 'styles/Home.module.css';
@@ -15,7 +16,7 @@ import homeStyles from 'styles/Home.module.css';
 export function SearchOverlay({
   rawSearchQuery,
   showOverlay,
-  setShowOverlay,
+  closeOverlay,
   results,
   setResults,
   setHighlightedIndexDistance,
@@ -23,18 +24,7 @@ export function SearchOverlay({
   setSelectedCity,
   recentCities,
   citiesCache
-}: {
-  rawSearchQuery: string;
-  showOverlay: ShowOverlayType;
-  setShowOverlay: Dispatch<SetStateAction<ShowOverlayType>>;
-  results: SearchResultCity[];
-  setResults: Dispatch<SetStateAction<SearchResultCity[]>>;
-  setHighlightedIndexDistance: Dispatch<SetStateAction<number>>;
-  highlightedIndex: number;
-  setSelectedCity: Dispatch<SetStateAction<SearchResultCity | undefined>>;
-  recentCities: SearchResultCity[];
-  citiesCache: CitiesCache | undefined;
-}) {
+}: SearchOverlayProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const debouncedSearchQuery: string = useDebounce<string>(searchQuery, CITY_SEARCH_DEBOUNCE_MS);
   const controllerRef = useRef<AbortController | undefined>();
@@ -139,57 +129,50 @@ export function SearchOverlay({
   }, [debouncedSearchQuery, sortRecentsToFront, setResults, setHighlightedIndexDistance]);
 
   return (
-    <div
-      className={`animated ${styles['search-overlay']} ${
-        showOverlay ? styles['search-overlay--visible'] : styles['search-overlay--hidden']
-      }`}
-      onClick={e => {
-        if (!e.defaultPrevented) {
-          setShowOverlay(false);
-        }
-      }}
+    <Overlay
+      closeOverlay={closeOverlay}
+      innerClassName={`${styles['search-overlay__inner']} ${homeStyles['container__content--no-padding']}`}
+      showOverlay={showOverlay}
     >
-      <div className={`${styles['search-overlay__inner']} ${homeStyles['container__content--no-padding']}`}>
-        <ul
-          className={`animated ${styles['search-overlay__results-list']} ${
-            showOverlay === 'search' ? styles['search-overlay__results-list--end'] : ''
-          }`}
-          id="SearchResultsList"
-          role="listbox"
-        >
-          {results.map((result, idx) => {
-            const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(result);
-            const isCurrentLocation = result?.geonameid === CURRENT_LOCATION.geonameid;
-            const resultIdxInRecent = recentCities.findIndex(recentCity => recentCity.geonameid === result.geonameid);
-            const isRecent = resultIdxInRecent !== -1;
-            const isRecentAndIsListed = isRecent && resultIdxInRecent < CITY_SEARCH_RESULT_LIMIT;
-            return (
-              <li
-                aria-selected={idx === highlightedIndex}
-                className={`${styles['search-overlay__result']} ${
-                  isCurrentLocation && !isRecentAndIsListed
-                    ? styles['search-overlay__result--non-recent-current-location']
-                    : ''
-                } ${idx === highlightedIndex ? styles['search-overlay__result--highlighted'] : ''}`}
-                id={`SearchResult${idx}`}
-                key={cityAndStateCode}
-                onClick={e => {
-                  e.preventDefault();
-                  setSelectedCity(results[highlightedIndex]);
-                  setShowOverlay(false);
-                }}
-                onFocus={() => setHighlightedIndexDistance(idx)}
-                onMouseEnter={() => setHighlightedIndexDistance(idx)}
-                onTouchStart={() => setHighlightedIndexDistance(idx)}
-                role="option"
-              >
-                <span>{cityAndStateCode}</span>
-                {isCurrentLocation ? <LocateIcon /> : <RecentIcon isHidden={!isRecent} />}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </div>
+      <ul
+        className={`animated ${styles['search-overlay__results-list']} ${
+          showOverlay ? styles['search-overlay__results-list--end'] : ''
+        }`}
+        id="SearchResultsList"
+        role="listbox"
+      >
+        {results.map((result, idx) => {
+          const cityAndStateCode = SearchQueryHelper.getCityAndStateCode(result);
+          const isCurrentLocation = result?.geonameid === CURRENT_LOCATION.geonameid;
+          const resultIdxInRecent = recentCities.findIndex(recentCity => recentCity.geonameid === result.geonameid);
+          const isRecent = resultIdxInRecent !== -1;
+          const isRecentAndIsListed = isRecent && resultIdxInRecent < CITY_SEARCH_RESULT_LIMIT;
+          return (
+            <li
+              aria-selected={idx === highlightedIndex}
+              className={`${styles['search-overlay__result']} ${
+                isCurrentLocation && !isRecentAndIsListed
+                  ? styles['search-overlay__result--non-recent-current-location']
+                  : ''
+              } ${idx === highlightedIndex ? styles['search-overlay__result--highlighted'] : ''}`}
+              id={`SearchResult${idx}`}
+              key={cityAndStateCode}
+              onClick={e => {
+                e.preventDefault();
+                setSelectedCity(results[highlightedIndex]);
+                closeOverlay();
+              }}
+              onFocus={() => setHighlightedIndexDistance(idx)}
+              onMouseEnter={() => setHighlightedIndexDistance(idx)}
+              onTouchStart={() => setHighlightedIndexDistance(idx)}
+              role="option"
+            >
+              <span>{cityAndStateCode}</span>
+              {isCurrentLocation ? <LocateIcon /> : <RecentIcon isHidden={!isRecent} />}
+            </li>
+          );
+        })}
+      </ul>
+    </Overlay>
   );
 }
