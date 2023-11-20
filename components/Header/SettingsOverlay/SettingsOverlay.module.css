@@ -1,4 +1,68 @@
-.settings-overlay__inner {
+.inner {
   display: flex;
   justify-content: flex-end;
+  padding-top: 1rem;
+}
+
+.sections-container {
+  display: flex;
+  flex-direction: column;
+  row-gap: 2rem;
+
+  max-width: 460px;
+  width: 100%;
+}
+
+@media screen and (max-width: 576px) {
+  .sections-container {
+    max-width: none;
+  }
+}
+
+.section__header {
+  padding-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.section__header,
+.section__sub__header {
+  font-weight: 500;
+}
+
+.section__radio-group {
+  display: flex;
+  justify-content: space-between;
+  column-gap: 1rem;
+}
+
+.section__sub {
+  display: grid;
+  row-gap: 0.5rem;
+  column-gap: 1rem;
+}
+
+.section__sub--units {
+  grid-template-columns: 1fr repeat(3, auto);
+}
+
+.section__sub__header {
+  grid-column: 1;
+}
+
+.section__sub__grid-col-end {
+  grid-column: 4;
+}
+
+.radio-label {
+  display: flex;
+  column-gap: 0.5rem;
+  align-items: center;
+}
+
+.radio-label input:enabled ~ * {
+  cursor: pointer;
+}
+
+.radio-label > span {
+  margin-top: 2px;
 }

@@ -15,6 +15,10 @@ const maisonNeue = localFont({
       weight: '400'
     },
     {
+      path: '../public/fonts/MaisonNeue-Medium.woff2',
+      weight: '500'
+    },
+    {
       path: '../public/fonts/MaisonNeue-Bold.woff2',
       weight: '700'
     }

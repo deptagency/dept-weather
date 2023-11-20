@@ -45,10 +45,20 @@ body {
   touch-action: none;
 }
 
+.animated {
+  transition-duration: var(--transition-duration);
+  transition-timing-function: ease;
+}
+
 button,
 input {
   font-family: unset;
   margin: 0rem;
+}
+
+button:enabled,
+input[type='radio']:enabled {
+  cursor: pointer;
 }
 
 button {
@@ -60,18 +70,24 @@ button {
   cursor: pointer;
 }
 
-button:disabled {
-  cursor: default;
-}
-
 a {
   color: inherit;
   text-decoration: none;
 }
 
-.animated {
-  transition-duration: var(--transition-duration);
-  transition-timing-function: ease;
+fieldset {
+  display: block;
+  margin-inline: 0;
+  padding-block: 0;
+  padding-inline: 0;
+  min-inline-size: auto;
+  border: none;
+}
+
+legend {
+  display: block;
+  padding-inline: 0;
+  border: none;
 }
 
 * {
