@@ -263,6 +263,7 @@ async function* notifications(domain: string, authHeader: string) {
     )
     .execute()) as DbCity[];
   yield prefixWithTime(
+    // TODO - avoid printing out all cities as this scales
     `${dbCities.length} cities retrieved from database: ${dbCities.map(dbc => dbc.cityAndStateCode).join(' + ')}`
   );
 
@@ -270,7 +271,7 @@ async function* notifications(domain: string, authHeader: string) {
   yield prefixWithTime(`${Object.keys(tzIndependentAlerts).length} alerts with subscriptions\n`);
 
   for (const [alertId, gids] of alertIdsGidsMap) {
-    yield prefixWithTime(`For alert "${alertId}"...`);
+    yield prefixWithTime(`For alert "${alertId}" / "${tzIndependentAlerts[alertId].title}"...`);
 
     const pushHistoryRecordForAlertId = await db
       .selectFrom('alertsPushHistory')
