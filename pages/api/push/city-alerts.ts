@@ -11,6 +11,11 @@ import { Response as ResponseModel } from 'models/api/response.model';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
+/**
+ * GET: Return subscribed cities for given @param uuid as an array of objects containing subscribed city details
+ * PATCH: Add a subscription to the city with the geoname @param id for given @param uuid
+ * DELETE: Remove a subscription to the city with the geoname @param id for given @param uuid
+ */
 export default async function cityAlerts(req: NextRequest) {
   const response: Omit<ResponseModel<CityAlertsResponse | null>, 'validUntil' | 'latestReadTime'> = {
     data: null,

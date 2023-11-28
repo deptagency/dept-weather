@@ -57,6 +57,7 @@ input {
 }
 
 button:enabled,
+input[type='checkbox']:enabled,
 input[type='radio']:enabled {
   cursor: pointer;
 }
