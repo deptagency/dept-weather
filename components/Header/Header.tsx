@@ -183,7 +183,7 @@ export function Header({
         setSelectedCity={setSelectedCity}
         showOverlay={showOverlay === 'search'}
       />
-      <SettingsOverlay showOverlay={showOverlay === 'settings'} />
+      <SettingsOverlay recentCities={recentCities} showOverlay={showOverlay === 'settings'} />
     </>
   );
 }

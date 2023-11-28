@@ -1,6 +1,7 @@
 import { ComponentPropsWithoutRef } from 'react';
 import { Overlay } from 'components/Header/Overlay/Overlay';
 import { SettingsOverlayProps } from 'components/Header/SettingsOverlay/SettingsOverlay.types';
+import { CURRENT_LOCATION } from 'constants/client';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
 import { SearchResultCity } from 'models/cities/cities.model';
 
@@ -30,7 +31,7 @@ const Radio = ({
   </label>
 );
 
-export function SettingsOverlay({ showOverlay }: SettingsOverlayProps) {
+export function SettingsOverlay({ showOverlay, recentCities }: SettingsOverlayProps) {
   // TODO - handle ESC key press
   return (
     <Overlay innerClassName={`${styles.inner} ${homeStyles.container__content}`} showOverlay={showOverlay}>
@@ -79,9 +80,12 @@ export function SettingsOverlay({ showOverlay }: SettingsOverlayProps) {
             </legend>
 
             <div className={styles.section__notifications}>
-              <NotificationsRow city={{ geonameid: '4560349', cityAndStateCode: 'Philadelphia, PA' }} />
-              <NotificationsRow city={{ geonameid: '', cityAndStateCode: 'New York City, NY' }} />
-              <NotificationsRow city={{ geonameid: '', cityAndStateCode: 'Washington, DC' }} />
+              {recentCities
+                .filter(city => city.geonameid !== CURRENT_LOCATION.geonameid)
+                .slice(0, 5)
+                .map(city => (
+                  <NotificationsRow city={city} key={city.geonameid} />
+                ))}
             </div>
           </fieldset>
         </form>
