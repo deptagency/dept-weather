@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import { PUSH_RESP_JSON_CONTENT_HEADERS, PUSH_URL_REGEX, PUSH_UUID_V1_REGEX } from 'constants/server';
-import { db } from 'helpers/api/database';
+import { Database, db } from 'helpers/api/database';
 import { UnSubscribeRequest, UnSubscribeResponse } from 'models/api/push/unsubscribe.model';
 import { Response as ResponseModel } from 'models/api/response.model';
 
@@ -14,7 +14,7 @@ export default async function unsubscribe(req: NextRequest) {
     warnings: [],
     errors: []
   };
-  if (req.method !== 'PATCH') {
+  if (req.method !== 'DELETE') {
     response.errors.push(`${req.method} is not supported`);
     console.error(response.errors[0]);
     return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 405 });
@@ -59,53 +59,44 @@ export default async function unsubscribe(req: NextRequest) {
   }
 
   try {
-    const emptySub = {
-      endpoint: null,
-      expirationTime: null,
-      keyP256dh: null,
-      keyAuth: null
-    };
-
-    // 1. Attempt to update existing record with the same endpoint
+    let existingRecord: { uuid: Database['pushSubscriptions']['id'] } | null = null;
+    // Lookup pushSubscriptions record by endpoint
     if (endpoint != null) {
-      // Get the uuid from the existingRecord before clearing the subscription data
-      const existingRecord =
+      existingRecord =
         (await db
           .selectFrom('pushSubscriptions')
           .select(eb => eb.fn<string>('BIN_TO_UUID', ['id']).as('uuid'))
           .where('endpoint', '=', endpoint)
           .executeTakeFirst()) ?? null;
-
-      if (existingRecord != null) {
-        const updateForEndpointResult = await db
-          .updateTable('pushSubscriptions')
-          .set(({ fn }) => ({
-            ...emptySub,
-            unSubscribedAt: fn('NOW', [])
-          }))
-          .where('endpoint', '=', endpoint)
-          .executeTakeFirst();
-        if (updateForEndpointResult.numUpdatedRows === BigInt(1)) {
-          response.data = existingRecord;
-          console.log(`Updated record with same endpoint for ${response.data.uuid}`);
-          return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 200 });
-        }
-      }
+    }
+    // Fallback to lookup pushSubscriptions record by uuid if not found by endpoint
+    if (existingRecord == null && uuid != null) {
+      existingRecord =
+        (await db
+          .selectFrom('pushSubscriptions')
+          .select(eb => eb.fn<string>('BIN_TO_UUID', ['id']).as('uuid'))
+          .where('id', '=', ({ fn, val }) => fn('UUID_TO_BIN', [val(uuid)]))
+          .executeTakeFirst()) ?? null;
     }
 
-    // 2. Attempt to update existing record with the same UUID
-    if (uuid != null) {
-      const updateForUuidResult = await db
-        .updateTable('pushSubscriptions')
-        .set(({ fn }) => ({
-          ...emptySub,
-          unSubscribedAt: fn('NOW', [])
-        }))
-        .where(({ eb, fn, val }) => eb('id', '=', fn('UUID_TO_BIN', [val(uuid)])))
+    if (existingRecord != null) {
+      // Use existing record's uuid in case query param not provided or incorrect
+      uuid = existingRecord.uuid;
+
+      // Unsubscribe from all city subscriptions
+      await db
+        .deleteFrom('alertCitySubscriptions')
+        .where('userId', '=', ({ fn, val }) => fn('UUID_TO_BIN', [val(uuid)]))
+        .execute();
+
+      // Delete existing pushSubscriptions record
+      const deleteForUuidResult = await db
+        .deleteFrom('pushSubscriptions')
+        .where('id', '=', ({ fn, val }) => fn('UUID_TO_BIN', [val(uuid)]))
         .executeTakeFirst();
-      if (updateForUuidResult.numUpdatedRows === BigInt(1)) {
+      if (deleteForUuidResult.numDeletedRows === BigInt(1)) {
         response.data = { uuid };
-        console.log(`Updated record with same uuid for ${response.data.uuid}`);
+        console.log(`Deleted record for ${uuid}`);
         return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 200 });
       }
     }

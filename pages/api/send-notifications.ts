@@ -258,18 +258,7 @@ async function* notifications(domain: string, authHeader: string) {
     .selectFrom('cities as c')
     .select(['c.geonameid', 'c.cityAndStateCode', 'c.timeZone', 'c.forecastZone', 'c.countyZone', 'c.fireZone'])
     .innerJoin(
-      eb =>
-        eb
-          .selectFrom('alertCitySubscriptions as acs')
-          .select(['acs.geonameid'])
-          .where(
-            qb =>
-              qb.selectFrom('pushSubscriptions as ps').select('ps.unSubscribedAt').whereRef('ps.id', '=', 'acs.userId'),
-            'is',
-            null
-          )
-          .distinct()
-          .as('acs'),
+      eb => eb.selectFrom('alertCitySubscriptions as acs').select(['acs.geonameid']).distinct().as('acs'),
       join => join.onRef('c.geonameid', '=', 'acs.geonameid')
     )
     .execute()) as DbCity[];
@@ -304,7 +293,6 @@ async function* notifications(domain: string, authHeader: string) {
         ])
         .where(({ and, or, eb, fn }) =>
           and([
-            // eb('ps.unSubscribedAt', 'is', null),
             eb('ps.endpoint', 'is not', null),
             eb('ps.keyP256dh', 'is not', null),
             eb('ps.keyAuth', 'is not', null),

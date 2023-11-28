@@ -16,7 +16,6 @@ export interface Database {
     expirationTime: Date | null;
     keyP256dh: string | null;
     keyAuth: string | null;
-    unSubscribedAt: Date | null;
   };
   alertCitySubscriptions: {
     id: number;

@@ -52,7 +52,7 @@ export default async function cityAlerts(req: NextRequest) {
     // Check subscription record
     const existingSubscriptionRecord = await db
       .selectFrom('pushSubscriptions')
-      .select('unSubscribedAt')
+      .select(eb => eb.fn<string>('BIN_TO_UUID', ['id']).as('uuid'))
       .where(({ eb, fn, val }) => eb('id', '=', fn('UUID_TO_BIN', [val(uuid)])))
       .executeTakeFirst();
     if (existingSubscriptionRecord == null) {
@@ -87,15 +87,6 @@ export default async function cityAlerts(req: NextRequest) {
 
     const geonameid = Number(geonameidStr);
     if (req.method === 'PATCH') {
-      // Prevent adding alertCitySubscriptions records when user is unsubscribed
-      if (existingSubscriptionRecord.unSubscribedAt != null) {
-        response.errors.push(
-          `Cannot PATCH since the user unsubscribed from all pushes at ${existingSubscriptionRecord.unSubscribedAt.toISOString()}`
-        );
-        console.error(`${response.errors[0]}: ${reqStr}`);
-        return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 403 });
-      }
-
       // Detect if an alertCitySubscriptions record already exists for geonameid
       const prevRecordIdx = response.data.findIndex(city => city.geonameid === geonameid);
       if (prevRecordIdx !== -1) {

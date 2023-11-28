@@ -224,7 +224,7 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
                   setIsChangingSubscription(true);
 
                   const res = await fetch(getPath(APIRoute.PUSH_UNSUBSCRIBE), {
-                    method: 'PATCH',
+                    method: 'DELETE',
                     body: JSON.stringify({ uuid })
                   });
                   const resJSON: Omit<

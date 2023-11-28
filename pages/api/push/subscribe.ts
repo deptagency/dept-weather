@@ -74,8 +74,7 @@ export default async function subscribe(req: NextRequest) {
     const sub = {
       endpoint: subReq.subscription.endpoint,
       keyP256dh: subReq.subscription.keys.p256dh,
-      keyAuth: subReq.subscription.keys.auth,
-      unSubscribedAt: null
+      keyAuth: subReq.subscription.keys.auth
     };
 
     const selectQuery = db
