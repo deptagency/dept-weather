@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef } from 'react';
+import { ComponentPropsWithoutRef, useEffect, useState } from 'react';
 import { Overlay } from 'components/Header/Overlay/Overlay';
 import { SettingsOverlayProps } from 'components/Header/SettingsOverlay/SettingsOverlay.types';
 import { CURRENT_LOCATION } from 'constants/client';
@@ -13,7 +13,7 @@ const NotificationsRow = ({
   className,
   ...props
 }: { city: SearchResultCity } & Omit<ComponentPropsWithoutRef<'input'>, 'children' | 'name' | 'type'>) => (
-  <label className={`${styles['notifications-row__label']} ${className ?? ''}`}>
+  <label className={`${styles['notifications-row__label']} ${className ?? ''}`} suppressHydrationWarning>
     <input name={city.geonameid} type="checkbox" {...props} />
     <span>{SearchQueryHelper.getCityAndStateCode(city)}</span>
   </label>
@@ -31,7 +31,14 @@ const Radio = ({
   </label>
 );
 
-export function SettingsOverlay({ showOverlay, recentCities }: SettingsOverlayProps) {
+export function SettingsOverlay({ showOverlay, recentCities: recentCitiesIn }: SettingsOverlayProps) {
+  const [recentCities, setRecentCities] = useState<SettingsOverlayProps['recentCities']>([]);
+
+  useEffect(
+    () => setRecentCities(recentCitiesIn.filter(city => city.geonameid !== CURRENT_LOCATION.geonameid)),
+    [recentCitiesIn]
+  );
+
   // TODO - handle ESC key press
   return (
     <Overlay innerClassName={`${styles.inner} ${homeStyles.container__content}`} showOverlay={showOverlay}>
@@ -71,7 +78,7 @@ export function SettingsOverlay({ showOverlay, recentCities }: SettingsOverlayPr
               <Radio name="precipitation">mm</Radio>
             </div>
           </fieldset>
-          <fieldset>
+          <fieldset className={styles['section__notifications-container']}>
             <legend className={styles.section__header}>
               Notifications
               <span className={styles.section__header__description}>
@@ -80,12 +87,9 @@ export function SettingsOverlay({ showOverlay, recentCities }: SettingsOverlayPr
             </legend>
 
             <div className={styles.section__notifications}>
-              {recentCities
-                .filter(city => city.geonameid !== CURRENT_LOCATION.geonameid)
-                .slice(0, 5)
-                .map(city => (
-                  <NotificationsRow city={city} key={city.geonameid} />
-                ))}
+              {recentCities.map(city => (
+                <NotificationsRow city={city} key={city.geonameid} />
+              ))}
             </div>
           </fieldset>
         </form>

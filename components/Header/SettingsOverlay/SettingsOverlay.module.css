@@ -19,6 +19,7 @@
   display: flex;
   flex-direction: column;
   row-gap: 2rem;
+  height: 100%;
 
   opacity: 0;
   transform: translateY(0.5rem);
@@ -89,10 +90,15 @@
   margin-top: 2px;
 }
 
+.section__notifications-container {
+  overflow-y: auto;
+}
+
 .section__notifications {
   display: flex;
   flex-direction: column;
   row-gap: 0.5rem;
+  padding-bottom: 1rem;
 }
 
 .notifications-row__label {
