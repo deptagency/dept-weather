@@ -11,12 +11,6 @@
   border-radius: var(--corner-radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  .notifications-card-header__contents__button {
-    background: rgba(0, 0, 0, 0.1);
-  }
-}
-
 .notifications-card-header__contents__button:focus {
   background: rgba(255, 255, 255, 0.2);
   outline: none;

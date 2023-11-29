@@ -16,12 +16,7 @@
 
   height: 2rem;
   width: 2rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .condition__icon {
-    filter: invert(1);
-  }
+  filter: var(--condition__icon_filter);
 }
 
 .condition__icon--small {
