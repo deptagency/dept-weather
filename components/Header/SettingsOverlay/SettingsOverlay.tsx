@@ -4,6 +4,7 @@ import { Overlay } from 'components/Header/Overlay/Overlay';
 import { SettingsInputs, SettingsOverlayProps } from 'components/Header/SettingsOverlay/SettingsOverlay.types';
 import { CURRENT_LOCATION, DEFAULT_APP_THEME, LocalStorageKey } from 'constants/client';
 import { DEFAULT_UNITS } from 'constants/shared';
+import { AppThemeHelper } from 'helpers/app-theme';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
 import { getLocalStorageItem, setLocalStorageItem, useLocalStorage } from 'hooks/use-local-storage';
 import { SearchResultCity } from 'models/cities/cities.model';
@@ -11,7 +12,6 @@ import { Unit } from 'models/unit.enum';
 
 import styles from './SettingsOverlay.module.css';
 import homeStyles from 'styles/Home.module.css';
-import { AppThemeHelper } from 'helpers/app-theme';
 
 const NotificationsRow = ({
   city,
