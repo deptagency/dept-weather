@@ -11,27 +11,70 @@
   --alert-minor: #006161;
   --alert-unknown: var(--alert-minor);
 
-  --background: var(--white);
-  --foreground: var(--black);
-  --foreground-light: var(--onyx);
-
   --transition-duration: 300ms;
 
-  --card_background-color: var(--white);
-  --card_box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
-  --condition__icon_filter: none;
-  --overlay__inner_background: linear-gradient(235deg, var(--white), rgba(255, 255, 255, 0.99));
+  --light-background: var(--white);
+  --light-foreground: var(--black);
+  --light-foreground-light: var(--onyx);
+  --light-card_background-color: var(--white);
+  --light-card_box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+  --light-condition__icon_filter: none;
+  --light-overlay__inner_background: linear-gradient(235deg, var(--white), rgba(255, 255, 255, 0.99));
+
+  --dark-background: var(--black);
+  --dark-foreground: var(--white);
+  --dark-foreground-light: var(--platinum);
+  --dark-card_background-color: var(--onyx);
+  --dark-card_box-shadow: inset 0.25rem 0.5rem 2rem rgba(255, 255, 255, 0.06);
+  --dark-condition__icon_filter: invert(1);
+  --dark-overlay__inner_background: linear-gradient(235deg, var(--black), rgba(0, 0, 0, 0.99));
+
+  /* Use light theme vars by default */
+  --background: var(--light-background);
+  --foreground: var(--light-foreground);
+  --foreground-light: var(--light-foreground-light);
+  --card_background-color: var(--light-card_background-color);
+  --card_box-shadow: var(--light-card_box-shadow);
+  --condition__icon_filter: var(--light-condition__icon_filter);
+  --overlay__inner_background: var(--light-overlay__inner_background);
 }
 
-:root.dark {
-  --background: var(--black);
-  --foreground: var(--white);
-  --foreground-light: var(--platinum);
+/* Use dark theme vars when system theme is dark */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--dark-background);
+    --foreground: var(--dark-foreground);
+    --foreground-light: var(--dark-foreground-light);
 
-  --card_background-color: var(--onyx);
-  --card_box-shadow: inset 0.25rem 0.5rem 2rem rgba(255, 255, 255, 0.06);
-  --condition__icon_filter: invert(1);
-  --overlay__inner_background: linear-gradient(235deg, var(--black), rgba(0, 0, 0, 0.99));
+    --card_background-color: var(--dark-card_background-color);
+    --card_box-shadow: var(--dark-card_box-shadow);
+    --condition__icon_filter: var(--dark-condition__icon_filter);
+    --overlay__inner_background: var(--dark-overlay__inner_background);
+  }
+}
+
+/* Class override for light theme */
+:root.light {
+  --background: var(--light-background);
+  --foreground: var(--light-foreground);
+  --foreground-light: var(--light-foreground-light);
+
+  --card_background-color: var(--light-card_background-color);
+  --card_box-shadow: var(--light-card_box-shadow);
+  --condition__icon_filter: var(--light-condition__icon_filter);
+  --overlay__inner_background: var(--light-overlay__inner_background);
+}
+
+/* Class override for dark theme */
+:root.dark {
+  --background: var(--dark-background);
+  --foreground: var(--dark-foreground);
+  --foreground-light: var(--dark-foreground-light);
+
+  --card_background-color: var(--dark-card_background-color);
+  --card_box-shadow: var(--dark-card_box-shadow);
+  --condition__icon_filter: var(--dark-condition__icon_filter);
+  --overlay__inner_background: var(--dark-overlay__inner_background);
 }
 
 @media (prefers-reduced-motion) {

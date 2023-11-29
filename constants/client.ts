@@ -1,4 +1,5 @@
 import { SearchResultCity } from 'models/cities/cities.model';
+import { AppTheme } from 'models/color.enum';
 
 export const APP_TITLE = 'DEPT® Weather';
 export const APP_DESCRIPTION = `The ${APP_TITLE} app provides up-to-date weather observations, daily & hourly forecasts, and alerts for locations across the U.S.`;
@@ -18,9 +19,12 @@ export const CITY_SEARCH_DEBOUNCE_MS = 250;
 export enum LocalStorageKey {
   RECENT_CITIES = 'recentCities',
   UUID = 'uuid',
-  THEME = 'theme',
+  APP_THEME = 'appTheme',
   UNITS = 'units'
 }
+
+export const DEFAULT_APP_THEME: AppTheme = 'system';
+export const COLOR_SCHEME_REGEX = /light|dark/g;
 
 export const IME_UNSETTLED_KEY_CODE = '229';
 

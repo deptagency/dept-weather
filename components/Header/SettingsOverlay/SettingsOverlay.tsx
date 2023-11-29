@@ -2,15 +2,16 @@ import { ComponentPropsWithoutRef, ComponentPropsWithRef, ForwardedRef, forwardR
 import { useForm, useWatch } from 'react-hook-form';
 import { Overlay } from 'components/Header/Overlay/Overlay';
 import { SettingsInputs, SettingsOverlayProps } from 'components/Header/SettingsOverlay/SettingsOverlay.types';
-import { CURRENT_LOCATION, LocalStorageKey } from 'constants/client';
+import { CURRENT_LOCATION, DEFAULT_APP_THEME, LocalStorageKey } from 'constants/client';
 import { DEFAULT_UNITS } from 'constants/shared';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
-import { getLocalStorageItem, useLocalStorage } from 'hooks/use-local-storage';
+import { getLocalStorageItem, setLocalStorageItem, useLocalStorage } from 'hooks/use-local-storage';
 import { SearchResultCity } from 'models/cities/cities.model';
 import { Unit } from 'models/unit.enum';
 
 import styles from './SettingsOverlay.module.css';
 import homeStyles from 'styles/Home.module.css';
+import { AppThemeHelper } from 'helpers/app-theme';
 
 const NotificationsRow = ({
   city,
@@ -43,18 +44,20 @@ export function SettingsOverlay({ showOverlay, recentCities: recentCitiesIn }: S
 
   const { register, control } = useForm<SettingsInputs>({
     defaultValues: {
-      theme: getLocalStorageItem(LocalStorageKey.THEME) ?? 'system',
-      units: { ...DEFAULT_UNITS, ...JSON.parse(getLocalStorageItem(LocalStorageKey.UNITS) ?? '{}') }
+      [LocalStorageKey.APP_THEME]: getLocalStorageItem(LocalStorageKey.APP_THEME) ?? DEFAULT_APP_THEME,
+      [LocalStorageKey.UNITS]: { ...DEFAULT_UNITS, ...JSON.parse(getLocalStorageItem(LocalStorageKey.UNITS) ?? '{}') }
     }
   });
 
-  useLocalStorage(
-    LocalStorageKey.THEME,
-    useWatch({
-      control,
-      name: 'theme'
-    })
-  );
+  const appTheme = useWatch({
+    control,
+    name: LocalStorageKey.APP_THEME
+  });
+  useEffect(() => {
+    setLocalStorageItem(LocalStorageKey.APP_THEME, appTheme);
+    AppThemeHelper.updateColorScheme(AppThemeHelper.prevIsNightVal);
+  }, [appTheme]);
+
   useLocalStorage(
     LocalStorageKey.UNITS,
     useWatch({
@@ -71,16 +74,16 @@ export function SettingsOverlay({ showOverlay, recentCities: recentCitiesIn }: S
           <fieldset>
             <legend className={styles.section__header}>Theme</legend>
             <div className={styles['section__radio-group']}>
-              <Radio {...register('theme')} value="auto">
-                Auto
-              </Radio>
-              <Radio {...register('theme')} value="system">
+              <Radio {...register('appTheme')} value="system">
                 System
               </Radio>
-              <Radio {...register('theme')} value="light">
+              <Radio {...register('appTheme')} value="auto">
+                Auto
+              </Radio>
+              <Radio {...register('appTheme')} value="light">
                 Light
               </Radio>
-              <Radio {...register('theme')} value="dark">
+              <Radio {...register('appTheme')} value="dark">
                 Dark
               </Radio>
             </div>

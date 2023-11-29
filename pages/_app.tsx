@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { AppProps } from 'next/app';
 import localFont from 'next/font/local';
+import { AppThemeHelper } from 'helpers/app-theme';
 
 import 'styles/globals.css';
 import styles from 'styles/Home.module.css';
@@ -27,6 +29,8 @@ const maisonNeue = localFont({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
+  useEffect(() => AppThemeHelper.updateColorScheme(), []);
+
   return (
     <div className={`${styles.container} ${maisonNeue.className}`}>
       <Component {...pageProps} />

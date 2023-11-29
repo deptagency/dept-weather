@@ -14,3 +14,6 @@ export enum Color {
   ALERT_MINOR = 'alert-minor',
   ALERT_UNKNOWN = 'alert-unknown'
 }
+
+export type ColorScheme = 'light' | 'dark';
+export type AppTheme = 'auto' | 'system' | ColorScheme;
