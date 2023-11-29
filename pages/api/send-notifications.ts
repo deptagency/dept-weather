@@ -262,10 +262,7 @@ async function* notifications(domain: string, authHeader: string) {
       join => join.onRef('c.geonameid', '=', 'acs.geonameid')
     )
     .execute()) as DbCity[];
-  yield prefixWithTime(
-    // TODO - avoid printing out all cities as this scales
-    `${dbCities.length} cities retrieved from database: ${dbCities.map(dbc => dbc.cityAndStateCode).join(' + ')}`
-  );
+  yield prefixWithTime(`${dbCities.length} cities retrieved from database`);
 
   const { alertIdsGidsMap, tzIndependentAlerts } = await getSubscribedAlerts(dbCities);
   yield prefixWithTime(`${Object.keys(tzIndependentAlerts).length} alerts with subscriptions\n`);
