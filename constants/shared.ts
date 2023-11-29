@@ -1,5 +1,5 @@
 import { City } from 'models/cities/cities.model';
-import { Unit, UnitType } from 'models/unit.enum';
+import { Unit, UnitChoices, UnitType } from 'models/unit.enum';
 
 export const MAX_COORDINATE_PRECISION = 2;
 
@@ -15,7 +15,7 @@ export const DEFAULT_CITY = BOSTON_CITY;
 
 export const CITY_SEARCH_RESULT_LIMIT = 5;
 
-export const DEFAULT_UNITS: Record<UnitType, Unit> = {
+export const DEFAULT_UNITS: UnitChoices = {
   [UnitType.temp]: Unit.F,
   [UnitType.wind]: Unit.MILES,
   [UnitType.pressure]: Unit.INCHES,

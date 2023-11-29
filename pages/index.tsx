@@ -10,13 +10,14 @@ import {
   APP_TITLE,
   CITIES_CACHE_FILENAME,
   CURRENT_LOCATION,
-  LOCAL_STORAGE_RECENT_CITIES_KEY,
+  LocalStorageKey,
   QUERY_EXPANDED_ALERT_ID_KEY,
   UI_ANIMATION_DURATION
 } from 'constants/client';
 import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY } from 'constants/shared';
 import { CoordinatesHelper } from 'helpers/coordinates-helper';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
+import { getLocalStorageItem, setLocalStorageItem } from 'hooks/use-local-storage';
 import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
 import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
 import useSWRImmutable from 'swr/immutable';
@@ -59,19 +60,15 @@ export default function Home() {
   const citiesCache = useCitiesCache();
 
   const [recentCities, setRecentCities] = useState<SearchResultCity[]>((): SearchResultCity[] => {
-    // Only run on client-side (i.e., when window object is available)
-    if (typeof window !== 'undefined') {
-      const recentCitiesStr = localStorage.getItem(LOCAL_STORAGE_RECENT_CITIES_KEY);
-      const parsedRecentCities = recentCitiesStr ? JSON.parse(recentCitiesStr) : [];
-      for (const recentCity of parsedRecentCities) {
-        // Convert number-typed geoname ids to strings
-        if (typeof recentCity.geonameid === 'number') {
-          recentCity.geonameid = String(recentCity.geonameid);
-        }
+    const recentCitiesStr = getLocalStorageItem(LocalStorageKey.RECENT_CITIES);
+    const parsedRecentCities = recentCitiesStr ? JSON.parse(recentCitiesStr) : [];
+    for (const recentCity of parsedRecentCities) {
+      // Convert number-typed geoname ids to strings
+      if (typeof recentCity.geonameid === 'number') {
+        recentCity.geonameid = String(recentCity.geonameid);
       }
-      return parsedRecentCities;
     }
-    return [];
+    return parsedRecentCities;
   });
   useEffect(() => {
     // Wait until selectedCity & queryParams are defined and in-sync before adding to recents
@@ -96,8 +93,7 @@ export default function Home() {
           geonameid: selectedCity.geonameid
         });
 
-        const newRecentCitiesStr = JSON.stringify(newRecentCities);
-        localStorage.setItem(LOCAL_STORAGE_RECENT_CITIES_KEY, newRecentCitiesStr);
+        setLocalStorageItem(LocalStorageKey.RECENT_CITIES, newRecentCities);
 
         if (isCurrentSelected) {
           setRecentCities(newRecentCities);

@@ -60,15 +60,7 @@
 }
 
 .section__sub--units {
-  grid-template-columns: 1fr repeat(3, auto);
-}
-
-.section__sub__header {
-  grid-column: 1;
-}
-
-.section__sub__grid-col-3 {
-  grid-column: 3;
+  grid-template-columns: 1fr repeat(2, auto);
 }
 
 .radio-label {

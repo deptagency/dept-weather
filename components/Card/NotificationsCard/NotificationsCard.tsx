@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useId, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { CardHeader } from 'components/Card/CardHeader/CardHeader';
-import { LOCAL_STORAGE_UUID_KEY, UI_ANIMATION_DURATION } from 'constants/client';
+import { LocalStorageKey, UI_ANIMATION_DURATION } from 'constants/client';
 import { API_GEONAMEID_KEY, API_UUID_KEY } from 'constants/shared';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
+import { getLocalStorageItem, setLocalStorageItem } from 'hooks/use-local-storage';
 import { useShouldContinueRendering } from 'hooks/use-should-continue-rendering';
 import { APIRoute, getPath } from 'models/api/api-route.model';
 import { CityAlertsResponse } from 'models/api/push/city-alerts.model';
@@ -41,14 +42,14 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
 
   const [isChangingSubscription, setIsChangingSubscription] = useState(true);
 
-  const [uuid, setUuid] = useState<string | undefined>();
+  const [uuid, setUuid] = useState<string | null | undefined>();
 
   const [subscribedCities, setSubscribedCities] = useState<[string, string][]>([]);
 
   useEffect(() => {
     setSupportsNotifications(typeof window !== 'undefined' && 'Notification' in window);
 
-    let newUuid = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_UUID_KEY) ?? undefined : undefined;
+    let newUuid = getLocalStorageItem(LocalStorageKey.UUID);
     setUuid(newUuid);
 
     const refreshUUID = async (sub: PushSubscription) => {
@@ -61,7 +62,7 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
       });
       const resJSON: Omit<ResponseModel<SubscribeResponse | null>, 'validUntil' | 'latestReadTime'> = await res.json();
       if (resJSON?.data?.uuid) {
-        localStorage.setItem(LOCAL_STORAGE_UUID_KEY, resJSON.data.uuid);
+        setLocalStorageItem(LocalStorageKey.UUID, resJSON.data.uuid);
         newUuid = resJSON.data.uuid;
         setUuid(newUuid);
       }
@@ -205,7 +206,7 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
                     'validUntil' | 'latestReadTime'
                   > = await res.json();
                   if (resJSON?.data?.uuid) {
-                    localStorage.setItem(LOCAL_STORAGE_UUID_KEY, resJSON.data.uuid);
+                    localStorage.setItem(LocalStorageKey.UUID, resJSON.data.uuid);
                     setUuid(resJSON.data.uuid);
                   }
 
@@ -232,7 +233,7 @@ export function NotificationsCard({ selectedCity }: { selectedCity: SearchResult
                     'validUntil' | 'latestReadTime'
                   > = await res.json();
                   if (resJSON?.data?.uuid) {
-                    localStorage.setItem(LOCAL_STORAGE_UUID_KEY, resJSON.data.uuid);
+                    localStorage.setItem(LocalStorageKey.UUID, resJSON.data.uuid);
                     setUuid(resJSON.data.uuid);
                   }
 

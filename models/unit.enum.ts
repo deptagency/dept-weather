@@ -17,6 +17,13 @@ export enum UnitType {
   precipitation = 'precipitation'
 }
 
+export interface UnitChoices {
+  [UnitType.temp]: Unit.F | Unit.C;
+  [UnitType.wind]: Unit.MILES | Unit.KM;
+  [UnitType.pressure]: Unit.INCHES | Unit.MILLIBAR;
+  [UnitType.precipitation]: Unit.INCHES | Unit.MILLIMETERS;
+}
+
 export interface UnitMapping {
   from: Unit;
   to: Unit;
