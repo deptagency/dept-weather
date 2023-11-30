@@ -3,6 +3,7 @@ import { Condition } from 'components/Card/Condition/Condition';
 import { PrecipitationForecast } from 'components/Card/Measurement/PrecipitationForecast';
 import { Wind } from 'components/Card/Measurement/Wind';
 import { NwsPeriodForecast } from 'models/api/forecast.model';
+import { UnitChoices, UnitType } from 'models/unit.enum';
 
 import styles from './SummaryForecast.module.css';
 
@@ -23,9 +24,11 @@ const simplifyCondition = (conditionIn: string | null | undefined) => {
 };
 
 export function SummaryForecast({
+  windUnit,
   forecast,
   isDaytime
 }: {
+  windUnit: UnitChoices[UnitType.wind];
   forecast: NwsPeriodForecast | null | undefined;
   isDaytime: boolean;
 }) {
@@ -45,7 +48,7 @@ export function SummaryForecast({
         <Condition condition={condition} isNight={!isDaytime} size="small" />
       </div>
       <div className={styles['summary-forecast__measurements']}>
-        <Wind includeGustSpeed={false} wind={forecast?.wind} />
+        <Wind includeGustSpeed={false} unit={windUnit} wind={forecast?.wind} />
         <PrecipitationForecast chanceOfPrecipitation={forecast?.chanceOfPrecip} />
       </div>
     </div>

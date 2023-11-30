@@ -3,12 +3,21 @@ import { ConditionIcon } from 'components/Card/Condition/ConditionIcon';
 import { ConditionLabel } from 'components/Card/Condition/ConditionLabel';
 import { WindHelper } from 'helpers/wind-helper';
 import { NwsHourlyPeriodForecast } from 'models/api/forecast.model';
-import { roundOrEmDash, roundTensOrEmDash } from 'utils';
+import { UnitChoices, UnitType } from 'models/unit.enum';
+import { getFormattedUnit, roundOrEmDash, roundTensOrEmDash } from 'utils';
 
 import styles from './HourlyForecast.module.css';
 
 const HOURLY_FORECAST_CONDITION_SIZE: ConditionSize = 'x-small';
-export function HourlyForecast({ forecast, isDaytime }: { forecast: NwsHourlyPeriodForecast; isDaytime: boolean }) {
+export function HourlyForecast({
+  windUnit,
+  forecast,
+  isDaytime
+}: {
+  windUnit: UnitChoices[UnitType.wind];
+  forecast: NwsHourlyPeriodForecast;
+  isDaytime: boolean;
+}) {
   return (
     <>
       <h5 className={styles['hourly-forecast__time-label']}>{forecast.startLabel}</h5>
@@ -27,9 +36,10 @@ export function HourlyForecast({ forecast, isDaytime }: { forecast: NwsHourlyPer
       <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.temperature)}°`}</p>
       <p className={styles['hourly-forecast__measurement']}>{`${roundTensOrEmDash(forecast.chanceOfPrecip)}%`}</p>
       <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.humidity)}%`}</p>
-      <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.wind.speed)}mph ${
-        forecast.wind.directionDeg != null ? ` ${WindHelper.degToDir(forecast.wind.directionDeg)}` : ''
-      }`}</p>
+      <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.wind.speed)}${getFormattedUnit(
+        UnitType.wind,
+        windUnit
+      )} ${forecast.wind.directionDeg != null ? ` ${WindHelper.degToDir(forecast.wind.directionDeg)}` : ''}`}</p>
     </>
   );
 }

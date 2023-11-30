@@ -8,9 +8,12 @@ import { Precipitation } from 'components/Card/Measurement/Precipitation';
 import { Pressure } from 'components/Card/Measurement/Pressure';
 import { UVIndex } from 'components/Card/Measurement/UVIndex';
 import { Wind } from 'components/Card/Measurement/Wind';
+import { DEFAULT_UNITS } from 'constants/shared';
 import { AppThemeHelper } from 'helpers/app-theme';
+import { QueryParams } from 'models/api/api-route.model';
 import { Observations, SunTimesObservations } from 'models/api/observations.model';
 import { Color } from 'models/color.enum';
+import { UnitChoices, UnitType } from 'models/unit.enum';
 
 import styles from './Card.module.css';
 
@@ -26,10 +29,12 @@ const getIsNight = (sunData?: SunTimesObservations) => {
 };
 
 export function ObservationsCard({
+  queryParamsUnits,
   isLoading,
   latestReadTime,
   observations
 }: {
+  queryParamsUnits: NonNullable<QueryParams>;
   isLoading?: boolean;
   latestReadTime?: number;
   observations?: Observations;
@@ -43,6 +48,9 @@ export function ObservationsCard({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [observations?.sun]);
+
+  const windUnit =
+    (queryParamsUnits[`${UnitType.wind}Unit`] as UnitChoices['wind'] | undefined) ?? DEFAULT_UNITS[UnitType.wind];
 
   return (
     <article className={styles.card}>
@@ -59,7 +67,7 @@ export function ObservationsCard({
           <Condition condition={observations?.nws?.textDescription} isNight={isNight} size="large" />
         </div>
         <div className={styles['card-contents__measurements']}>
-          <Wind includeGustSpeed={true} wind={observations?.wl?.wind ?? observations?.nws?.wind} />
+          <Wind includeGustSpeed unit={windUnit} wind={observations?.wl?.wind ?? observations?.nws?.wind} />
           <UVIndex epaData={observations?.epa} />
           <AirQuality airnowData={observations?.airnow} />
           <Humidity humidity={observations?.wl?.humidity ?? observations?.nws?.humidity} />

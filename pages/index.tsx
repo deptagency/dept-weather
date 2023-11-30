@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import { NextRouter, useRouter } from 'next/router';
 import { LocateError } from 'components/Errors/LocateError/LocateError';
@@ -14,12 +14,13 @@ import {
   QUERY_EXPANDED_ALERT_ID_KEY,
   UI_ANIMATION_DURATION
 } from 'constants/client';
-import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY } from 'constants/shared';
+import { API_COORDINATES_KEY, API_GEONAMEID_KEY, DEFAULT_CITY, DEFAULT_UNITS } from 'constants/shared';
 import { CoordinatesHelper } from 'helpers/coordinates-helper';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
 import { getLocalStorageItem, setLocalStorageItem } from 'hooks/use-local-storage';
 import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
 import { CitiesCache, SearchResultCity } from 'models/cities/cities.model';
+import { UnitChoices, UnitType } from 'models/unit.enum';
 import useSWRImmutable from 'swr/immutable';
 
 const getGeonameidFromUrl = (routerQuery: NextRouter['query']) => {
@@ -38,6 +39,15 @@ const getExpandedAlertIdFromUrl = (routerQuery: NextRouter['query']) => {
   return typeof expandedAlertId === 'string' && expandedAlertId.length ? expandedAlertId : undefined;
 };
 
+const getQueryParamsUnits = (): NonNullable<QueryParams> => {
+  const unitChoices = JSON.parse(getLocalStorageItem(LocalStorageKey.UNITS) ?? '{}') as Partial<UnitChoices>;
+  return Object.fromEntries(
+    Object.entries(unitChoices)
+      .filter(([unitType, unit]) => DEFAULT_UNITS[unitType as UnitType] !== unit)
+      .map(([k, v]) => [`${k}Unit`, v])
+  );
+};
+
 const getQueryParamsForGeonameid = (geonameid: string): QueryParams => ({
   [API_GEONAMEID_KEY]: geonameid
 });
@@ -54,8 +64,11 @@ export default function Home() {
   const geonameid = getGeonameidFromUrl(router.query);
   const expandedAlertId = getExpandedAlertIdFromUrl(router.query);
   const [selectedCity, setSelectedCity] = useState<SearchResultCity | undefined>(undefined);
-  const [queryParams, setQueryParams] = useState<QueryParams>(undefined);
+  const [queryParamsLocation, setQueryParamsLocation] = useState<QueryParams>(undefined);
   const [locateError, setLocateError] = useState<number | undefined>(undefined);
+
+  const [queryParamsUnits, setQueryParamsUnits] = useState<NonNullable<QueryParams>>(() => getQueryParamsUnits());
+  const onUnitChoicesChange = useCallback(() => setQueryParamsUnits(getQueryParamsUnits()), [setQueryParamsUnits]);
 
   const citiesCache = useCitiesCache();
 
@@ -77,9 +90,9 @@ export default function Home() {
     if (
       recentCities != null &&
       selectedCity != null &&
-      queryParams != null &&
-      ((!isCurrentSelected && queryParams[API_GEONAMEID_KEY] === selectedCity.geonameid) ||
-        (isCurrentSelected && queryParams[API_COORDINATES_KEY] != null))
+      queryParamsLocation != null &&
+      ((!isCurrentSelected && queryParamsLocation[API_GEONAMEID_KEY] === selectedCity.geonameid) ||
+        (isCurrentSelected && queryParamsLocation[API_COORDINATES_KEY] != null))
     ) {
       const idxOfSelectedInRecents = recentCities.findIndex(city => city.geonameid === selectedCity.geonameid);
       if (idxOfSelectedInRecents === -1 || idxOfSelectedInRecents > 0) {
@@ -103,20 +116,20 @@ export default function Home() {
         }
       }
     }
-  }, [recentCities, selectedCity, queryParams]);
+  }, [recentCities, selectedCity, queryParamsLocation]);
 
   useEffect(() => {
     // Wait until geonameid & selectedCity are defined and in-sync before calling setQueryParams()
     if (geonameid != null && selectedCity != null && geonameid === selectedCity.geonameid) {
       if (geonameid === CURRENT_LOCATION.geonameid) {
         // Clear previous data by using undefined query params, wait for current location coordinates, then update query params
-        setQueryParams(undefined);
+        setQueryParamsLocation(undefined);
         navigator.geolocation.getCurrentPosition(
           position => {
             const adjustedCoordinates = CoordinatesHelper.adjustPrecision(
               CoordinatesHelper.cityToNumArr(position.coords)
             );
-            setQueryParams({ [API_COORDINATES_KEY]: CoordinatesHelper.numArrToStr(adjustedCoordinates) });
+            setQueryParamsLocation({ [API_COORDINATES_KEY]: CoordinatesHelper.numArrToStr(adjustedCoordinates) });
           },
           error => {
             setLocateError(error.code);
@@ -131,7 +144,7 @@ export default function Home() {
           }
         );
       } else {
-        setQueryParams(getQueryParamsForGeonameid(geonameid));
+        setQueryParamsLocation(getQueryParamsForGeonameid(geonameid));
         setLocateError(undefined);
       }
     }
@@ -221,13 +234,19 @@ export default function Home() {
       </Head>
       <Header
         citiesCache={citiesCache}
+        onUnitChoicesChange={onUnitChoicesChange}
         recentCities={recentCities}
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         setShowOverlay={setShowOverlay}
         showOverlay={showOverlay}
       />
-      <Main expandedAlertId={expandedAlertId} queryParams={queryParams} selectedCity={selectedCity}>
+      <Main
+        expandedAlertId={expandedAlertId}
+        queryParamsLocation={queryParamsLocation}
+        queryParamsUnits={queryParamsUnits}
+        selectedCity={selectedCity}
+      >
         {locateError != null ? <LocateError locateError={locateError} /> : undefined}
       </Main>
       <Footer />

@@ -6,6 +6,7 @@ import { UnitChoices } from 'models/unit.enum';
 
 export interface SettingsOverlayProps extends Pick<OverlayProps, 'showOverlay'> {
   recentCities: SearchResultCity[];
+  onUnitChoicesChange: () => void;
 }
 
 export interface SettingsInputs {

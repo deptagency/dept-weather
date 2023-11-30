@@ -17,6 +17,7 @@ export function Header({
   setShowOverlay,
   selectedCity,
   setSelectedCity,
+  onUnitChoicesChange,
   recentCities,
   citiesCache
 }: {
@@ -24,6 +25,7 @@ export function Header({
   setShowOverlay: Dispatch<SetStateAction<ShowOverlayType>>;
   selectedCity: SearchResultCity | undefined;
   setSelectedCity: Dispatch<SetStateAction<SearchResultCity | undefined>>;
+  onUnitChoicesChange: () => void;
   recentCities: SearchResultCity[];
   citiesCache: CitiesCache | undefined;
 }) {
@@ -183,7 +185,11 @@ export function Header({
         setSelectedCity={setSelectedCity}
         showOverlay={showOverlay === 'search'}
       />
-      <SettingsOverlay recentCities={recentCities} showOverlay={showOverlay === 'settings'} />
+      <SettingsOverlay
+        onUnitChoicesChange={onUnitChoicesChange}
+        recentCities={recentCities}
+        showOverlay={showOverlay === 'settings'}
+      />
     </>
   );
 }

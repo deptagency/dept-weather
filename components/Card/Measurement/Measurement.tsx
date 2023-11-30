@@ -20,8 +20,16 @@ export function Measurement({
         <p className={styles.measurement__description__label}>{label}</p>
       </div>
       <div>
-        <p className={styles.measurement__value}>{value}</p>
-        {secondaryValue ? <p className={styles['measurement__secondary-value']}>{secondaryValue}</p> : <></>}
+        <p className={styles.measurement__value} suppressHydrationWarning>
+          {value}
+        </p>
+        {secondaryValue ? (
+          <p className={styles['measurement__secondary-value']} suppressHydrationWarning>
+            {secondaryValue}
+          </p>
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );

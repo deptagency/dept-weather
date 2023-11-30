@@ -6,9 +6,10 @@ import { CURRENT_LOCATION, DEFAULT_APP_THEME, LocalStorageKey } from 'constants/
 import { DEFAULT_UNITS } from 'constants/shared';
 import { AppThemeHelper } from 'helpers/app-theme';
 import { SearchQueryHelper } from 'helpers/search-query-helper';
-import { getLocalStorageItem, setLocalStorageItem, useLocalStorage } from 'hooks/use-local-storage';
+import { getLocalStorageItem, setLocalStorageItem } from 'hooks/use-local-storage';
 import { SearchResultCity } from 'models/cities/cities.model';
-import { Unit } from 'models/unit.enum';
+import { Unit, UnitChoices, UnitType } from 'models/unit.enum';
+import { getFormattedUnit } from 'utils';
 
 import styles from './SettingsOverlay.module.css';
 import homeStyles from 'styles/Home.module.css';
@@ -35,7 +36,11 @@ const Radio = forwardRef<
 ));
 Radio.displayName = 'Radio';
 
-export function SettingsOverlay({ showOverlay, recentCities: recentCitiesIn }: SettingsOverlayProps) {
+export function SettingsOverlay({
+  showOverlay,
+  recentCities: recentCitiesIn,
+  onUnitChoicesChange
+}: SettingsOverlayProps) {
   const [recentCities, setRecentCities] = useState<SettingsOverlayProps['recentCities']>([]);
   useEffect(
     () => setRecentCities(recentCitiesIn.filter(city => city.geonameid !== CURRENT_LOCATION.geonameid)),
@@ -45,7 +50,10 @@ export function SettingsOverlay({ showOverlay, recentCities: recentCitiesIn }: S
   const { register, control } = useForm<SettingsInputs>({
     defaultValues: {
       [LocalStorageKey.APP_THEME]: getLocalStorageItem(LocalStorageKey.APP_THEME) ?? DEFAULT_APP_THEME,
-      [LocalStorageKey.UNITS]: { ...DEFAULT_UNITS, ...JSON.parse(getLocalStorageItem(LocalStorageKey.UNITS) ?? '{}') }
+      [LocalStorageKey.UNITS]: {
+        ...DEFAULT_UNITS,
+        ...(JSON.parse(getLocalStorageItem(LocalStorageKey.UNITS) ?? '{}') as Partial<UnitChoices>)
+      }
     }
   });
 
@@ -58,13 +66,14 @@ export function SettingsOverlay({ showOverlay, recentCities: recentCitiesIn }: S
     AppThemeHelper.updateColorScheme(AppThemeHelper.prevIsNightVal);
   }, [appTheme]);
 
-  useLocalStorage(
-    LocalStorageKey.UNITS,
-    useWatch({
-      control,
-      name: 'units'
-    })
-  );
+  const unitChoices = useWatch({
+    control,
+    name: LocalStorageKey.UNITS
+  });
+  useEffect(() => {
+    setLocalStorageItem(LocalStorageKey.UNITS, unitChoices);
+    onUnitChoicesChange();
+  }, [unitChoices, onUnitChoicesChange]);
 
   // TODO - handle ESC key press
   return (
@@ -93,24 +102,24 @@ export function SettingsOverlay({ showOverlay, recentCities: recentCitiesIn }: S
             <div className={`${styles.section__sub} ${styles['section__sub--units']}`}>
               <legend className={styles.section__sub__header}>Temperature</legend>
               <Radio className={styles['section__sub__grid-col-3']} {...register('units.temp')} value={Unit.F}>
-                °F
+                {getFormattedUnit(UnitType.temp, Unit.F)}
               </Radio>
               <Radio {...register('units.temp')} value={Unit.C}>
-                °C
+                {getFormattedUnit(UnitType.temp, Unit.C)}
               </Radio>
               <legend className={styles.section__sub__header}>Wind Speed</legend>
               <Radio className={styles['section__sub__grid-col-3']} {...register('units.wind')} value={Unit.MILES}>
-                mph
+                {getFormattedUnit(UnitType.wind, Unit.MILES)}
               </Radio>
               <Radio {...register('units.wind')} value={Unit.KM}>
-                kmh
+                {getFormattedUnit(UnitType.wind, Unit.KM)}
               </Radio>
               <legend className={styles.section__sub__header}>Pressure</legend>
               <Radio {...register('units.pressure')} value={Unit.INCHES}>
-                in
+                {getFormattedUnit(UnitType.pressure, Unit.INCHES)}
               </Radio>
               <Radio {...register('units.pressure')} value={Unit.MILLIBAR}>
-                mb
+                {getFormattedUnit(UnitType.pressure, Unit.MILLIBAR)}
               </Radio>
               <legend className={styles.section__sub__header}>Precipitation</legend>
               <Radio
@@ -118,10 +127,10 @@ export function SettingsOverlay({ showOverlay, recentCities: recentCitiesIn }: S
                 {...register('units.precipitation')}
                 value={Unit.INCHES}
               >
-                in
+                {getFormattedUnit(UnitType.precipitation, Unit.INCHES)}
               </Radio>
               <Radio {...register('units.precipitation')} value={Unit.MILLIMETERS}>
-                mm
+                {getFormattedUnit(UnitType.precipitation, Unit.MILLIMETERS)}
               </Radio>
             </div>
           </fieldset>

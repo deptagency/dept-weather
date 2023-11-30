@@ -4,6 +4,7 @@ import { ForecastCard } from 'components/Card/ForecastCard';
 import { NotificationsCard } from 'components/Card/NotificationsCard/NotificationsCard';
 import { ObservationsCard } from 'components/Card/ObservationsCard';
 import { OfflineError } from 'components/Errors/OfflineError/OfflineError';
+import { DEFAULT_UNITS } from 'constants/shared';
 import { useOnlineStatus } from 'hooks/use-online-status';
 import { Alerts, NwsAlert } from 'models/api/alerts.model';
 import { APIRoute, getPath, QueryParams } from 'models/api/api-route.model';
@@ -11,16 +12,21 @@ import { Forecast, NwsPeriod } from 'models/api/forecast.model';
 import { Observations } from 'models/api/observations.model';
 import { Response } from 'models/api/response.model';
 import { SearchResultCity } from 'models/cities/cities.model';
+import { UnitChoices, UnitType } from 'models/unit.enum';
 import useSWR from 'swr';
 
 import homeStyles from 'styles/Home.module.css';
 
 const fetcher = (key: string) => fetch(key).then(res => res.json());
 const useAlerts = (
-  queryParams: QueryParams
-): { alerts?: Response<Alerts>; alertsIsLoading: boolean; alertsIsError: boolean } => {
+  queryParamsLocation: QueryParams
+): {
+  alerts?: Response<Alerts>;
+  alertsIsLoading: boolean;
+  alertsIsError: boolean;
+} => {
   const { data, error, isLoading, isValidating } = useSWR<Response<Alerts>>(
-    queryParams != null ? getPath(APIRoute.ALERTS, queryParams) : null,
+    queryParamsLocation != null ? getPath(APIRoute.ALERTS, queryParamsLocation) : null,
     fetcher
   );
 
@@ -31,10 +37,15 @@ const useAlerts = (
   };
 };
 const useObservations = (
-  queryParams: QueryParams
-): { observations?: Response<Observations>; observationsIsLoading: boolean; observationsIsError: boolean } => {
+  queryParamsLocation: QueryParams,
+  queryParamsUnits: NonNullable<QueryParams>
+): {
+  observations?: Response<Observations>;
+  observationsIsLoading: boolean;
+  observationsIsError: boolean;
+} => {
   const { data, error, isLoading, isValidating } = useSWR<Response<Observations>>(
-    queryParams != null ? getPath(APIRoute.CURRENT, queryParams) : null,
+    queryParamsLocation != null ? getPath(APIRoute.CURRENT, { ...queryParamsLocation, ...queryParamsUnits }) : null,
     fetcher
   );
 
@@ -45,10 +56,15 @@ const useObservations = (
   };
 };
 const useForecast = (
-  queryParams: QueryParams
-): { forecast?: Response<Forecast>; forecastIsLoading: boolean; forecastIsError: boolean } => {
+  queryParamsLocation: QueryParams,
+  queryParamsUnits: NonNullable<QueryParams>
+): {
+  forecast?: Response<Forecast>;
+  forecastIsLoading: boolean;
+  forecastIsError: boolean;
+} => {
   const { data, error, isLoading, isValidating } = useSWR<Response<Forecast>>(
-    queryParams != null ? getPath(APIRoute.FORECAST, queryParams) : null,
+    queryParamsLocation != null ? getPath(APIRoute.FORECAST, { ...queryParamsLocation, ...queryParamsUnits }) : null,
     fetcher
   );
 
@@ -77,44 +93,62 @@ const AlertCards = ({
 );
 
 const ForecastCards = ({
+  queryParamsUnits,
   isLoading,
   latestReadTime,
   periods,
   lid
 }: {
+  queryParamsUnits: NonNullable<QueryParams>;
   isLoading?: boolean;
   latestReadTime?: number;
   periods: NwsPeriod[];
   lid: string;
-}) => (
-  <>
-    {periods.map((period, idx) => {
-      const key = `${lid}-${idx}`;
-      return (
-        <ForecastCard _key={key} isLoading={isLoading} key={key} latestReadTime={latestReadTime} period={period} />
-      );
-    })}
-  </>
-);
+}) => {
+  const windUnit =
+    (queryParamsUnits[`${UnitType.wind}Unit`] as UnitChoices['wind'] | undefined) ?? DEFAULT_UNITS[UnitType.wind];
+  return (
+    <>
+      {periods.map((period, idx) => {
+        const key = `${lid}-${idx}`;
+        return (
+          <ForecastCard
+            _key={key}
+            isLoading={isLoading}
+            key={key}
+            latestReadTime={latestReadTime}
+            period={period}
+            windUnit={windUnit}
+          />
+        );
+      })}
+    </>
+  );
+};
 
 export function Main({
-  queryParams,
+  queryParamsLocation,
+  queryParamsUnits,
   selectedCity,
   expandedAlertId,
   children
 }: {
-  queryParams: QueryParams;
+  queryParamsLocation: QueryParams;
+  queryParamsUnits: NonNullable<QueryParams>;
   selectedCity: SearchResultCity | undefined;
   expandedAlertId: string | undefined;
   children?: ReactNode;
 }) {
   const isOnline = useOnlineStatus();
-  const { alerts, alertsIsError } = useAlerts(queryParams);
-  const { observations, observationsIsLoading, observationsIsError } = useObservations(queryParams);
-  const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParams);
+  const { alerts, alertsIsError } = useAlerts(queryParamsLocation);
+  const { observations, observationsIsLoading, observationsIsError } = useObservations(
+    queryParamsLocation,
+    queryParamsUnits
+  );
+  const { forecast, forecastIsLoading, forecastIsError } = useForecast(queryParamsLocation, queryParamsUnits);
 
   const [lid, setLid] = useState<string>('');
-  useEffect(() => setLid(String(queryParams?.id ?? '')), [queryParams]);
+  useEffect(() => setLid(String(queryParamsLocation?.id ?? '')), [queryParamsLocation]);
 
   const [placeholderPeriods, setPlaceholderPeriods] = useState<NwsPeriod[]>([]);
 
@@ -168,12 +202,14 @@ export function Main({
             isLoading={observationsIsLoading}
             latestReadTime={observationsLatestReadTime}
             observations={observations?.data}
+            queryParamsUnits={queryParamsUnits}
           />
           <ForecastCards
             isLoading={forecastIsLoading}
             latestReadTime={forecast?.latestReadTime ? forecast!.latestReadTime! : undefined}
             lid={lid}
             periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
+            queryParamsUnits={queryParamsUnits}
           />
         </>
       )}
