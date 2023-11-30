@@ -8,19 +8,19 @@ import { WindIcon } from 'components/Icons/WindIcon';
 import { UI_ANIMATION_DURATION } from 'constants/client';
 import { useShouldContinueRendering } from 'hooks/use-should-continue-rendering';
 import { NwsHourlyPeriodForecast, NwsPeriodForecast } from 'models/api/forecast.model';
-import { UnitChoices } from 'models/unit.enum';
+import { UnitChoices, UnitType } from 'models/unit.enum';
 
 import styles from './Forecast.module.css';
 
 export function Forecast({
-  windUnit,
+  units,
   summaryForecast,
   hourlyForecasts,
   isDaytime,
   isExpanded,
   animatedContentsWrapperId
 }: {
-  windUnit: UnitChoices['wind'];
+  units: Pick<UnitChoices, UnitType.wind>;
   summaryForecast: NwsPeriodForecast | null | undefined;
   hourlyForecasts: NwsHourlyPeriodForecast[] | null | undefined;
   isDaytime: boolean;
@@ -30,7 +30,7 @@ export function Forecast({
   const shouldContinueRendering = useShouldContinueRendering(isExpanded);
   return (
     <>
-      <SummaryForecast forecast={summaryForecast} isDaytime={isDaytime} windUnit={windUnit} />
+      <SummaryForecast forecast={summaryForecast} isDaytime={isDaytime} units={units} />
       <AnimateHeight duration={UI_ANIMATION_DURATION} height={isExpanded ? 'auto' : 0} id={animatedContentsWrapperId}>
         {hourlyForecasts?.length && (isExpanded || shouldContinueRendering) ? (
           <>
@@ -43,7 +43,7 @@ export function Forecast({
               <HumidityIcon ariaLabel="Humidity" />
               <WindIcon ariaLabel="Wind" directionDeg={undefined} />
               {hourlyForecasts.map((hourlyForecast, i) => (
-                <HourlyForecast forecast={hourlyForecast} isDaytime={isDaytime} key={i} windUnit={windUnit} />
+                <HourlyForecast forecast={hourlyForecast} isDaytime={isDaytime} key={i} units={units} />
               ))}
             </div>
           </>

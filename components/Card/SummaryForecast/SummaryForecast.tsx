@@ -24,11 +24,11 @@ const simplifyCondition = (conditionIn: string | null | undefined) => {
 };
 
 export function SummaryForecast({
-  windUnit,
+  units,
   forecast,
   isDaytime
 }: {
-  windUnit: UnitChoices[UnitType.wind];
+  units: Pick<UnitChoices, UnitType.wind>;
   forecast: NwsPeriodForecast | null | undefined;
   isDaytime: boolean;
 }) {
@@ -48,7 +48,7 @@ export function SummaryForecast({
         <Condition condition={condition} isNight={!isDaytime} size="small" />
       </div>
       <div className={styles['summary-forecast__measurements']}>
-        <Wind includeGustSpeed={false} unit={windUnit} wind={forecast?.wind} />
+        <Wind includeGustSpeed={false} units={units} wind={forecast?.wind} />
         <PrecipitationForecast chanceOfPrecipitation={forecast?.chanceOfPrecip} />
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { ComponentPropsWithoutRef, ComponentPropsWithRef, ForwardedRef, forwardRef, useEffect, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm, UseFormRegister, useWatch } from 'react-hook-form';
 import { Overlay } from 'components/Header/Overlay/Overlay';
 import { SettingsInputs, SettingsOverlayProps } from 'components/Header/SettingsOverlay/SettingsOverlay.types';
 import { CURRENT_LOCATION, DEFAULT_APP_THEME, LocalStorageKey } from 'constants/client';
@@ -35,6 +35,21 @@ const Radio = forwardRef<
   </label>
 ));
 Radio.displayName = 'Radio';
+
+const Radios = ({
+  unitType,
+  choices,
+  register
+}: {
+  unitType: UnitType;
+  choices: Unit[];
+  register: UseFormRegister<SettingsInputs>;
+}) =>
+  choices.map(unit => (
+    <Radio key={unit} {...register(`units.${unitType}`)} value={unit}>
+      {getFormattedUnit({ [unitType]: unit }, unitType)}
+    </Radio>
+  ));
 
 export function SettingsOverlay({
   showOverlay,
@@ -101,37 +116,16 @@ export function SettingsOverlay({
             <legend className={styles.section__header}>Units</legend>
             <div className={`${styles.section__sub} ${styles['section__sub--units']}`}>
               <legend className={styles.section__sub__header}>Temperature</legend>
-              <Radio className={styles['section__sub__grid-col-3']} {...register('units.temp')} value={Unit.F}>
-                {getFormattedUnit(UnitType.temp, Unit.F)}
-              </Radio>
-              <Radio {...register('units.temp')} value={Unit.C}>
-                {getFormattedUnit(UnitType.temp, Unit.C)}
-              </Radio>
+              <Radios choices={[Unit.F, Unit.C]} register={register} unitType={UnitType.temp} />
+
               <legend className={styles.section__sub__header}>Wind Speed</legend>
-              <Radio className={styles['section__sub__grid-col-3']} {...register('units.wind')} value={Unit.MILES}>
-                {getFormattedUnit(UnitType.wind, Unit.MILES)}
-              </Radio>
-              <Radio {...register('units.wind')} value={Unit.KM}>
-                {getFormattedUnit(UnitType.wind, Unit.KM)}
-              </Radio>
+              <Radios choices={[Unit.MILES, Unit.KM]} register={register} unitType={UnitType.wind} />
+
               <legend className={styles.section__sub__header}>Pressure</legend>
-              <Radio {...register('units.pressure')} value={Unit.INCHES}>
-                {getFormattedUnit(UnitType.pressure, Unit.INCHES)}
-              </Radio>
-              <Radio {...register('units.pressure')} value={Unit.MILLIBAR}>
-                {getFormattedUnit(UnitType.pressure, Unit.MILLIBAR)}
-              </Radio>
+              <Radios choices={[Unit.INCHES, Unit.MILLIBAR]} register={register} unitType={UnitType.pressure} />
+
               <legend className={styles.section__sub__header}>Precipitation</legend>
-              <Radio
-                className={styles['section__sub__grid-col-3']}
-                {...register('units.precipitation')}
-                value={Unit.INCHES}
-              >
-                {getFormattedUnit(UnitType.precipitation, Unit.INCHES)}
-              </Radio>
-              <Radio {...register('units.precipitation')} value={Unit.MILLIMETERS}>
-                {getFormattedUnit(UnitType.precipitation, Unit.MILLIMETERS)}
-              </Radio>
+              <Radios choices={[Unit.INCHES, Unit.MILLIMETERS]} register={register} unitType={UnitType.precipitation} />
             </div>
           </fieldset>
           <fieldset className={styles['section__notifications-container']}>

@@ -93,38 +93,34 @@ const AlertCards = ({
 );
 
 const ForecastCards = ({
-  queryParamsUnits,
+  units,
   isLoading,
   latestReadTime,
   periods,
   lid
 }: {
-  queryParamsUnits: NonNullable<QueryParams>;
+  units: Pick<UnitChoices, UnitType.wind>;
   isLoading?: boolean;
   latestReadTime?: number;
   periods: NwsPeriod[];
   lid: string;
-}) => {
-  const windUnit =
-    (queryParamsUnits[`${UnitType.wind}Unit`] as UnitChoices['wind'] | undefined) ?? DEFAULT_UNITS[UnitType.wind];
-  return (
-    <>
-      {periods.map((period, idx) => {
-        const key = `${lid}-${idx}`;
-        return (
-          <ForecastCard
-            _key={key}
-            isLoading={isLoading}
-            key={key}
-            latestReadTime={latestReadTime}
-            period={period}
-            windUnit={windUnit}
-          />
-        );
-      })}
-    </>
-  );
-};
+}) => (
+  <>
+    {periods.map((period, idx) => {
+      const key = `${lid}-${idx}`;
+      return (
+        <ForecastCard
+          _key={key}
+          isLoading={isLoading}
+          key={key}
+          latestReadTime={latestReadTime}
+          period={period}
+          units={units}
+        />
+      );
+    })}
+  </>
+);
 
 export function Main({
   queryParamsLocation,
@@ -134,7 +130,7 @@ export function Main({
   children
 }: {
   queryParamsLocation: QueryParams;
-  queryParamsUnits: NonNullable<QueryParams>;
+  queryParamsUnits: Partial<UnitChoices>;
   selectedCity: SearchResultCity | undefined;
   expandedAlertId: string | undefined;
   children?: ReactNode;
@@ -188,6 +184,9 @@ export function Main({
     setObservationsLatestReadTime(newObservationsLatestReadTime);
   }, [observations]);
 
+  const [units, setUnits] = useState(DEFAULT_UNITS);
+  useEffect(() => setUnits({ ...DEFAULT_UNITS, ...queryParamsUnits }), [queryParamsUnits]);
+
   return (
     <main className={homeStyles.container__content}>
       {children != null ? (
@@ -202,14 +201,14 @@ export function Main({
             isLoading={observationsIsLoading}
             latestReadTime={observationsLatestReadTime}
             observations={observations?.data}
-            queryParamsUnits={queryParamsUnits}
+            units={units}
           />
           <ForecastCards
             isLoading={forecastIsLoading}
             latestReadTime={forecast?.latestReadTime ? forecast!.latestReadTime! : undefined}
             lid={lid}
             periods={forecast?.data?.nws?.periods?.length ? forecast!.data!.nws!.periods! : placeholderPeriods}
-            queryParamsUnits={queryParamsUnits}
+            units={units}
           />
         </>
       )}

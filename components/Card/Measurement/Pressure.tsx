@@ -1,43 +1,29 @@
 import { Measurement } from 'components/Card/Measurement/Measurement';
-import { PressureIcon, PressureLevel, PressureTrend } from 'components/Icons/PressureIcon';
-import { WlPressure } from 'models/api/observations.model';
-import { toFixedOrEmDash } from 'utils';
+import { PressureIcon } from 'components/Icons/PressureIcon';
+import { BasePressure, WlPressure } from 'models/api/observations.model';
+import { Unit, UnitChoices, UnitType } from 'models/unit.enum';
+import { getFormattedUnit, toFixedOrEmDash } from 'utils';
 
-type PressureArg = (Pick<WlPressure, 'atSeaLevel'> & Partial<Pick<WlPressure, 'trend'>>) | null | undefined;
-
-const LOW_PRESSURE = 29.7;
-const HIGH_PRESSURE = 30.1;
-const getPressureLevel = (pressure?: PressureArg): PressureLevel => {
-  if (pressure?.atSeaLevel == null) return PressureLevel.MEDIUM;
-  else if (pressure.atSeaLevel < LOW_PRESSURE) return PressureLevel.LOW;
-  else if (pressure.atSeaLevel > HIGH_PRESSURE) return PressureLevel.HIGH;
-  else return PressureLevel.MEDIUM;
-};
-
-const STABLE_PRESSURE_TREND = 0.059; // ≈ 2 mb
-const getPressureTrend = (pressure?: PressureArg): PressureTrend => {
-  if (pressure?.trend == null) return PressureTrend.UNKNOWN;
-  else if (pressure.trend < STABLE_PRESSURE_TREND * -1) return PressureTrend.DECREASING;
-  else if (pressure.trend > STABLE_PRESSURE_TREND) return PressureTrend.INCREASING;
-  else return PressureTrend.STABLE;
-};
-
-export function Pressure({ pressure }: { pressure?: PressureArg }) {
-  const level = getPressureLevel(pressure);
-  const trend = getPressureTrend(pressure);
-
+export function Pressure({
+  pressure,
+  units
+}: {
+  pressure: (BasePressure & Partial<WlPressure>) | null | undefined;
+  units: Pick<UnitChoices, UnitType.pressure>;
+}) {
   let trendArrow = '';
-  if (trend === PressureTrend.DECREASING) trendArrow = ' ↓';
-  else if (trend === PressureTrend.STABLE) trendArrow = ' →';
-  else if (trend === PressureTrend.INCREASING) trendArrow = ' ↑';
+  if (pressure?.trendDescription === 'decreasing') trendArrow = ' ↓';
+  else if (pressure?.trendDescription === 'stable') trendArrow = ' →';
+  else if (pressure?.trendDescription === 'increasing') trendArrow = ' ↑';
 
   return (
     <Measurement
-      icon={<PressureIcon level={level} trend={trend} />}
+      icon={<PressureIcon level={pressure?.atSeaLevelDescription} trend={pressure?.trendDescription} />}
       label="Pressure"
       value={
         <>
-          {toFixedOrEmDash(pressure?.atSeaLevel)} <span>in</span>
+          {toFixedOrEmDash(pressure?.atSeaLevel, units[UnitType.pressure] === Unit.INCHES ? 2 : 1)}{' '}
+          <span suppressHydrationWarning>{getFormattedUnit(units, UnitType.pressure)}</span>
           {trendArrow}
         </>
       }

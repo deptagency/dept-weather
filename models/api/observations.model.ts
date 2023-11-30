@@ -48,12 +48,17 @@ export interface Wind {
   gustSpeed: number | null;
 }
 
+export type PressureLevelDescription = 'low' | 'medium' | 'high';
+export type PressureTrendDescription = 'decreasing' | 'stable' | 'increasing';
+
 export interface BasePressure {
   atSeaLevel: number | null;
+  atSeaLevelDescription: PressureLevelDescription | null;
 }
 
 export interface WlPressure extends BasePressure {
   trend: number | null;
+  trendDescription: PressureTrendDescription | null;
 }
 
 export interface BasePrecipitation {

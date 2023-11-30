@@ -42,9 +42,7 @@ const getExpandedAlertIdFromUrl = (routerQuery: NextRouter['query']) => {
 const getQueryParamsUnits = (): NonNullable<QueryParams> => {
   const unitChoices = JSON.parse(getLocalStorageItem(LocalStorageKey.UNITS) ?? '{}') as Partial<UnitChoices>;
   return Object.fromEntries(
-    Object.entries(unitChoices)
-      .filter(([unitType, unit]) => DEFAULT_UNITS[unitType as UnitType] !== unit)
-      .map(([k, v]) => [`${k}Unit`, v])
+    Object.entries(unitChoices).filter(([unitType, unit]) => DEFAULT_UNITS[unitType as UnitType] !== unit)
   );
 };
 

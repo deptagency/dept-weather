@@ -73,10 +73,9 @@ export class NumberHelper {
   }
 
   static getUnitMapping(unitType: UnitType, from: Unit, reqQuery: ReqQuery): UnitMapping {
-    const reqToUnit = reqQuery[`${unitType}Unit`];
     return {
       from,
-      to: reqToUnit != null ? ((reqToUnit as string).toLowerCase() as Unit) : DEFAULT_UNITS[unitType]
+      to: reqQuery[unitType] != null ? ((reqQuery[unitType] as string).toLowerCase() as Unit) : DEFAULT_UNITS[unitType]
     };
   }
 

@@ -4,20 +4,20 @@ import { Forecast } from 'components/Card/Forecast/Forecast';
 import { ForecastTemps } from 'components/Card/ForecastTemps/ForecastTemps';
 import { NwsPeriod } from 'models/api/forecast.model';
 import { Color } from 'models/color.enum';
-import { UnitChoices } from 'models/unit.enum';
+import { UnitChoices, UnitType } from 'models/unit.enum';
 
 import styles from './Card.module.css';
 
 const ANIMATED_HOURLY_FORECASTS_WRAPPER_ID = 'HourlyForecastsWrapper';
 
 export function ForecastCard({
-  windUnit,
+  units,
   isLoading,
   latestReadTime,
   period,
   _key
 }: {
-  windUnit: UnitChoices['wind'];
+  units: Pick<UnitChoices, UnitType.wind>;
   isLoading?: boolean;
   latestReadTime?: number;
   period: NwsPeriod;
@@ -61,7 +61,7 @@ export function ForecastCard({
             isDaytime={true}
             isExpanded={isExpanded}
             summaryForecast={period.dayForecast}
-            windUnit={windUnit}
+            units={units}
           />
           <Forecast
             animatedContentsWrapperId={animatedContentsWrapperIds[1]}
@@ -69,7 +69,7 @@ export function ForecastCard({
             isDaytime={false}
             isExpanded={isExpanded}
             summaryForecast={period.nightForecast}
-            windUnit={windUnit}
+            units={units}
           />
         </div>
       </div>

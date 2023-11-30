@@ -5,6 +5,7 @@ import { Cached, CacheEntry } from 'helpers/api/cached';
 import { LoggerHelper } from 'helpers/api/logger-helper';
 import { CoordinatesHelper } from 'helpers/coordinates-helper';
 import { NumberHelper } from 'helpers/number-helper';
+import { PressureHelper } from 'helpers/pressure-helper';
 import { WlObservations } from 'models/api/observations.model';
 import { ReqQuery } from 'models/api/req-query.model';
 import { MinimalQueriedCity } from 'models/cities/cities.model';
@@ -76,11 +77,16 @@ export class WeatherlinkHelper {
           units[UnitType.pressure],
           units[UnitType.pressure].to === Unit.INCHES ? 2 : 1
         ),
+        atSeaLevelDescription: PressureHelper.getAtSeaLevelDescription(
+          wlBarometer.bar_sea_level,
+          DEFAULT_UNITS[UnitType.pressure]
+        ),
         trend: NumberHelper.convert(
           wlBarometer.bar_trend,
           units[UnitType.pressure],
           units[UnitType.pressure].to === Unit.INCHES ? 3 : 1
-        )
+        ),
+        trendDescription: PressureHelper.getTrendDescription(wlBarometer.bar_trend, DEFAULT_UNITS[UnitType.pressure])
       },
       rainfall: {
         last15Mins: NumberHelper.convert(wlMain.rainfall_last_15_min_in, units[UnitType.precipitation], 2),

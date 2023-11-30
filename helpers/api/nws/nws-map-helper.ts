@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/utc';
 import { CacheEntry } from 'helpers/api/cached';
 import { FeelsHelper } from 'helpers/api/feels-helper';
 import { NumberHelper } from 'helpers/number-helper';
+import { PressureHelper } from 'helpers/pressure-helper';
 import { WindHelper } from 'helpers/wind-helper';
 import { DescriptionItem, NwsAlert, NwsAlerts } from 'models/api/alerts.model';
 import { NwsForecast, NwsHourlyPeriodForecast, NwsPeriod, NwsPeriodForecast } from 'models/api/forecast.model';
@@ -71,6 +72,10 @@ export class NwsMapHelper {
           nwsCurrent?.seaLevelPressure?.value,
           pressureUnitMapping,
           pressureUnitMapping?.to === Unit.INCHES ? 2 : 1
+        ),
+        atSeaLevelDescription: PressureHelper.getAtSeaLevelDescription(
+          nwsCurrent?.seaLevelPressure?.value,
+          NwsUnits[nwsCurrent.seaLevelPressure.unitCode]
         )
       },
       precipitation: {

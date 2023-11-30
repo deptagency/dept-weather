@@ -8,13 +8,13 @@ import { getFormattedUnit, roundOrEmDash } from 'utils';
 export function Wind({
   wind,
   includeGustSpeed,
-  unit
+  units
 }: {
   wind: WindModel | undefined;
   includeGustSpeed: boolean;
-  unit: UnitChoices[UnitType.wind];
+  units: Pick<UnitChoices, UnitType.wind>;
 }) {
-  const formattedUnit = getFormattedUnit(UnitType.wind, unit);
+  const formattedUnit = getFormattedUnit(units, UnitType.wind);
 
   return (
     <Measurement

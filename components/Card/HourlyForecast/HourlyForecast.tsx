@@ -10,11 +10,11 @@ import styles from './HourlyForecast.module.css';
 
 const HOURLY_FORECAST_CONDITION_SIZE: ConditionSize = 'x-small';
 export function HourlyForecast({
-  windUnit,
+  units,
   forecast,
   isDaytime
 }: {
-  windUnit: UnitChoices[UnitType.wind];
+  units: Pick<UnitChoices, UnitType.wind>;
   forecast: NwsHourlyPeriodForecast;
   isDaytime: boolean;
 }) {
@@ -37,8 +37,8 @@ export function HourlyForecast({
       <p className={styles['hourly-forecast__measurement']}>{`${roundTensOrEmDash(forecast.chanceOfPrecip)}%`}</p>
       <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.humidity)}%`}</p>
       <p className={styles['hourly-forecast__measurement']}>{`${roundOrEmDash(forecast.wind.speed)}${getFormattedUnit(
-        UnitType.wind,
-        windUnit
+        units,
+        UnitType.wind
       )} ${forecast.wind.directionDeg != null ? ` ${WindHelper.degToDir(forecast.wind.directionDeg)}` : ''}`}</p>
     </>
   );
