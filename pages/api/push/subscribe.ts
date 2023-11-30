@@ -34,6 +34,9 @@ const validateRequest = (subReq: SubscribeRequest, response: Pick<ResponseModel<
   }
 };
 
+/**
+ * PUT: Update/add entry in pushSubscriptions for given @param subscription and optional @param uuid
+ */
 export default async function subscribe(req: NextRequest) {
   const response: Omit<ResponseModel<SubscribeResponse | null>, 'validUntil' | 'latestReadTime'> = {
     data: null,

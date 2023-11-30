@@ -82,7 +82,13 @@ export default async function cityAlerts(req: NextRequest) {
     }
 
     if (req.method === 'GET') {
-      return new NextResponse(JSON.stringify(response), { headers: PUSH_RESP_JSON_CONTENT_HEADERS, status: 200 });
+      return new NextResponse(JSON.stringify(response), {
+        headers: {
+          ...PUSH_RESP_JSON_CONTENT_HEADERS,
+          ...(process.env.NODE_ENV === 'development' ? {} : { 'Cache-Control': 'public, stale-while-revalidate' })
+        },
+        status: 200
+      });
     }
 
     const geonameid = Number(geonameidStr);

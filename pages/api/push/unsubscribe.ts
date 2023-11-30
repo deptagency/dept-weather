@@ -8,6 +8,9 @@ import { Response as ResponseModel } from 'models/api/response.model';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
+/**
+ * DELETE: Delete entry in pushSubscriptions for @param subscription.endpoint or @param uuid
+ */
 export default async function unsubscribe(req: NextRequest) {
   const response: Omit<ResponseModel<UnSubscribeResponse | null>, 'validUntil' | 'latestReadTime'> = {
     data: null,
