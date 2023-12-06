@@ -153,7 +153,7 @@ const run = async () => {
   // await generateCaches();
 
   // Use for building upon existing caches
-  const topN = 30_557;
+  const topN = 30_556;
   const queryCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-query-cache.json`);
   const cityAndStateCodeCache = await read(`${DOT_DATA_PATH}/cities-top${topN}-cityAndStateCode-cache.json`);
   await generateCaches(queryCache, cityAndStateCodeCache, topN);
