@@ -1,8 +1,16 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
+config({ path: resolve(process.cwd(), '.env.local') });
+
 import { createWriteStream } from 'fs';
-import { readFile, unlink, writeFile } from 'fs/promises';
+import { readdir, readFile, unlink, writeFile } from 'fs/promises';
+import { Kysely } from 'kysely';
+import { PlanetScaleDialect } from 'kysely-planetscale';
 import prettier from 'prettier';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
+
+import { DOT_DATA_PATH, QUERY_CACHE_FILE_REGEX } from './constants.js';
 
 export const cityGeonameidSorter = (city1, city2) => city1.geonameid - city2.geonameid;
 export const cityPopulationSorter = (city1, city2) => city2.population - city1.population;
@@ -38,3 +46,24 @@ export const download = async (url, path) => {
   const fileStream = createWriteStream(path, { flags: 'wx' });
   await finished(Readable.fromWeb(res.body).pipe(fileStream));
 };
+
+export const getMaxNExistingQueryCache = async () => {
+  const dotDataFiles = await readdir(DOT_DATA_PATH);
+  const queryCacheFiles = dotDataFiles
+    .filter(fName => QUERY_CACHE_FILE_REGEX.test(fName))
+    .map(fName => ({ fName, topN: fName.match(QUERY_CACHE_FILE_REGEX)[1] }))
+    .sort((a, b) => b.topN - a.topN);
+  if (queryCacheFiles.length === 0) {
+    console.error('Could not find any existing query cache files!');
+    process.exit(1);
+  }
+  return queryCacheFiles[0];
+};
+
+export const db = new Kysely({
+  dialect: new PlanetScaleDialect({
+    host: process.env.DATABASE_HOST,
+    username: process.env.DATABASE_USERNAME,
+    password: process.env.DATABASE_PASSWORD
+  })
+});
