@@ -36,20 +36,20 @@ const getTopResults = results => {
   // Sort sets of results with same score by population
   for (let start = 0; start < results.length && topResults.length < CITY_SEARCH_RESULT_LIMIT; ) {
     const score = results[start].score;
-    let end = start;
+    let end = start + 1;
     for (; end < results.length; end++) {
       if (results[end].score !== score) {
         break;
       }
     }
-    if (end > start) {
-      const resultsWithScore = results.slice(start, end);
-      const sortedResultsWithScore = [...resultsWithScore]
-        .sort(cityPopulationSorter)
-        .slice(0, CITY_SEARCH_RESULT_LIMIT - topResults.length);
-      topResults.push(...sortedResultsWithScore);
-    }
-    start = end + 1;
+
+    const resultsWithScore = results.slice(start, end);
+    const sortedResultsWithScore = [...resultsWithScore]
+      .sort(cityPopulationSorter)
+      .slice(0, CITY_SEARCH_RESULT_LIMIT - topResults.length);
+    topResults.push(...sortedResultsWithScore);
+
+    start = end;
   }
 
   return topResults;
