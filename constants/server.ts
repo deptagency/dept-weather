@@ -8,7 +8,7 @@ export const CITY_SEARCH_DISTANCE_TO_QUERIED_ROUNDING_LEVEL = 2;
 export const CITY_SEARCH_RESULTS_MAX_AGE = 90 * 24 * 60 * 60; // 90 days;
 export const CITY_SEARCH_DATA_FOLDER = './data';
 export const CITY_SEARCH_CITIES_BY_ID_FILENAME = 'cities-by-id.json';
-export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top30557-query-cache.json';
+export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top30556-query-cache.json';
 
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
 export const AIRNOW_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour

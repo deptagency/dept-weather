@@ -5,7 +5,7 @@ export const APP_TITLE = 'DEPT® Weather';
 export const APP_DESCRIPTION = `The ${APP_TITLE} app provides up-to-date weather observations, daily & hourly forecasts, and alerts for locations across the U.S.`;
 export const APP_URL = 'https://weather.deptagency.com';
 export const APP_MASK_ICON_COLOR = '#000';
-export const CITIES_CACHE_FILENAME = 'cities-top10000-bundled-cache.json';
+export const CITIES_CACHE_FILENAME = 'cities-top10000-bundled-cache-2023-12-05.json';
 export const UI_ANIMATION_DURATION = 300;
 export const GEOPOSITION_PERMISSION_DENIED_ERROR_CODE = 1;
 
