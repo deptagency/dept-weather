@@ -63,9 +63,10 @@ export function SearchOverlay({
     // If query is non-empty string & cache is defined...
     if (formattedQuery && citiesCache != null) {
       const cachedQuery = citiesCache.queryCache[formattedQuery.toLowerCase()];
-      // If query is in gidQueryCache...
+      // If query is in queryCache...
       if (cachedQuery?.length) {
-        // Map array of geonameids to array of objects, which also include the cityAndStateCode found in the gidCityAndStateCodeCache
+        // Map array of geonameids to array of objects,
+        //  with cityAndStateCode from cityAndStateCodeCache
         const cachedResults = cachedQuery.map(geonameidNum => {
           const geonameid = String(geonameidNum);
           return {
@@ -92,7 +93,9 @@ export function SearchOverlay({
     const getCachedResponseElseDebounce = async () => {
       try {
         const cachedResponse = await caches.match(
-          getPath(APIRoute.CITY_SEARCH, { [API_SEARCH_QUERY_KEY]: formattedQuery })
+          getPath(APIRoute.CITY_SEARCH, {
+            [API_SEARCH_QUERY_KEY]: formattedQuery
+          })
         );
         if (cachedResponse) {
           // API call was previously made & cached, use the cached response
@@ -119,9 +122,14 @@ export function SearchOverlay({
       controllerRef.current = controller;
 
       try {
-        const res = await fetch(getPath(APIRoute.CITY_SEARCH, { [API_SEARCH_QUERY_KEY]: searchQuery }), {
-          signal: controllerRef.current?.signal
-        });
+        const res = await fetch(
+          getPath(APIRoute.CITY_SEARCH, {
+            [API_SEARCH_QUERY_KEY]: searchQuery
+          }),
+          {
+            signal: controllerRef.current?.signal
+          }
+        );
         const resJSON = await res.json();
         setResults([...resJSON.data].sort(sortRecentsToFront));
         setHighlightedIndexDistance(0);
