@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { AppProps } from 'next/app';
 import localFont from 'next/font/local';
-import { AppThemeHelper } from 'helpers/app-theme';
+import { AppThemeHelper } from 'helpers/app-theme-helper';
 
 import 'styles/globals.css';
 import styles from 'styles/Home.module.css';

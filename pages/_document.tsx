@@ -49,8 +49,7 @@ export default function Document() {
       <Head>
         <meta content={APP_TITLE} name="application-name" />
         <meta content="yes" name="apple-mobile-web-app-capable" />
-        <meta content="white" media="(prefers-color-scheme: light)" name="apple-mobile-web-app-status-bar-style" />
-        <meta content="black" media="(prefers-color-scheme: dark)" name="apple-mobile-web-app-status-bar-style" />
+        <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style" />
         <meta content={APP_TITLE} name="apple-mobile-web-app-title" />
         <meta content={APP_DESCRIPTION} name="description" />
         <meta content="yes" name="mobile-web-app-capable" />

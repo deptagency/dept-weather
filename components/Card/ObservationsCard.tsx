@@ -8,7 +8,7 @@ import { Precipitation } from 'components/Card/Measurement/Precipitation';
 import { Pressure } from 'components/Card/Measurement/Pressure';
 import { UVIndex } from 'components/Card/Measurement/UVIndex';
 import { Wind } from 'components/Card/Measurement/Wind';
-import { AppThemeHelper } from 'helpers/app-theme';
+import { AppThemeHelper } from 'helpers/app-theme-helper';
 import { Observations, SunTimesObservations } from 'models/api/observations.model';
 import { Color } from 'models/color.enum';
 import { UnitChoices, UnitType } from 'models/unit.enum';

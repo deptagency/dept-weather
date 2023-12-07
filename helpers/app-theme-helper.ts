@@ -8,14 +8,30 @@ export class AppThemeHelper {
     return this._prevIsNightVal;
   }
 
+  private static readonly THEME_COLOR: Record<ColorScheme, string> = {
+    light: '#fff',
+    dark: '#000'
+  };
+
+  private static getThemeColorMetaSelector(prefersColorScheme?: ColorScheme) {
+    return `meta[name="theme-color"]${
+      prefersColorScheme ? `[media="(prefers-color-scheme: ${prefersColorScheme})"]` : ''
+    }`;
+  }
+
   private static setColorScheme(colorScheme: ColorScheme) {
     const root = document.querySelector(':root')!;
-    const existingWithoutColorScheme = root.className.replaceAll(COLOR_SCHEME_REGEX, '').trim();
-    root.className = `${existingWithoutColorScheme.length ? `${existingWithoutColorScheme} ` : ''}${colorScheme}`;
+    const themeColorMetas = document.querySelectorAll(this.getThemeColorMetaSelector())!;
+    const rootBaseClassName = root.className.replaceAll(COLOR_SCHEME_REGEX, '').trim();
+
+    root.className = `${rootBaseClassName.length ? `${rootBaseClassName} ` : ''}${colorScheme}`;
+    themeColorMetas.forEach(themeColorMeta => themeColorMeta.setAttribute('content', this.THEME_COLOR[colorScheme]));
   }
 
   private static unsetColorScheme() {
     document.querySelector(':root')!.classList.remove('light', 'dark');
+    document.querySelector(this.getThemeColorMetaSelector('light'))!.setAttribute('content', this.THEME_COLOR['light']);
+    document.querySelector(this.getThemeColorMetaSelector('dark'))!.setAttribute('content', this.THEME_COLOR['dark']);
   }
 
   /** Only call from client-side
