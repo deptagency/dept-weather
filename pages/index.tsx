@@ -218,9 +218,19 @@ export default function Home() {
   }, [geonameid, selectedCity, router, isPopState]);
 
   const [showOverlay, setShowOverlay] = useState<ShowOverlayType>(false);
+  const windowHandleKeyDown = (event: KeyboardEvent) => event.key === 'Escape' && setShowOverlay(false);
+
   useEffect(() => {
     const className = 'body--disable-scroll';
-    showOverlay ? document.body.classList.add(className) : document.body.classList.remove(className);
+
+    if (showOverlay) {
+      document.body.classList.add(className);
+      window.addEventListener('keydown', windowHandleKeyDown);
+      return () => window.removeEventListener('keydown', windowHandleKeyDown);
+    }
+
+    document.body.classList.remove(className);
+    window.removeEventListener('keydown', windowHandleKeyDown);
   }, [showOverlay]);
 
   return (

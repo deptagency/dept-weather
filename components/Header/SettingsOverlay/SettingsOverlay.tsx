@@ -90,7 +90,6 @@ export function SettingsOverlay({
     onUnitChoicesChange();
   }, [unitChoices, onUnitChoicesChange]);
 
-  // TODO - handle ESC key press
   return (
     <Overlay innerClassName={`${styles.inner} ${homeStyles.container__content}`} showOverlay={showOverlay}>
       <div className={styles['form-container']}>
