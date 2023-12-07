@@ -2,6 +2,9 @@ import { ComponentPropsWithoutRef, ComponentPropsWithRef, ForwardedRef, forwardR
 import { useForm, UseFormRegister, useWatch } from 'react-hook-form';
 import { Overlay } from 'components/Header/Overlay/Overlay';
 import { SettingsInputs, SettingsOverlayProps } from 'components/Header/SettingsOverlay/SettingsOverlay.types';
+import { NotificationsIcon } from 'components/Icons/NotificationsIcon';
+import { ThemeIcon } from 'components/Icons/ThemeIcon';
+import { UnitsIcon } from 'components/Icons/UnitsIcon';
 import { CURRENT_LOCATION, DEFAULT_APP_THEME, LocalStorageKey } from 'constants/client';
 import { DEFAULT_UNITS } from 'constants/shared';
 import { AppThemeHelper } from 'helpers/app-theme-helper';
@@ -95,7 +98,10 @@ export function SettingsOverlay({
       <div className={styles['form-container']}>
         <form className={`animated ${styles['form']} ${showOverlay ? styles['form--end'] : ''}`}>
           <fieldset>
-            <legend className={styles.section__header}>Theme</legend>
+            <legend className={styles.section__header}>
+              <ThemeIcon />
+              <span>Theme</span>
+            </legend>
             <div className={styles['section__radio-group']}>
               <Radio {...register('appTheme')} value="system">
                 System
@@ -112,7 +118,10 @@ export function SettingsOverlay({
             </div>
           </fieldset>
           <fieldset>
-            <legend className={styles.section__header}>Units</legend>
+            <legend className={styles.section__header}>
+              <UnitsIcon />
+              <span>Units</span>
+            </legend>
             <div className={`${styles.section__sub} ${styles['section__sub--units']}`}>
               <legend className={styles.section__sub__header}>Temperature</legend>
               <Radios choices={[Unit.F, Unit.C]} register={register} unitType={UnitType.temp} />
@@ -129,7 +138,8 @@ export function SettingsOverlay({
           </fieldset>
           <fieldset className={styles['section__notifications-container']}>
             <legend className={styles.section__header}>
-              Notifications
+              <NotificationsIcon />
+              <span>Notifications</span>
               <span className={styles.section__header__description}>
                 Receive severe weather alerts for selected cities
               </span>

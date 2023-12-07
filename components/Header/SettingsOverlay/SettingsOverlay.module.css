@@ -36,6 +36,12 @@
   font-size: 2rem;
 }
 
+.section__header > svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+}
+
 .section__header,
 .section__sub__header {
   font-weight: 500;
