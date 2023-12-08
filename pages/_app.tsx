@@ -4,7 +4,6 @@ import localFont from 'next/font/local';
 import { AppThemeHelper } from 'helpers/app-theme-helper';
 
 import 'styles/globals.css';
-import styles from 'styles/Home.module.css';
 
 const maisonNeue = localFont({
   src: [
@@ -32,7 +31,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => AppThemeHelper.updateColorScheme(), []);
 
   return (
-    <div className={`${styles.container} ${maisonNeue.className}`}>
+    <div className={maisonNeue.className}>
       <Component {...pageProps} />
     </div>
   );

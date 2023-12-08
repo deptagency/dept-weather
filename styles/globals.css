@@ -89,10 +89,16 @@ body {
   color: var(--foreground);
   padding: 0;
   margin: 0;
+
+  -webkit-overflow-scrolling: touch !important;
+  overflow: auto !important;
+  height: 100vh !important;
 }
 
 .body--disable-scroll {
-  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  overflow: hidden !important;
   touch-action: none;
 }
 
