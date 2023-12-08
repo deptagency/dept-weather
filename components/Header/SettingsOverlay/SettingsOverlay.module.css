@@ -5,14 +5,8 @@
 }
 
 .form-container {
-  max-width: 460px;
+  max-width: 492px;
   width: 100%;
-}
-
-@media screen and (max-width: 576px) {
-  .form-container {
-    max-width: none;
-  }
 }
 
 .form {
@@ -29,6 +23,22 @@
 .form--end {
   opacity: 1;
   transform: translateY(0);
+}
+
+.form > * {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media screen and (max-width: 576px) {
+  .form-container {
+    max-width: none;
+  }
+
+  .form > * {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
 }
 
 .section__header {

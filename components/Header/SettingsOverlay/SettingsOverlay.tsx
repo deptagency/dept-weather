@@ -94,7 +94,10 @@ export function SettingsOverlay({
   }, [unitChoices, onUnitChoicesChange]);
 
   return (
-    <Overlay innerClassName={`${styles.inner} ${homeStyles.container__content}`} showOverlay={showOverlay}>
+    <Overlay
+      innerClassName={`${styles.inner} ${homeStyles['container__content--no-padding']}`}
+      showOverlay={showOverlay}
+    >
       <div className={styles['form-container']}>
         <form className={`animated ${styles['form']} ${showOverlay ? styles['form--end'] : ''}`}>
           <fieldset>
