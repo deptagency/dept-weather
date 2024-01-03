@@ -42,9 +42,18 @@ export class AirNowHelper {
 
   private static readonly current = new Cached<CurrentObservationsWithTz, MinimalQueriedCity>(
     async (minQueriedCity: MinimalQueriedCity) => {
-      const currentObservations = (await (
-        await fetch(this.getRequestUrlFor(minQueriedCity), { headers: { 'User-Agent': this.userAgent } })
-      ).json()) as CurrentObservations;
+      let currentObservations: CurrentObservations = [];
+      try {
+        currentObservations = (await (
+          await fetch(this.getRequestUrlFor(minQueriedCity), { headers: { 'User-Agent': this.userAgent } })
+        ).json()) as CurrentObservations;
+      } catch (err) {
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.current.getItemOnMiss()`).error(
+          `Couldn't fetch due to an exception`
+        );
+        console.error(err);
+      }
+
       return {
         observations: currentObservations,
         timeZone: minQueriedCity.timeZone
@@ -64,11 +73,11 @@ export class AirNowHelper {
     return {
       readTime: this.getLatestReadTime(cacheEntry.item),
       validUntil: cacheEntry.validUntil,
-      observations: cacheEntry.item.observations
+      observations: (cacheEntry.item.observations ?? [])
         .map(observation => ({
           pollutant: observation.ParameterName,
           aqi: observation.AQI,
-          aqiLevelName: observation.Category.Name
+          aqiLevelName: observation.Category?.Name
         }))
         .sort((a, b) => b.aqi - a.aqi)
     };

@@ -43,7 +43,7 @@ export function ObservationsCard({
       />
       <div className={styles['card-contents']}>
         <div className={styles['card-contents__overview']}>
-          <CurrentTemp observations={observations?.wl ?? observations?.nws} />
+          <CurrentTemp observations={observations?.wl?.temperature != null ? observations.wl : observations?.nws} />
           <Condition
             condition={observations?.nws?.textDescription}
             isNight={getIsNight(observations?.sun)}
@@ -51,11 +51,18 @@ export function ObservationsCard({
           />
         </div>
         <div className={styles['card-contents__measurements']}>
-          <Wind includeGustSpeed={true} wind={observations?.wl?.wind ?? observations?.nws?.wind} />
+          <Wind
+            includeGustSpeed={true}
+            wind={observations?.wl?.wind?.speed != null ? observations.wl.wind : observations?.nws?.wind}
+          />
           <UVIndex epaData={observations?.epa} />
           <AirQuality airnowData={observations?.airnow} />
           <Humidity humidity={observations?.wl?.humidity ?? observations?.nws?.humidity} />
-          <Pressure pressure={observations?.wl?.pressure ?? observations?.nws?.pressure} />
+          <Pressure
+            pressure={
+              observations?.wl?.pressure?.atSeaLevel != null ? observations.wl.pressure : observations?.nws?.pressure
+            }
+          />
           {observations?.wl?.rainfall?.last24Hrs != null ? (
             <Precipitation label="Last 24hr Rainfall" precipitation={observations.wl.rainfall.last24Hrs} />
           ) : (

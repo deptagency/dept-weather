@@ -6,6 +6,7 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { CacheEntry } from 'helpers/api/cached';
 import { FeelsHelper } from 'helpers/api/feels-helper';
+import { LoggerHelper } from 'helpers/api/logger-helper';
 import { NumberHelper } from 'helpers/number-helper';
 import { WindHelper } from 'helpers/wind-helper';
 import { DescriptionItem, NwsAlert, NwsAlerts } from 'models/api/alerts.model';
@@ -43,6 +44,8 @@ const NWS_ALERTS_HEADING_REGEX = /(\w+( +\w+)*)(?=\.{3})/;
 const NWS_ALERTS_BODY_REGEX = /(?<=\.{3})(.*)/m;
 
 export class NwsMapHelper {
+  private static readonly CLASS_NAME = 'NwsMapHelper';
+
   private static getIsoTzString(time: Dayjs) {
     return time.format('YYYY-MM-DDTHH:mm:ssZ');
   }
@@ -52,6 +55,13 @@ export class NwsMapHelper {
     const pressureUnitMapping = nwsCurrent?.seaLevelPressure?.unitCode
       ? NumberHelper.getUnitMapping(UnitType.pressure, NwsUnits[nwsCurrent.seaLevelPressure.unitCode], reqQuery)
       : null;
+
+    if (nwsCurrent == null && 'status' in cacheEntry.item) {
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.mapCurrentToNwsObservations()`).error(
+        `${cacheEntry.item.status} error on response`
+      );
+      console.error(cacheEntry.item);
+    }
 
     return {
       readTime: nwsCurrent?.timestamp ? dayjs(nwsCurrent.timestamp).unix() : 0,

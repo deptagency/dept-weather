@@ -11,6 +11,7 @@ import { MinimalQueriedCity } from 'models/cities/cities.model';
 import { Unit, UnitType } from 'models/unit.enum';
 import { BarometerSensorData, CurrentConditions, MainSensorData } from 'models/weatherlink/current-conditions.model';
 import { SensorType } from 'models/weatherlink/sensor-type.enum';
+import { Station } from 'models/weatherlink/stations.model';
 import { default as WeatherLink } from 'weatherlink';
 
 export class WeatherlinkHelper {
@@ -20,8 +21,13 @@ export class WeatherlinkHelper {
   private static readonly wl = WeatherLink({ apiKey: this.apiKey, apiSecret: this.apiSecret });
 
   private static readonly getAllStationsPromise = this.wl.getAllStations();
-  private static async getMainStation() {
-    return (await this.getAllStationsPromise).stations[0];
+  private static async getMainStation(): Promise<Station | undefined> {
+    try {
+      return (await this.getAllStationsPromise).stations[0];
+    } catch (err) {
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getMainStation()`).error(`Couldn't fetch due to an exception`);
+      console.error(err);
+    }
   }
 
   static shouldUse(minQueriedCity: MinimalQueriedCity) {
@@ -36,11 +42,24 @@ export class WeatherlinkHelper {
     return distanceToAQ < 5;
   }
 
-  private static readonly current = new Cached<CurrentConditions, undefined>(
-    async () => this.wl.getCurrent({ stationId: (await this.getMainStation()).station_id }),
-    async (_: string, newItem: CurrentConditions) => {
-      const lastReading = newItem.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0]?.ts ?? 0;
-      const recordingInterval = (await this.getMainStation()).recording_interval * 60;
+  private static readonly current = new Cached<CurrentConditions | undefined, undefined>(
+    async () => {
+      let currentConditions: CurrentConditions | undefined;
+      try {
+        currentConditions = (await this.wl.getCurrent({
+          stationId: (await this.getMainStation())!.station_id
+        })) as CurrentConditions;
+      } catch (err) {
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.current.getItemOnMiss()`).error(
+          `Couldn't fetch due to an exception`
+        );
+        console.error(err);
+      }
+      return currentConditions;
+    },
+    async (_: string, newItem: CurrentConditions | undefined) => {
+      const lastReading = newItem?.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0]?.ts ?? 0;
+      const recordingInterval = ((await this.getMainStation())?.recording_interval ?? 0) * 60;
       return lastReading ? lastReading + recordingInterval + 10 : 0;
     },
     LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
@@ -49,11 +68,14 @@ export class WeatherlinkHelper {
     return this.current.get(AQ_COORDINATES_STR, undefined);
   }
 
-  static mapCurrentToWlObservations(cacheEntry: CacheEntry<CurrentConditions>, reqQuery: ReqQuery): WlObservations {
-    const wlMain = cacheEntry.item.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)!
-      .data[0] as MainSensorData;
-    const wlBarometer = cacheEntry.item.sensors.find(sensor => sensor.sensor_type === SensorType.BAROMETER)!
-      .data[0] as BarometerSensorData;
+  static mapCurrentToWlObservations(
+    cacheEntry: CacheEntry<CurrentConditions | undefined>,
+    reqQuery: ReqQuery
+  ): WlObservations {
+    const wlMain = (cacheEntry.item?.sensors.find(sensor => sensor.sensor_type === SensorType.MAIN)?.data[0] ??
+      {}) as MainSensorData;
+    const wlBarometer = (cacheEntry.item?.sensors.find(sensor => sensor.sensor_type === SensorType.BAROMETER)
+      ?.data[0] ?? {}) as BarometerSensorData;
 
     const units = NumberHelper.getUnitMappings(DEFAULT_UNITS, reqQuery);
 

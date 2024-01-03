@@ -66,9 +66,17 @@ export class NwsHelper {
     return null as unknown as ResponseItem;
   }
 
-  private static readonly points = new Cached<PointsResponse, string>(
-    async (coordinatesStr: string) =>
-      (await this.fetch(`${this.BASE_URL}points/${coordinatesStr}`)).json() as Promise<PointsResponse>,
+  private static readonly points = new Cached<PointsResponse | undefined, string>(
+    async (coordinatesStr: string) => {
+      let pointsResp: PointsResponse | undefined;
+      try {
+        pointsResp = await (await this.fetch(`${this.BASE_URL}points/${coordinatesStr}`)).json();
+      } catch (err) {
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.points.getItemOnMiss()`).error(`Couldn't fetch due to an exception`);
+        console.error(err);
+      }
+      return pointsResp;
+    },
     async () => dayjs().add(1, 'week').unix(),
     LoggerHelper.getLogger(`${this.CLASS_NAME}.points`)
   );
@@ -76,15 +84,32 @@ export class NwsHelper {
     return this.points.get(coordinatesStr, coordinatesStr);
   }
 
-  private static readonly stations = new Cached<StationsResponse, string>(
-    async (stationsUrl: string) => (await this.fetch(stationsUrl)).json() as Promise<StationsResponse>,
+  private static readonly stations = new Cached<StationsResponse | undefined, string>(
+    async (stationsUrl: string) => {
+      let stationsResp: StationsResponse | undefined;
+      try {
+        stationsResp = await (await this.fetch(stationsUrl)).json();
+      } catch (err) {
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.stations.getItemOnMiss()`).error(
+          `Couldn't fetch due to an exception`
+        );
+        console.error(err);
+      }
+      return stationsResp;
+    },
     async () => dayjs().add(1, 'week').unix(),
     LoggerHelper.getLogger(`${this.CLASS_NAME}.stations`)
   );
   private static async getStations(coordinatesStr: string) {
     const points = await this.getPoints(coordinatesStr);
-    const stationsUrl = points.item.properties.observationStations;
-    return this.stations.get(stationsUrl, stationsUrl);
+    const stationsUrl = points.item?.properties?.observationStations;
+    return stationsUrl
+      ? this.stations.get(stationsUrl, stationsUrl)
+      : {
+          item: undefined,
+          validUntil: 0,
+          key: ''
+        };
   }
 
   private static async getNearestStation(coordinatesStr: string) {
@@ -92,12 +117,20 @@ export class NwsHelper {
     return stations.item?.features?.length ? stations.item.features[0] : null;
   }
 
-  private static readonly current = new Cached<ObservationResponse, string>(
-    async (stationId: string) =>
-      (
-        await this.fetch(`${this.BASE_URL}stations/${stationId}/observations/latest`)
-      ).json() as Promise<ObservationResponse>,
-    async (_: string, newItem: ObservationResponse) => {
+  private static readonly current = new Cached<ObservationResponse | undefined, string>(
+    async (stationId: string) => {
+      let observationsResp: ObservationResponse | undefined;
+      try {
+        observationsResp = await (await this.fetch(`${this.BASE_URL}stations/${stationId}/observations/latest`)).json();
+      } catch (err) {
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.current.getItemOnMiss()`).error(
+          `Couldn't fetch due to an exception`
+        );
+        console.error(err);
+      }
+      return observationsResp;
+    },
+    async (_: string, newItem: ObservationResponse | undefined) => {
       const lastReadingTimestamp = newItem?.properties?.timestamp;
       return lastReadingTimestamp != null ? dayjs(lastReadingTimestamp).unix() + NWS_RECORDING_INTERVAL : 0;
     },

@@ -40,13 +40,21 @@ export class EpaHelper {
 
   private static readonly hourly = new Cached<UVHourlyForecastWithTz, MinimalQueriedCity>(
     async (minQueriedCity: MinimalQueriedCity) => {
-      const coordinatesNumArr = CoordinatesHelper.cityToNumArr(minQueriedCity);
-      const closestZipArr = await geo2zip(coordinatesNumArr);
-      const closestZip = closestZipArr?.length > 0 ? closestZipArr[0] : '';
+      let uvHourlyForecast: UVHourlyForecast = [];
 
-      const uvHourlyForecast = (await (
-        await fetch(this.getRequestUrlFor(closestZip), { headers: { 'User-Agent': this.userAgent } })
-      ).json()) as UVHourlyForecast;
+      try {
+        const coordinatesNumArr = CoordinatesHelper.cityToNumArr(minQueriedCity);
+        const closestZipArr = await geo2zip(coordinatesNumArr);
+        const closestZip = closestZipArr?.length > 0 ? closestZipArr[0] : '';
+
+        uvHourlyForecast = (await (
+          await fetch(this.getRequestUrlFor(closestZip), { headers: { 'User-Agent': this.userAgent } })
+        ).json()) as UVHourlyForecast;
+      } catch (err) {
+        LoggerHelper.getLogger(`${this.CLASS_NAME}.hourly.getItemOnMiss()`).error(`Couldn't fetch due to an exception`);
+        console.error(err);
+      }
+
       return {
         uvHourlyForecast,
         timeZone: minQueriedCity.timeZone
