@@ -168,8 +168,8 @@ export class NwsHelper {
     this.forecastCalculateExpiration,
     LoggerHelper.getLogger(`${this.CLASS_NAME}.summaryForecast`)
   );
-  static async getSummaryForecast(points: CacheEntry<PointsResponse>) {
-    const summaryForecastUrl = points.item.properties.forecast;
+  static async getSummaryForecast(points: CacheEntry<PointsResponse | undefined>) {
+    const summaryForecastUrl = points.item!.properties.forecast;
     return this.summaryForecast.get(summaryForecastUrl, summaryForecastUrl);
   }
 
@@ -183,8 +183,8 @@ export class NwsHelper {
     this.forecastCalculateExpiration,
     LoggerHelper.getLogger(`${this.CLASS_NAME}.forecastGridData`)
   );
-  static async getForecastGridData(points: CacheEntry<PointsResponse>) {
-    const forecastGridDataUrl = points.item.properties.forecastGridData;
+  static async getForecastGridData(points: CacheEntry<PointsResponse | undefined>) {
+    const forecastGridDataUrl = points.item!.properties.forecastGridData;
     return this.forecastGridData.get(forecastGridDataUrl, forecastGridDataUrl);
   }
 

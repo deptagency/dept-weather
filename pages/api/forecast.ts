@@ -6,7 +6,7 @@ import { NwsHelper } from 'helpers/api/nws/nws-helper';
 import { NwsMapHelper } from 'helpers/api/nws/nws-map-helper';
 import { CoordinatesHelper } from 'helpers/coordinates-helper';
 import { APIRoute, getPath } from 'models/api/api-route.model';
-import { Forecast } from 'models/api/forecast.model';
+import { Forecast, NwsForecast } from 'models/api/forecast.model';
 import { Response } from 'models/api/response.model';
 import { DataSource } from 'models/data-source.enum';
 
@@ -20,12 +20,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       getFormattedDuration
     );
 
+    let nwsForecast: NwsForecast = { periods: [], readTime: 0, validUntil: 0 };
+
     const points = await NwsHelper.getPoints(CoordinatesHelper.cityToStr(minimalQueriedCity));
-    const timeZone = points.item.properties.timeZone;
-    const forecasts = await Promise.all([NwsHelper.getSummaryForecast(points), NwsHelper.getForecastGridData(points)]);
+    if (points.item?.properties.timeZone != null) {
+      const timeZone = points.item?.properties?.timeZone;
+      const forecasts = await Promise.all([
+        NwsHelper.getSummaryForecast(points),
+        NwsHelper.getForecastGridData(points)
+      ]);
+      nwsForecast = NwsMapHelper.mapForecastsToNwsForecast(...forecasts, timeZone, req.query);
+    }
 
     const data: Forecast = {
-      [DataSource.NATIONAL_WEATHER_SERVICE]: NwsMapHelper.mapForecastsToNwsForecast(...forecasts, timeZone, req.query),
+      [DataSource.NATIONAL_WEATHER_SERVICE]: nwsForecast,
       [DataSource.QUERIED_CITY]: queriedCity
     };
 
