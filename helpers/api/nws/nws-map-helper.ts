@@ -56,7 +56,7 @@ export class NwsMapHelper {
       ? NumberHelper.getUnitMapping(UnitType.pressure, NwsUnits[nwsCurrent.seaLevelPressure.unitCode], reqQuery)
       : null;
 
-    if (nwsCurrent == null && 'status' in cacheEntry.item) {
+    if (nwsCurrent == null && cacheEntry.item != null && 'status' in cacheEntry.item) {
       LoggerHelper.getLogger(`${this.CLASS_NAME}.mapCurrentToNwsObservations()`).error(
         `${cacheEntry.item.status} error on response`
       );
