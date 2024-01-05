@@ -12,6 +12,9 @@ export const CITY_SEARCH_QUERY_CACHE_FILENAME = 'cities-top30556-query-cache.jso
 export const NWS_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
 export const AIRNOW_RECORDING_INTERVAL = 1 * 60 * 60; // 1 hour
 
+export const NWS_OBSERVATIONS_STALE_AFTER_MINUTES = 1.5 * 60; // 1.5 hours
+export const NWS_OBSERVATIONS_UNUSABLE_AFTER_MINUTES = 3 * 60; // 3 hours
+
 export const FEELS_UNITS: Record<UnitType, Unit> = {
   ...DEFAULT_UNITS,
   [UnitType.temp]: Unit.C,

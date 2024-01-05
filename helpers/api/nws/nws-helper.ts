@@ -1,16 +1,26 @@
-import { NWS_RECORDING_INTERVAL } from 'constants/server';
+import {
+  NWS_OBSERVATIONS_STALE_AFTER_MINUTES,
+  NWS_OBSERVATIONS_UNUSABLE_AFTER_MINUTES,
+  NWS_RECORDING_INTERVAL
+} from 'constants/server';
 import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import geodist from 'geodist';
 import { Cached, CacheEntry } from 'helpers/api/cached';
 import { LoggerHelper } from 'helpers/api/logger-helper';
 import { CoordinatesHelper } from 'helpers/coordinates-helper';
+import { NumberHelper } from 'helpers/number-helper';
 import { getQueryParamsStr } from 'models/api/api-route.model';
 import { MinimalQueriedCity } from 'models/cities/cities.model';
 import { AlertsResponse } from 'models/nws/alerts.model';
 import { ForecastGridDataResponse } from 'models/nws/forecast-grid-data.model';
 import { ObservationResponse } from 'models/nws/observation.model';
 import { PointsResponse } from 'models/nws/points.model';
-import { StationsResponse } from 'models/nws/stations.model';
+import { Feature as StationFeature, StationsResponse } from 'models/nws/stations.model';
 import { SummaryForecastResponse } from 'models/nws/summary-forecast.model';
+import { Unit } from 'models/unit.enum';
+
+dayjs.extend(duration);
 
 export class NwsHelper {
   private static readonly CLASS_NAME = 'NwsHelper';
@@ -112,11 +122,6 @@ export class NwsHelper {
         };
   }
 
-  private static async getNearestStation(coordinatesStr: string) {
-    const stations = await this.getStations(coordinatesStr);
-    return stations.item?.features?.length ? stations.item.features[0] : null;
-  }
-
   private static readonly current = new Cached<ObservationResponse | undefined, string>(
     async (stationId: string) => {
       let observationsResp: ObservationResponse | undefined;
@@ -137,9 +142,96 @@ export class NwsHelper {
     LoggerHelper.getLogger(`${this.CLASS_NAME}.current`)
   );
   static async getCurrent(minQueriedCity: MinimalQueriedCity) {
-    const stationId =
-      (await this.getNearestStation(CoordinatesHelper.cityToStr(minQueriedCity)))?.properties?.stationIdentifier ?? '';
-    return this.current.get(stationId, stationId);
+    const acceptableStations: { stationId: string; distanceFromQueried: number }[] = [];
+
+    const stationsResp = await this.getStations(CoordinatesHelper.cityToStr(minQueriedCity));
+    if (stationsResp.item?.features?.length) {
+      const queriedCityCoordinates = CoordinatesHelper.cityToNumArr(minQueriedCity);
+      const getDistanceFromQueried = (station: StationFeature) => {
+        try {
+          const stationCoordinates = [...(station.geometry.coordinates as number[])].reverse();
+          return geodist(queriedCityCoordinates, stationCoordinates, {
+            exact: true,
+            unit: Unit.MILES
+          });
+        } catch {
+          /* empty */
+        }
+      };
+
+      // Set maxAcceptableStationDistance to distanceToClosestStation + 25
+      let maxAcceptableStationDistance;
+      for (let i = 0; i < stationsResp.item.features.length; i++) {
+        const distanceFromQueried = getDistanceFromQueried(stationsResp.item.features[i]);
+        if (distanceFromQueried != null) {
+          if (maxAcceptableStationDistance == null) {
+            maxAcceptableStationDistance = distanceFromQueried + 25;
+          }
+          if (distanceFromQueried <= maxAcceptableStationDistance && acceptableStations.length < 3) {
+            acceptableStations.push({
+              stationId: stationsResp.item.features[i].properties.stationIdentifier,
+              distanceFromQueried: NumberHelper.round(distanceFromQueried, 2)!
+            });
+          } else break;
+        }
+      }
+    }
+
+    // Fallback; the most recent observations that are stale but usable
+    let bestUsableObservations:
+      | {
+          stationId: string;
+          cacheEntry: CacheEntry<ObservationResponse | undefined>;
+          minutesSinceLastReadTime: number;
+        }
+      | undefined;
+
+    for (let i = 0; i < acceptableStations.length; i++) {
+      const currentForStation = await this.current.get(
+        acceptableStations[i].stationId,
+        acceptableStations[i].stationId
+      );
+      const lastReadingTimestamp = currentForStation.item?.properties?.timestamp;
+      const lastReadTime = lastReadingTimestamp != null ? dayjs(lastReadingTimestamp) : dayjs(0);
+      const durationSinceLastReadTime = dayjs.duration(dayjs().diff(lastReadTime));
+      if (durationSinceLastReadTime.asMinutes() < NWS_OBSERVATIONS_STALE_AFTER_MINUTES) {
+        if (i > 0) {
+          LoggerHelper.getLogger(`${this.CLASS_NAME}.getCurrent()`).info(
+            `${acceptableStations[i].stationId} station has fresh alternative observations, using... `
+          );
+        }
+        return currentForStation;
+      } else if (
+        durationSinceLastReadTime.asMinutes() < NWS_OBSERVATIONS_UNUSABLE_AFTER_MINUTES &&
+        (bestUsableObservations == null ||
+          durationSinceLastReadTime.asMinutes() < bestUsableObservations.minutesSinceLastReadTime)
+      ) {
+        bestUsableObservations = {
+          stationId: acceptableStations[i].stationId,
+          cacheEntry: currentForStation,
+          minutesSinceLastReadTime: durationSinceLastReadTime.asMinutes()
+        };
+      }
+
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getCurrent()`).info(
+        `${acceptableStations[i].stationId} station has ${
+          durationSinceLastReadTime.asMinutes() > NWS_OBSERVATIONS_UNUSABLE_AFTER_MINUTES ? 'unusable' : 'stale'
+        } observations - ${Math.round(durationSinceLastReadTime.asMinutes())} minutes since last update`
+      );
+    }
+
+    if (bestUsableObservations) {
+      LoggerHelper.getLogger(`${this.CLASS_NAME}.getCurrent()`).info(
+        `${bestUsableObservations.stationId} station has best usable observations, using... `
+      );
+      return bestUsableObservations.cacheEntry;
+    }
+
+    return {
+      item: undefined,
+      validUntil: 0,
+      key: ''
+    };
   }
 
   private static async forecastCalculateExpiration(
